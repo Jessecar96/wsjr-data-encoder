@@ -1,4 +1,4 @@
-﻿namespace JrEncoder;
+﻿namespace JrEncoder.Frames;
 
 public class DataFrame
 {

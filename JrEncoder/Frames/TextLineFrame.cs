@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace JrEncoder;
+namespace JrEncoder.Frames;
 
 public class TextLineFrame : DataFrame
 {

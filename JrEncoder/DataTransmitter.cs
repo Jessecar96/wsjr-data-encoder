@@ -2,6 +2,7 @@
 using System.Device.Gpio;
 using System.Device.Spi;
 using System.Text;
+using JrEncoder.Frames;
 
 namespace JrEncoder;
 

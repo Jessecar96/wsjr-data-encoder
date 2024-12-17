@@ -1,4 +1,5 @@
-﻿using JrEncoder.StarAttributes;
+﻿using JrEncoder.Frames;
+using JrEncoder.StarAttributes;
 
 namespace JrEncoder;
 

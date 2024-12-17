@@ -1,6 +1,6 @@
 ﻿using JrEncoder.StarAttributes;
 
-namespace JrEncoder;
+namespace JrEncoder.Frames;
 
 public class ControlFrame : DataFrame
 {
