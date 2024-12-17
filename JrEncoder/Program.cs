@@ -6,9 +6,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        DateTime currentTime = DateTime.Now;
-        int hour = int.Parse(currentTime.ToString("%h"));
-        int amPm = currentTime.Hour > 12 ? 1 : 0;
+
         
         // OMCW, shows page 10 in the upper region.
         OMCW omcw = OMCW.Create()
@@ -18,7 +16,7 @@ class Program
             .LDL(LDLStyle.AlternateCrawl)
             .Commit();
 
-        TimeOfDayFrame todFrame = new(omcw, 8, 1, currentTime.Month, currentTime.Day, hour, currentTime.Minute, currentTime.Second, amPm);
+        TimeOfDayFrame todFrame = TimeOfDayFrame.Now(omcw, 8);
 
         DataFrame[] testPage = new PageBuilder(10, new Address(1, 2, 3, 4), omcw)
             .AddLine("Test Line 1")
