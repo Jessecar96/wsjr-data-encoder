@@ -1,33 +1,24 @@
 ﻿namespace JrEncoder.StarAttributes;
 
-public class Address
+/// <summary>
+/// Represents a STAR address.
+/// </summary>
+/// <param name="serviceId">3 bits service ID.</param>
+/// <param name="zone">10 bits zone ID.</param>
+/// <param name="county">5 bits county ID.</param>
+/// <param name="unit">6 bits unit ID.</param>
+public struct Address(int serviceId, int zone, int county, int unit)
 {
-    private int serviceID;
-    private int zone;
-    private int county;
-    private int unit;
-    private byte[] address;
+    private readonly int _serviceId = serviceId;
+    private readonly int _zone = zone;
+    private readonly int _county = county;
+    private readonly int _unit = unit;
 
-    public Address(int serviceID, int zone, int county, int unit) {
-        this.serviceID = serviceID;
-        this.zone = zone;
-        this.county = county;
-        this.unit = unit;
-    }
-
-    public Address() {
-        //Default constructor. Zero out address if called.
-        serviceID = 0;
-        zone = 0;
-        county = 0;
-        unit = 0;
-    }
-
-    private byte[] createAddressArray() {
-        /*
-        "Service" (3 bits), "Zone' (10 bits), "County' (5 bits), and "Unit" (6 bits)
-        */
-        address = new byte[6];
-        return address;
+    /// <summary>
+    /// Returns a 6-byte packet representing the address.
+    /// </summary>
+    /// <returns></returns>
+    private byte[] ToBytes() {
+        throw new NotImplementedException();
     }
 }
