@@ -96,7 +96,7 @@ public class OMCW
     /// <returns></returns>
     public OMCW RegionSeparator(bool enabled = true)
     {
-        _regionSeparator = !enabled;
+        _regionSeparator = enabled;
         _needsCommit = true;
         return this;
     }
