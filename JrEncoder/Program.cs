@@ -10,8 +10,14 @@ class Program
         int hour = int.Parse(currentTime.ToString("%h"));
         int amPm = currentTime.Hour > 12 ? 1 : 0;
         
-        // First OMCW, show only LDL
-        OMCW omcw = new(false, false, false, false, false, true, true, true, 10, 3);
+        // OMCW, shows page 10 in the upper region.
+        OMCW omcw = OMCW.Create()
+            .TopSolid()
+            .BottomSolid()
+            .TopPage(10)
+            .LDL(LDLStyle.AlternateCrawl)
+            .Commit();
+
         TimeOfDayFrame todFrame = new(omcw, 8, 1, currentTime.Month, currentTime.Day, hour, currentTime.Minute, currentTime.Second, amPm);
 
         DataFrame[] testPage = new PageBuilder(10, new Address(1, 2, 3, 4), omcw)
@@ -25,6 +31,9 @@ class Program
             .AddLine("This should also work too")
             .AddLine("LDL line 3")
             .Build();
+
+        omcw.TopPage(2).Commit();
+
 
         DataTransmitter transmitter = new();
         transmitter.Init(todFrame, ldlPage, testPage);

@@ -11,7 +11,7 @@ public class ControlFrame : DataFrame
             return;
         }
         // OMCW is always at bytes 4-7
-        byte[] omcwBytes = omcw.getOmcwBytes();
+        byte[] omcwBytes = omcw.ToBytes();
         frame[4] = omcwBytes[0];
         frame[5] = omcwBytes[1];
         frame[6] = omcwBytes[2];
