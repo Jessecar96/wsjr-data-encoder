@@ -5,7 +5,7 @@
 /// </summary>
 public class OMCW
 {
-    //Declare variables for the integer representation of the constructors parameters.
+    // Instance variables. See their respective setter functions for details.
     private bool _localProgram;
     private bool _localPreroll;
     private bool _auxAudio;
@@ -16,6 +16,8 @@ public class OMCW
     private bool _botSolid;
     private int _topPageNum;
     private LDLStyle _ldlStyle = LDLStyle.Nothing;
+
+    private bool _needsCommit = false;
 
     /// <summary>
     /// Bytes 4-9 that will be manipulated. They are attached to header packets.
@@ -35,6 +37,7 @@ public class OMCW
     public OMCW LocalProgram(bool enabled = true)
     {
         _localProgram = enabled;
+        _needsCommit = true;
         return this;
     }
 
@@ -46,6 +49,7 @@ public class OMCW
     public OMCW LocalPreroll(bool enabled = true)
     {
         _localPreroll = enabled;
+        _needsCommit = true;
         return this;
     }
 
@@ -57,6 +61,7 @@ public class OMCW
     public OMCW AuxAudio(bool enabled = true)
     {
         _auxAudio = enabled;
+        _needsCommit = true;
         return this;
     }
 
@@ -68,6 +73,7 @@ public class OMCW
     public OMCW WxWarning(bool enabled = true)
     {
         _wxWarning = !enabled;
+        _needsCommit = true;
         return this;
     }
 
@@ -79,6 +85,7 @@ public class OMCW
     public OMCW Radar(bool enabled = true)
     {
         _radar = enabled;
+        _needsCommit = true;
         return this;
     }
 
@@ -90,6 +97,7 @@ public class OMCW
     public OMCW RegionSeparator(bool enabled = true)
     {
         _regionSeparator = !enabled;
+        _needsCommit = true;
         return this;
     }
 
@@ -101,6 +109,7 @@ public class OMCW
     public OMCW TopSolid(bool solid = true)
     {
         _topSolid = solid;
+        _needsCommit = true;
         return this;
     }
 
@@ -112,6 +121,7 @@ public class OMCW
     public OMCW BottomSolid(bool solid = true)
     {
         _botSolid = solid;
+        _needsCommit = true;
         return this;
     }
 
@@ -123,6 +133,7 @@ public class OMCW
     public OMCW TopPage(int pageNumber)
     {
         _topPageNum = pageNumber;
+        _needsCommit = true;
         return this;
     }
 
@@ -134,6 +145,7 @@ public class OMCW
     public OMCW LDL(LDLStyle style)
     {
         _ldlStyle = style;
+        _needsCommit = true;
         return this;
     }
 
@@ -170,11 +182,12 @@ public class OMCW
         _omcwBytes[3] = (byte) (((_topPageNum & 0x03) << 2) | ((byte)_ldlStyle & 0x03));
 
         // Byte 8
-        _omcwBytes[4] = (byte) (_topPageNum & 0xF0); //Top Page Number MSB
+        _omcwBytes[4] = (byte) (_topPageNum & 0xF0); // Top Page Number MSB
 
         // Byte 9
-        _omcwBytes[5] = (byte) (_topPageNum & 0xF); //Top Page Number LSB
+        _omcwBytes[5] = (byte) (_topPageNum & 0xF); // Top Page Number LSB
 
+        _needsCommit = false;
         return this;
     }
 
@@ -182,7 +195,11 @@ public class OMCW
     /// The byte representation of this OMCW.
     /// </summary>
     /// <returns></returns>
-    public byte[] ToBytes() {
+    public byte[] ToBytes()
+    {
+        if (_needsCommit) // Ensure that any data manipulation was committed before use-- helps with catching bugs.
+            throw new Exception("OMCW edited and used without first committing.");
+
         return _omcwBytes;
     }
 }
