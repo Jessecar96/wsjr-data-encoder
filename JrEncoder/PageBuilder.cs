@@ -18,13 +18,16 @@ public class PageBuilder(int pageNumber, Address address, OMCW omcw)
     /// <returns></returns>
     public PageBuilder AddLine(string text, TextLineAttributes attribs)
     {
+        int currentPages = _textFrames.Count;
+        if (currentPages > 9) // Ensure that more than 9 pages are not added.
+            throw new Exception("Cannot add more than 9 pages.");
+
         // Calculate bits for text size
         byte textSize = (byte)attribs.Width;
         byte heightBits = (byte)((attribs.Height << 2) & 0x0F);
         textSize = (byte)((textSize | heightBits) & 0x0F);
         
         // Assign attributes & add the frame
-        int currentPages = _textFrames.Count;
         if (currentPages <= 8) // There can only be 8 attributes, but up to 9 lines. Attribute 8 is carried to 9.
             _lineAttributes[currentPages] = attribs;
 
