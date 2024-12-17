@@ -1,104 +1,78 @@
-﻿namespace JrEncoder;
+﻿using JrEncoder.StarAttributes;
 
-public class PageBuilder
+namespace JrEncoder;
+
+public class PageBuilder(int pageNumber, Address address, OMCW omcw)
 {
-    private int pageNumber;
-    private OMCW omcw;
-    private Address address;
-    private PageAttributes attributes;
-    private TextLineAttributes[] lineAttributes = new TextLineAttributes[8];
-    private List<TextLineFrame> textFrames; // Max of 9 lines per page
+    private PageAttributes _attributes;
+    private readonly TextLineAttributes[] _lineAttributes = new TextLineAttributes[8];
+    private readonly List<TextLineFrame> _textFrames = [];
 
-    public PageBuilder(int pageNumber)
+    /// <summary>
+    /// Adds a new line of text to the page.
+    /// If the line is the ninth line, the attributes will be dumped and the attributes for the 8th line will be used.
+    /// This is due to hardware implementation.
+    /// </summary>
+    /// <param name="text">The text to show.</param>
+    /// <param name="attribs">The attributes of the text.</param>
+    /// <returns></returns>
+    public PageBuilder AddLine(string text, TextLineAttributes attribs)
     {
-        this.pageNumber = pageNumber;
-        attributes = new PageAttributes();
-        address = new Address();
-        textFrames = new List<TextLineFrame>();
-
-        //Init textlineattributes in case we have null lines ...
-        for (int i = 0; i < 7; i++)
-        {
-            lineAttributes[i] = new TextLineAttributes();
-        }
-    }
-
-    public PageBuilder setLineAttributes(TextLineAttributes lineAttributes1, TextLineAttributes lineAttributes2,
-        TextLineAttributes lineAttributes3, TextLineAttributes lineAttributes4,
-        TextLineAttributes lineAttributes5, TextLineAttributes lineAttributes6,
-        TextLineAttributes lineAttributes7, TextLineAttributes lineAttributes8)
-    {
-        this.lineAttributes[0] = lineAttributes1;
-        this.lineAttributes[1] = lineAttributes2;
-        this.lineAttributes[2] = lineAttributes3;
-        this.lineAttributes[3] = lineAttributes4;
-        this.lineAttributes[4] = lineAttributes5;
-        this.lineAttributes[5] = lineAttributes6;
-        this.lineAttributes[6] = lineAttributes7;
-        this.lineAttributes[7] = lineAttributes8;
-        return this;
-    }
-
-    public PageBuilder setPageAttributes(PageAttributes attributes)
-    {
-        this.attributes = attributes;
-        return this;
-    }
-
-    /**
-     * Set the OMCW for this page
-     */
-    public PageBuilder setOMCW(OMCW omcw)
-    {
-        this.omcw = omcw;
-        return this;
-    }
-
-    /**
-     * Set the unit address for this page
-     */
-    public PageBuilder setAddress(Address address)
-    {
-        this.address = address;
-        return this;
-    }
-
-    /**
-     * Add a text line with the default attributes, and color
-     *
-     * @param lineNumber Line Number
-     * @param text       Text
-     * @param height     Line text height
-     * @param width      Line text width
-     * @return this
-     */
-    public PageBuilder addLine(int lineNumber, String text, int height = 1, int width = 0)
-    {
-        byte textSize = (byte)width;
-        byte heightBits = (byte)((height << 2) & 0x0F);
+        // Calculate bits for text size
+        byte textSize = (byte)attribs.Width;
+        byte heightBits = (byte)((attribs.Height << 2) & 0x0F);
         textSize = (byte)((textSize | heightBits) & 0x0F);
-        textFrames.Add(new TextLineFrame(lineNumber, textSize, text));
+        
+        // Assign attributes & add the frame
+        int currentPages = _textFrames.Count;
+        if (currentPages <= 8) // There can only be 8 attributes, but up to 9 lines. Attribute 8 is carried to 9.
+            _lineAttributes[currentPages] = attribs;
+
+        _textFrames.Add(new TextLineFrame(currentPages + 1, textSize, text));
         return this;
     }
 
-    /**
-     * Build the array of frames needed for this page
-     *
-     * @return Array of frames to send to the STAR
-     */
-    public DataFrame[] build()
+    /// <summary>
+    /// Adds a new line of text to the page.
+    /// The line will be added with historically-default text attributes (blue color, with border, width 0, height 1).
+    /// </summary>
+    /// <param name="text">The text to show.</param>
+    /// <returns></returns>
+    public PageBuilder AddLine(string text)
     {
-        int lineCount = textFrames.Count;
+        return AddLine(text, new TextLineAttributes
+        {
+            Color = Color.Blue,
+            Border = true,
+            Width = 0,
+            Height = 1
+        });
+    }
+
+    public PageBuilder Attributes(PageAttributes attributes)
+    {
+        _attributes = attributes;
+        return this;
+    }
+    
+    /// <summary>
+    /// Builds the packet for this page to send to the STAR.
+    /// </summary>
+    /// <returns></returns>
+    public DataFrame[] Build()
+    {
+        int lineCount = _textFrames.Count;
         int frameIndex = 1;
         DataFrame[] frames = new DataFrame[lineCount + 1];
 
         // Add the header to our output frames
-        frames[0] = new PageHeaderFrame(pageNumber, lineCount, omcw, address, attributes, lineAttributes[0],
-            lineAttributes[1], lineAttributes[2], lineAttributes[3], lineAttributes[4], lineAttributes[5],
-            lineAttributes[6], lineAttributes[7]);
+        frames[0] = new PageHeaderFrame(
+            pageNumber, lineCount, omcw, address, _attributes, _lineAttributes[0],
+            _lineAttributes[1], _lineAttributes[2], _lineAttributes[3], _lineAttributes[4], _lineAttributes[5],
+            _lineAttributes[6], _lineAttributes[7]);
 
-        // Add all of the text lines
-        foreach (TextLineFrame textFrame in textFrames)
+        // Add all the text lines
+        foreach (TextLineFrame textFrame in _textFrames)
         {
             frames[frameIndex] = textFrame;
             frameIndex++;

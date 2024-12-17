@@ -1,4 +1,6 @@
-﻿namespace JrEncoder;
+﻿using JrEncoder.StarAttributes;
+
+namespace JrEncoder;
 
 public class TimeOfDayFrame : ControlFrame
 {

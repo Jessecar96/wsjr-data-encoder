@@ -1,4 +1,6 @@
-﻿namespace JrEncoder;
+﻿using JrEncoder.StarAttributes;
+
+namespace JrEncoder;
 
 public class PageHeaderFrame : ControlFrame
 {
@@ -14,7 +16,7 @@ public class PageHeaderFrame : ControlFrame
         Reference: https://patentimages.storage.googleapis.com/8d/f3/42/7f8952923cce48/US4916539.pdf
         */
 
-        byte[] attributeBytes = attributes.buildAttributes();
+        byte[] attributeBytes = attributes.ToBytes();
 
         frame[0] = ClockRunIn;
         frame[1] = ClockRunIn;
@@ -32,24 +34,24 @@ public class PageHeaderFrame : ControlFrame
         frame[16] = (byte) lineCount;   // Line Count
         frame[17] = attributeBytes[0];  // Page Attributes
         frame[18] = attributeBytes[1];  // "
-        frame[19] = line1attributes.getByte1(); // Line 1 Attributes
-        frame[20] = line1attributes.getByte2(); // "
-        frame[21] = line2attributes.getByte1(); // Line 2 Attributes
-        frame[22] = line2attributes.getByte2(); // "
-        frame[23] = line3attributes.getByte1(); // Line 3 Attributes
-        frame[24] = line3attributes.getByte2(); // "
-        frame[25] = line4attributes.getByte1(); // Line 4 Attributes
-        frame[26] = line4attributes.getByte2(); // "
-        frame[27] = line5attributes.getByte1(); // Line 5 Attributes
-        frame[28] = line5attributes.getByte2(); // "
-        frame[29] = line6attributes.getByte1(); // Line 6 Attributes
-        frame[30] = line6attributes.getByte2(); // "
-        frame[31] = line7attributes.getByte1(); // Line 7 Attributes
-        frame[32] = line7attributes.getByte2(); // "
+        frame[19] = line1attributes.GetByte1(); // Line 1 Attributes
+        frame[20] = line1attributes.GetByte2(); // "
+        frame[21] = line2attributes.GetByte1(); // Line 2 Attributes
+        frame[22] = line2attributes.GetByte2(); // "
+        frame[23] = line3attributes.GetByte1(); // Line 3 Attributes
+        frame[24] = line3attributes.GetByte2(); // "
+        frame[25] = line4attributes.GetByte1(); // Line 4 Attributes
+        frame[26] = line4attributes.GetByte2(); // "
+        frame[27] = line5attributes.GetByte1(); // Line 5 Attributes
+        frame[28] = line5attributes.GetByte2(); // "
+        frame[29] = line6attributes.GetByte1(); // Line 6 Attributes
+        frame[30] = line6attributes.GetByte2(); // "
+        frame[31] = line7attributes.GetByte1(); // Line 7 Attributes
+        frame[32] = line7attributes.GetByte2(); // "
         frame[33] = 0; // OMCW Extension
         frame[34] = 0; // "
-        frame[35] = line8attributes.getByte1(); // Line 8/9 Attributes
-        frame[36] = line8attributes.getByte2(); // "
+        frame[35] = line8attributes.GetByte1(); // Line 8/9 Attributes
+        frame[36] = line8attributes.GetByte2(); // "
 
         // Set bytes 4-7 for OMCW
         setOmcwBytes();

@@ -1,4 +1,4 @@
-﻿namespace JrEncoder;
+﻿namespace JrEncoder.StarAttributes;
 
 public class OMCW
 {
