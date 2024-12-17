@@ -44,7 +44,7 @@ public class DataTransmitter
     // Bool to store when the fifo is empty. This is updated from a callback on EmptyFifo 
     private bool _fifoIsEmpty;
 
-    public void Init()
+    public void Init(TimeOfDayFrame todFrame, DataFrame[] ldlPage, DataFrame[] testPage)
     {
         Console.WriteLine("Starting WeatherSTAR Data Transmitter");
         Console.WriteLine("Written by Jesse Cardone, 2024");
@@ -97,58 +97,6 @@ public class DataTransmitter
 
         InitDds();
         Console.WriteLine("DDS Init Complete");
-        
-        DateTime currentTime = DateTime.Now;
-        int hour = int.Parse(currentTime.ToString("%h"));
-        int amPm = currentTime.Hour > 12 ? 1 : 0;
-        
-        // First OMCW, show only LDL
-        OMCW omcw = new(false, false, false, false, false, true, true, true, 10, 3);
-        TimeOfDayFrame todFrame = new(omcw, 8, 1, currentTime.Month, currentTime.Day, hour, currentTime.Minute, currentTime.Second, amPm);
-        
-        DataFrame[] testPage = new PageBuilder(10)
-            .setOMCW(omcw)
-            .setPageAttributes(new PageAttributes(false, false, false, false, false, false))
-            .setLineAttributes(
-                new TextLineAttributes(false, false, false, true, Color.Blue),
-                new TextLineAttributes(false, false, false, true, Color.Blue),
-                new TextLineAttributes(false, false, false, true, Color.Blue),
-                new TextLineAttributes(false, false, false, true, Color.Blue),
-                new TextLineAttributes(false, false, false, true, Color.Blue),
-                new TextLineAttributes(false, false, false, true, Color.Blue),
-                new TextLineAttributes(false, false, false, true, Color.Blue),
-                new TextLineAttributes(false, false, false, true, Color.Blue)
-            )
-            .addLine(1, "Conditions on Earth")
-            .addLine(2, "Cataclysm")
-            .addLine(3, "Temp: 0K")
-            .addLine(4, "Humidity: -51%   Dewpoint: yes")
-            .addLine(5, "Barometric Pressure: 753 atm.")
-            .addLine(6, "Wind: DOWN 7 LYPH")
-            .addLine(7, "Visib: 0 in. Ceiling: html")
-            .addLine(8, "9 + 10: 21")
-
-            .setAddress(new Address(1, 2, 3, 4))
-            .build();
-        
-        DataFrame[] ldlPage = new PageBuilder(50)
-            .setOMCW(omcw)
-            .setPageAttributes(new PageAttributes(false, false, false, false, false, false))
-            .setLineAttributes(
-                new TextLineAttributes(false, false, false, true, Color.Blue),
-                new TextLineAttributes(false, false, false, true, Color.Blue),
-                new TextLineAttributes(false, false, false, true, Color.Blue),
-                new TextLineAttributes(false, false, false, true, Color.Blue),
-                new TextLineAttributes(false, false, false, true, Color.Blue),
-                new TextLineAttributes(false, false, false, true, Color.Blue),
-                new TextLineAttributes(false, false, false, true, Color.Blue),
-                new TextLineAttributes(false, false, false, true, Color.Blue)
-            )
-            .addLine(1, "This should show on the LDL :)")
-            .addLine(2, "This should also work too")
-            .addLine(3, "LDL line 3")
-            .setAddress(new Address(1, 2, 3, 4))
-            .build();
         
         WriteFrame(todFrame.getFrame());
         
