@@ -4,7 +4,7 @@ namespace JrEncoder.Frames;
 
 public class TextLineFrame : DataFrame
 {
-    public TextLineFrame(int rowNumber, byte textSize, String text)
+    public TextLineFrame(int rowNumber, byte textSize, string text)
     {
         /*
         Prior Reference: https://patentimages.storage.googleapis.com/6d/b2/60/69fee298647dc3/US4725886.pdf
@@ -29,20 +29,15 @@ public class TextLineFrame : DataFrame
         foreach (byte i in textBytes)
         {
             if (startIndex >= frame.Length) continue; // Text lines have a max of 32 characters
-            frame[startIndex] = calculateOddParity(i);
+            frame[startIndex] = CalculateOddParity(i);
             startIndex++;
         }
 
         // Only 3 and 4 are hamming code here
-        hamBytes(3, 4);
+        HamBytes(3, 4);
     }
 
-    byte calculateOddParity(String input)
-    {
-        return calculateOddParity(Encoding.ASCII.GetBytes(input)[0]);
-    }
-
-    byte calculateOddParity(int input)
+    private static byte CalculateOddParity(int input)
     {
         // Degrees symbol is mapped to a different location
         if (input == 0x3F)

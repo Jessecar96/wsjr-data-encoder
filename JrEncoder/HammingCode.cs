@@ -2,6 +2,12 @@
 
 public static class HammingCode
 {
+    /// <summary>
+    /// Add error correcting bits to an input byte
+    /// https://en.wikipedia.org/wiki/Hamming_code
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
     public static byte Get(byte input)
     {
         return input switch

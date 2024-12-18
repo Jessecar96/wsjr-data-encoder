@@ -179,13 +179,13 @@ public class OMCW
 
         // Byte 7
         // Get the two least significant bits of topPageNumber, shift by 2, then place LDL page number in the two least significant bits to create the nibble.
-        _omcwBytes[3] = (byte) (((_topPageNum & 0x03) << 2) | ((byte)_ldlStyle & 0x03));
+        _omcwBytes[3] = (byte)(((_topPageNum & 0x03) << 2) | ((byte)_ldlStyle & 0x03));
 
         // Byte 8
-        _omcwBytes[4] = (byte) (_topPageNum & 0xF0); // Top Page Number MSB
+        _omcwBytes[4] = (byte)(_topPageNum & 0xF0); // Top Page Number MSB
 
         // Byte 9
-        _omcwBytes[5] = (byte) (_topPageNum & 0xF); // Top Page Number LSB
+        _omcwBytes[5] = (byte)(_topPageNum & 0xF); // Top Page Number LSB
 
         _needsCommit = false;
         return this;

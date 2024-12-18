@@ -20,14 +20,14 @@ public class PageBuilder(int pageNumber, Address address, OMCW omcw)
     public PageBuilder AddLine(string text, TextLineAttributes attribs)
     {
         int currentPages = _textFrames.Count;
-        if (currentPages > 9) // Ensure that more than 9 pages are not added.
-            throw new Exception("Cannot add more than 9 pages.");
+        if (currentPages > 9) // Ensure that more than 9 lines are not added.
+            throw new Exception("Cannot add more than 9 lines.");
 
         // Calculate bits for text size
         byte textSize = (byte)attribs.Width;
         byte heightBits = (byte)((attribs.Height << 2) & 0x0F);
         textSize = (byte)((textSize | heightBits) & 0x0F);
-        
+
         // Assign attributes & add the frame
         if (currentPages <= 8) // There can only be 8 attributes, but up to 9 lines. Attribute 8 is carried to 9.
             _lineAttributes[currentPages] = attribs;
@@ -58,7 +58,7 @@ public class PageBuilder(int pageNumber, Address address, OMCW omcw)
         _attributes = attributes;
         return this;
     }
-    
+
     /// <summary>
     /// Builds the packet for this page to send to the STAR.
     /// </summary>

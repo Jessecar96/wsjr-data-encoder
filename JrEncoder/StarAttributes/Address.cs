@@ -18,7 +18,8 @@ public struct Address(int serviceId, int zone, int county, int unit)
     /// Returns a 6-byte packet representing the address.
     /// </summary>
     /// <returns></returns>
-    private byte[] ToBytes() {
+    private byte[] ToBytes()
+    {
         throw new NotImplementedException();
     }
 }

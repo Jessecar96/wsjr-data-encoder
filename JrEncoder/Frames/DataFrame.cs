@@ -7,26 +7,33 @@ public class DataFrame
 
     protected byte[] frame = new byte[38];
 
-    public byte[] getFrame() {
+    /// <summary>
+    /// Return byte array for this frame
+    /// </summary>
+    /// <returns></returns>
+    public virtual byte[] GetBytes()
+    {
         return frame;
     }
 
-    /**
-     * @return A string of HEX values for debugging purposes
-     */
-    public string getFrameAsString()
+    /// <summary>
+    /// Get this frame as a hex string
+    /// </summary>
+    /// <returns></returns>
+    public string GetFrameAsString()
     {
-        return Convert.ToHexString(getFrame());
+        return Convert.ToHexString(GetBytes());
     }
 
-    /**
-     * Convert an index range of the frame to hamming code bytes
-     *
-     * @param start Start index
-     * @param end   Ending index
-     */
-    public void hamBytes(int start, int end) {
-        for (int i = start; i <= end; i++) {
+    /// <summary>
+    /// Convert the specified index range of a byte array to hamming code bytes
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="end"></param>
+    protected void HamBytes(int start, int end)
+    {
+        for (int i = start; i <= end; i++)
+        {
             frame[i] = HammingCode.Get(frame[i]);
         }
     }

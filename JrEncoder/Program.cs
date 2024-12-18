@@ -7,34 +7,74 @@ class Program
 {
     static void Main(string[] args)
     {
-
-        
-        // OMCW, shows page 10 in the upper region.
+        // Build our OMCW
         OMCW omcw = OMCW.Create()
-            .TopSolid()
             .BottomSolid()
-            .TopPage(10)
-            .LDL(LDLStyle.AlternateCrawl)
+            .TopPage(0)
+            .RegionSeparator()
+            .LDL(LDLStyle.DateTime)
             .Commit();
 
+        // Init data transmitter, sets up DDS module
+        DataTransmitter transmitter = new(omcw);
+        transmitter.Init();
+
+        // Background thread to keep data transmitter running
+        new Thread(() =>
+        {
+            Thread.CurrentThread.IsBackground = true;
+            transmitter.Run();
+        }).Start();
+
+        // Build a TOD frame and send it
         TimeOfDayFrame todFrame = TimeOfDayFrame.Now(omcw, 8);
+        transmitter.AddFrame(todFrame);
 
         DataFrame[] testPage = new PageBuilder(10, new Address(1, 2, 3, 4), omcw)
-            .AddLine("Test Line 1")
-            .AddLine("Test Line 2")
-            .AddLine("Test Line 3")
+            .Attributes(new PageAttributes
+            {
+                Roll = true,
+                Chain = true
+            })
+            .AddLine("This page will rolllllllllllll")
+            .AddLine("This page will rolllllllllllll", new TextLineAttributes()
+            {
+                Border = true,
+                Color = Color.Red,
+                Height = 1,
+                Width = 0,
+            })
+            .AddLine("This page will rolllllllllllll")
+            .AddLine("This page will rolllllllllllll")
+            .AddLine("This page will rolllllllllllll")
+            .AddLine("This page will rolllllllllllll")
+            .AddLine("This page will rolllllllllllll")
+            .AddLine("This page will rolllllllllllll")
             .Build();
+        transmitter.AddFrame(testPage);
 
-        DataFrame[] ldlPage = new PageBuilder(50, new Address(1, 2, 3, 4), omcw)
-            .AddLine("This should show on the LDL :)")
-            .AddLine("This should also work too")
-            .AddLine("LDL line 3")
+        DataFrame[] testPage2 = new PageBuilder(11, new Address(1, 2, 3, 4), omcw)
+            .Attributes(new PageAttributes
+            {
+                Roll = false
+            })
+            .AddLine("Page 11 rolllllllllllll")
+            .AddLine("Page 11 rolllllllllllll")
+            .AddLine("Page 11 rolllllllllllll")
+            .AddLine("Page 11 rolllllllllllll")
+            .AddLine("Page 11 rolllllllllllll")
+            .AddLine("Page 11 rolllllllllllll")
+            .AddLine("Page 11 rolllllllllllll")
+            .AddLine("Page 11 rolllllllllllll")
             .Build();
+        transmitter.AddFrame(testPage2);
 
-        omcw.TopPage(2).Commit();
+        // Switch to page 11
+        transmitter.omcw.TopPage(10).TopSolid().Commit();
 
-
-        DataTransmitter transmitter = new();
-        transmitter.Init(todFrame, ldlPage, testPage);
+        while (true)
+        {
+            Thread.Sleep(1000);
+        }
     }
 }

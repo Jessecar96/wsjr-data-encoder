@@ -28,15 +28,15 @@ public struct TextLineAttributes
     public Color Color;
 
     /// <summary>
-    /// The width of the text.
+    /// The width of the text. 0 or 1
     /// </summary>
     public int Width;
 
     /// <summary>
-    /// The height of the text.
+    /// The height of the text. 0, 1, or 2
     /// </summary>
     public int Height;
-    
+
     /// <summary>
     /// Returns the two-byte packet for this TextLineAttributes.
     /// </summary>
