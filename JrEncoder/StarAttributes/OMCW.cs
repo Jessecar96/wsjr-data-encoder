@@ -175,17 +175,17 @@ public class OMCW
         // Byte 6.
         // MASK: 0x3C = 111100... we're only wanting the upper four bits of the topPageNum variable.
         // Then shift right by two to make room for hamming.
-        _omcwBytes[2] = (byte)((_topPageNum & 0x3C) >> 2);
+        _omcwBytes[2] = (byte)((_topPageNum & 0b00111100) >> 2);
 
         // Byte 7
         // Get the two least significant bits of topPageNumber, shift by 2, then place LDL page number in the two least significant bits to create the nibble.
-        _omcwBytes[3] = (byte)(((_topPageNum & 0x03) << 2) | ((byte)_ldlStyle & 0x03));
+        _omcwBytes[3] = (byte)(((_topPageNum & 0b00000011) << 2) | ((byte)_ldlStyle & 0b00000011));
 
         // Byte 8
-        _omcwBytes[4] = (byte)(_topPageNum & 0xF0); // Top Page Number MSB
+        _omcwBytes[4] = (byte)(_topPageNum & 0b11110000); // Top Page Number MSB
 
         // Byte 9
-        _omcwBytes[5] = (byte)(_topPageNum & 0xF); // Top Page Number LSB
+        _omcwBytes[5] = (byte)(_topPageNum & 0b00001111); // Top Page Number LSB
 
         _needsCommit = false;
         return this;

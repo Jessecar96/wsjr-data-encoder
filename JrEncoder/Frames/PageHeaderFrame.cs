@@ -54,7 +54,14 @@ public class PageHeaderFrame : ControlFrame
         frame[35] = line8attributes.GetByte1(); // Line 8/9 Attributes
         frame[36] = line8attributes.GetByte2(); // "
 
-        // TODO: Set address
+        // Set address for the page
+        byte[] addrBytes = address.ToBytes();
+        frame[10] = addrBytes[0];
+        frame[11] = addrBytes[1];
+        frame[12] = addrBytes[2];
+        frame[13] = addrBytes[3];
+        frame[14] = addrBytes[4];
+        frame[15] = addrBytes[5];
 
         // Convert bytes 3-36 to hamming code
         HamBytes(3, 36);
