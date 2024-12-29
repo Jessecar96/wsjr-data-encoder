@@ -1,4 +1,4 @@
-namespace JrEncoder.StarAttributes;
+namespace JrEncoderLib.StarAttributes;
 
 public enum LDLStyle
 {
