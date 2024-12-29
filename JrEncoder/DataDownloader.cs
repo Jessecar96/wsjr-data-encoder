@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using JrEncoder.Schema.TWC;
 using JrEncoderLib;
 using JrEncoderLib.DataTransmitter;
 using JrEncoderLib.StarAttributes;
@@ -42,34 +43,36 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 }
 
                 string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
-                dynamic conditionsData = JsonConvert.DeserializeObject(responseBody);
-                var jsonDocument = JsonDocument.Parse(responseBody);
-                var conditionsData2 = jsonDocument.RootElement;
+                Observations? conditionsData = JsonConvert.DeserializeObject<Observations>(responseBody);
+
+                if (conditionsData == null)
+                {
+                    Console.WriteLine($"[DataDownloader] Failed to download current conditions for {star.LocationName}");
+                    continue;
+                }
 
                 // Build padding into strings 
-                string tempStr = conditionsData2.Get<string>("temperature").PadLeft(4, ' ');
-                string wcStr = conditionsData2.GetProperty("temperatureWindChill").GetRawText().PadLeft(3, ' ');
-                string humStr = conditionsData2.GetProperty("relativeHumidity").GetRawText().PadLeft(4, ' ');
-                string dewptStr = conditionsData2.GetProperty("temperatureDewPoint").GetRawText().PadLeft(3, ' ');
-                string presStr = conditionsData2.GetProperty("pressureAltimeter").GetRawText().PadLeft(6, ' ');
-                string windDir = conditionsData2.GetProperty("windDirectionCardinal").GetString().PadLeft(4, ' ');
-                string windSpeedStr = conditionsData2.GetProperty("windSpeed").GetRawText().PadLeft(3, ' ');
-                string visibStr = conditionsData2.GetProperty("visibility").GetRawText().PadLeft(4, ' ');
-                string ceilingStr = conditionsData2.GetProperty("cloudCeiling").GetRawText().PadLeft(5, ' ');
-
-                //string tempStr = conditionsData2.Raw("temperature").PadLeft(4, ' ');
+                string tempStr = conditionsData.Temperature.ToString().PadLeft(4, ' ');
+                string wcStr = conditionsData.TemperatureWindChill.ToString().PadLeft(3, ' ');
+                string humStr = conditionsData.RelativeHumidity.ToString().PadLeft(4, ' ');
+                string dewptStr = conditionsData.TemperatureDewPoint.ToString().PadLeft(3, ' ');
+                string presStr = conditionsData.PressureAltimeter.ToString().PadLeft(6, ' ');
+                string windDir = conditionsData.WindDirectionCardinal.PadLeft(4, ' ');
+                string windSpeedStr = conditionsData.WindSpeed.ToString().PadLeft(3, ' ');
+                string visibStr = conditionsData.Visibility.ToString().PadLeft(4, ' ');
+                string ceilingStr = conditionsData.CloudCeiling == null ? " Unlimited" : ": " + (conditionsData.CloudCeiling + " ft.").PadLeft(5, ' ');
 
                 // Build page
                 var testPage = new PageBuilder(50, Address.FromSwitches(star.Switches), _omcw)
                     .AddLine($"Conditions at {star.LocationName}")
-                    .AddLine(conditionsData.wxPhraseLong.ToString())
+                    .AddLine(conditionsData.WxPhraseLong)
                     .AddLine($"Temp:{tempStr}°F    Wind Chill:{wcStr}°F")
                     .AddLine($"Humidity:{humStr}%   Dewpoint:{dewptStr}°F")
                     .AddLine($"Barometric Pressure:{presStr} in.")
                     .AddLine($"Wind:{windDir}{windSpeedStr} MPH")
-                    .AddLine($"Visib:{visibStr} mi. Ceiling:{ceilingStr} ft.")
+                    .AddLine($"Visib:{visibStr} mi. Ceiling{ceilingStr} ft.")
                     .Build();
-                
+
                 _dataTransmitter.AddFrame(testPage);
                 Console.WriteLine($"[DataDownloader] Page 50 sent");
 

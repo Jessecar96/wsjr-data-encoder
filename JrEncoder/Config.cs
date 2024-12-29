@@ -7,21 +7,21 @@ using System.Text.Json;
 public class Config
 {
     [JsonPropertyName("apikey")]
-    public string APIKey { get; set; }
+    public required string APIKey { get; set; }
     
     [JsonPropertyName("stars")]
-    public WeatherStar[] Stars { get; set; }
+    public required WeatherStar[] Stars { get; set; }
 
     public class WeatherStar
     {
         [JsonPropertyName("switches")]
-        public string Switches { get; set; }
+        public required string Switches { get; set; }
         
         [JsonPropertyName("location")]
-        public string Location { get; set; }
+        public required string Location { get; set; }
         
         [JsonPropertyName("location_name")]
-        public string LocationName { get; set; }
+        public required string LocationName { get; set; }
     }
 
     /// <summary>
@@ -53,12 +53,24 @@ public class Config
         if (!File.Exists(configPath))
         {
             Console.WriteLine("config.json file doesn't exist. Creating a new one.");
-            Config newConfig = new();
+            Config newConfig = new()
+            {
+                APIKey = "",
+                Stars =
+                [
+                    new WeatherStar()
+                    {
+                        Location = "Lat,Lon",
+                        LocationName = "Location Name",
+                        Switches = "00000000",
+                    }
+                ],
+            };
             newConfig.Save();
             return newConfig;
         }
 
         string fileContent = File.ReadAllText(configPath);
-        return JsonSerializer.Deserialize<Config>(fileContent);
+        return JsonSerializer.Deserialize<Config>(fileContent) ?? throw new InvalidOperationException("Invalid config.json file");
     }
 }

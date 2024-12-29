@@ -49,6 +49,9 @@ public struct Address(int serviceId, int zone, int county, int unit)
 
     public static Address FromSwitches(string switches)
     {
+        if (switches.Length != 8)
+            throw new Exception("Switches must be 8 characters long");
+        
         return new Address(1, 0, 0, 0);
     }
 }
