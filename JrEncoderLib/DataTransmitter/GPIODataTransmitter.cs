@@ -30,8 +30,8 @@ public class GPIODataTransmitter(OMCW omcw) : DataTransmitter(omcw)
     private const int LowDataBit2 = 6; // D2 / GPIO 6  / A6
     private const int LowDataBit3 = 13; // D3 / GPIO 13 / A5
     private const int LowDataBit4 = 19; // D4 / GPIO 19 / A4
-    private const int LowDataBit5 = 26; // D5 / GPIO 26 / A3
-    private const int LowDataBit6 = 20; // D6 / GPIO 20 / A2
+    private const int LowDataBit5 = 20; // D5 / GPIO 20 / A2
+    private const int LowDataBit6 = 26; // D6 / GPIO 26 / A3
     private const int LowDataBit7 = 21; // D7 / GPIO 21 / A1
 
     // High byte (Fifohigh)
