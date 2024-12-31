@@ -26,10 +26,10 @@ public class Observations
     public int IconCodeExtend { get; set; }
 
     [JsonPropertyName("obsQualifierCode")]
-    public string ObsQualifierCode { get; set; }
+    public string? ObsQualifierCode { get; set; }
 
     [JsonPropertyName("obsQualifierSeverity")]
-    public int ObsQualifierSeverity { get; set; }
+    public int? ObsQualifierSeverity { get; set; }
 
     [JsonPropertyName("precip1Hour")]
     public double Precip1Hour { get; set; }
@@ -128,7 +128,7 @@ public class Observations
     public string WindDirectionCardinal { get; set; }
 
     [JsonPropertyName("windGust")]
-    public int WindGust { get; set; }
+    public int? WindGust { get; set; }
 
     [JsonPropertyName("windSpeed")]
     public int WindSpeed { get; set; }
