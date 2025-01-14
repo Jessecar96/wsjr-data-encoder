@@ -8,6 +8,9 @@ public class Config
 {
     [JsonPropertyName("apikey")]
     public required string APIKey { get; set; }
+
+    [JsonPropertyName("page_interval")] 
+    public required int PageInterval { get; set; }
     
     [JsonPropertyName("stars")]
     public required WeatherStar[] Stars { get; set; }
@@ -56,6 +59,7 @@ public class Config
             Config newConfig = new()
             {
                 APIKey = "",
+                PageInterval = 30,
                 Stars =
                 [
                     new WeatherStar()

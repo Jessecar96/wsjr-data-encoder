@@ -100,7 +100,7 @@ public class GPIODataTransmitter(OMCW omcw) : DataTransmitter(omcw)
 
     public override async Task Run()
     {
-        DataFrame[] idleFrames = new PageBuilder(42, new Address(1, 2, 3, 4), omcw)
+        DataFrame[] idleFrames = new PageBuilder(42, Address.None, omcw)
             .AddLine("00000000000000000000000000000000")
             .Build();
 

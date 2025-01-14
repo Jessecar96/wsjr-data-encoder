@@ -12,6 +12,16 @@ namespace JrEncoderLib.StarAttributes;
 public struct Address(int serviceId, int zone, int county, int unit)
 {
     /// <summary>
+    /// Service id 1 and everything else 0s makes this address all stars
+    /// </summary>
+    public static Address All = new Address(1,0,0,0);
+    
+    /// <summary>
+    /// Setting service id to 0 makes this address no stars
+    /// </summary>
+    public static Address None = new Address(0,0,0,0);
+    
+    /// <summary>
     /// Returns a 6-byte array representing the address.
     /// </summary>
     /// <returns></returns>
