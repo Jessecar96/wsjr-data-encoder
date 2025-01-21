@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+﻿using CoordinateSharp;
 using JrEncoder.Schema.TWC;
 using JrEncoderLib;
 using JrEncoderLib.DataTransmitter;
@@ -13,11 +13,12 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
     private Config _config = config;
     private DataTransmitter _dataTransmitter = dataTransmitter;
     private OMCW _omcw = omcw;
-    
+
     public async Task UpdateAll()
     {
         Console.WriteLine("[DataDownloader] Updating all records...");
         await UpdateCurrentConditions();
+        await UpdateAlmanac();
     }
 
     public async Task Run()
@@ -80,6 +81,80 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
 
             _dataTransmitter.AddFrame(testPage);
             Console.WriteLine($"[DataDownloader] Page 50 sent");
+        }
+    }
+
+    private async Task UpdateAlmanac()
+    {
+        foreach (Config.WeatherStar star in _config.Stars)
+        {
+            Console.WriteLine($"[DataDownloader] Updating almanac for {star.LocationName}");
+
+            int currentDay = DateTime.Now.Day;
+            int currentMonth = DateTime.Now.Month;
+
+            // Make HTTP request
+            HttpResponseMessage httpResponseMessage =
+                await Util.HttpClient.GetAsync($"https://api.weather.com/v3/wx/almanac/daily/5day?geocode={star.Location}&format=json&units=e&startDay={currentDay}&startMonth={currentMonth}&apiKey={_config.APIKey}");
+
+            // Make sure the request was successful
+            if (!httpResponseMessage.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"[DataDownloader] Failed to download almanac for {star.LocationName}");
+                continue;
+            }
+
+            string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+            Almanac? almanacData = JsonConvert.DeserializeObject<Almanac>(responseBody);
+
+            if (almanacData == null)
+            {
+                Console.WriteLine($"[DataDownloader] Failed to download almanac for {star.LocationName}");
+                continue;
+            }
+
+            // Build padding into strings
+            string todayDayName = DateTime.Today.ToString("dddd");
+            string tomorrowDayName = DateTime.Today.AddDays(1).ToString("dddd");
+            string monthName = DateTime.Today.ToString("MMMM");
+            // When it's Tuesday, Wednesday needs to be moved over 1 character left
+            int leftDayPadding = DateTime.Today.DayOfWeek == DayOfWeek.Tuesday ? 9 : 10;
+
+            string precipLine = "";
+            if (almanacData.PrecipitationAverage[0] != null)
+            {
+                precipLine = $"Normal {monthName} Precip".PadRight(24, ' ') +
+                             $"{almanacData.PrecipitationAverage[0]}in".PadLeft(7, ' ');
+            }
+
+            // Get sunset and sunrise
+            Console.WriteLine(star.GetLat() + "," + star.GetLon());
+            Coordinate cToday = new(star.GetLat(), star.GetLon(), DateTime.Now);
+            Coordinate cTomorrow = new(star.GetLat(), star.GetLon(), DateTime.Now.AddDays(1));
+
+            TextLineAttributes smallHeight = new()
+            {
+                Color = Color.Blue,
+                Border = true,
+                Width = 0,
+                Height = 0
+            };
+
+            // Build page
+            DataFrame[] testPage = new PageBuilder(51, Address.FromSwitches(star.Switches), _omcw)
+                .AddLine("  The Weather Channel Almanac   ")
+                .AddLine("", smallHeight)
+                .AddLine($"            {todayDayName.PadRight(-leftDayPadding)}{tomorrowDayName}")
+                .AddLine("Sunrise       " + cToday.CelestialInfo.SunRise?.ToLocalTime().ToString("h:mm tt") + "   " + cTomorrow.CelestialInfo.SunRise?.ToLocalTime().ToString("h:mm tt"))
+                .AddLine("Sunset        " + cToday.CelestialInfo.SunSet?.ToLocalTime().ToString("h:mm tt") + "   " + cTomorrow.CelestialInfo.SunSet?.ToLocalTime().ToString("h:mm tt"))
+                .AddLine($"Normal Low     {almanacData.TemperatureAverageMin[0].ToString(),3} ?F    {almanacData.TemperatureAverageMin[1].ToString(),3} ?F")
+                .AddLine($"Normal High    {almanacData.TemperatureAverageMax[0].ToString(),3} ?F    {almanacData.TemperatureAverageMax[1].ToString(),3} ?F")
+                .AddLine("")
+                .AddLine(precipLine)
+                .Build();
+
+            _dataTransmitter.AddFrame(testPage);
+            Console.WriteLine($"[DataDownloader] Page 51 sent");
         }
     }
 }

@@ -9,9 +9,9 @@ public class Config
     [JsonPropertyName("apikey")]
     public required string APIKey { get; set; }
 
-    [JsonPropertyName("page_interval")] 
+    [JsonPropertyName("page_interval")]
     public required int PageInterval { get; set; }
-    
+
     [JsonPropertyName("stars")]
     public required WeatherStar[] Stars { get; set; }
 
@@ -19,12 +19,24 @@ public class Config
     {
         [JsonPropertyName("switches")]
         public required string Switches { get; set; }
-        
+
         [JsonPropertyName("location")]
         public required string Location { get; set; }
-        
+
         [JsonPropertyName("location_name")]
         public required string LocationName { get; set; }
+
+        public double GetLat()
+        {
+            string[] latLon = Location.Split(',');
+            return double.Parse(latLon[0]);
+        }
+
+        public double GetLon()
+        {
+            string[] latLon = Location.Split(',');
+            return double.Parse(latLon[1]);
+        }
     }
 
     /// <summary>

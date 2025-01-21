@@ -88,7 +88,7 @@ class Program
         {
             omcw.TopPage(50).Commit();
             Thread.Sleep(config.PageInterval * 1000);
-            omcw.TopPage(41).Commit();
+            omcw.TopPage(51).Commit();
             Thread.Sleep(config.PageInterval * 1000);
         }
     }
