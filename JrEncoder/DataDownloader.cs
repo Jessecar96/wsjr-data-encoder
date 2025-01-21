@@ -100,16 +100,38 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             // Make sure the request was successful
             if (!httpResponseMessage.IsSuccessStatusCode)
             {
-                Console.WriteLine($"[DataDownloader] Failed to download almanac for {star.LocationName}");
+                Console.WriteLine($"[DataDownloader] Failed to download daily almanac for {star.LocationName}");
                 continue;
             }
 
             string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
-            Almanac? almanacData = JsonConvert.DeserializeObject<Almanac>(responseBody);
+            Almanac? dailyAlmanacData = JsonConvert.DeserializeObject<Almanac>(responseBody);
 
-            if (almanacData == null)
+            if (dailyAlmanacData == null)
             {
-                Console.WriteLine($"[DataDownloader] Failed to download almanac for {star.LocationName}");
+                Console.WriteLine($"[DataDownloader] Failed to download daily almanac for {star.LocationName}");
+                continue;
+            }
+            
+            // Same but for monthly almanac
+            
+            // Make HTTP request
+            HttpResponseMessage httpResponseMessage2 =
+                await Util.HttpClient.GetAsync($"https://api.weather.com/v3/wx/almanac/monthly/1month?geocode={star.Location}&format=json&units=e&month={currentMonth}&apiKey={_config.APIKey}");
+
+            // Make sure the request was successful
+            if (!httpResponseMessage2.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"[DataDownloader] Failed to download monthly almanac for {star.LocationName}");
+                continue;
+            }
+
+            string responseBody2 = await httpResponseMessage2.Content.ReadAsStringAsync();
+            Almanac? monthlyAlmanacData = JsonConvert.DeserializeObject<Almanac>(responseBody2);
+
+            if (monthlyAlmanacData == null)
+            {
+                Console.WriteLine($"[DataDownloader] Failed to download monthly almanac for {star.LocationName}");
                 continue;
             }
 
@@ -121,14 +143,13 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             int leftDayPadding = DateTime.Today.DayOfWeek == DayOfWeek.Tuesday ? 9 : 10;
 
             string precipLine = "";
-            if (almanacData.PrecipitationAverage[0] != null)
+            if (monthlyAlmanacData.PrecipitationAverage[0] != null)
             {
                 precipLine = $"Normal {monthName} Precip".PadRight(24, ' ') +
-                             $"{almanacData.PrecipitationAverage[0]}in".PadLeft(7, ' ');
+                             $"{monthlyAlmanacData.PrecipitationAverage[0]}in".PadLeft(7, ' ');
             }
 
             // Get sunset and sunrise
-            Console.WriteLine(star.GetLat() + "," + star.GetLon());
             Coordinate cToday = new(star.GetLat(), star.GetLon(), DateTime.Now);
             Coordinate cTomorrow = new(star.GetLat(), star.GetLon(), DateTime.Now.AddDays(1));
 
