@@ -86,10 +86,11 @@ class Program
         // Start looping pages
         while (true)
         {
-            omcw.TopPage(50).Commit();
-            Thread.Sleep(config.PageInterval * 1000);
-            omcw.TopPage(51).Commit();
-            Thread.Sleep(config.PageInterval * 1000);
+            for (int i = 50; i <= 54; i++)
+            {
+                omcw.TopPage(i).Commit();
+                Thread.Sleep(config.PageInterval * 1000);
+            }
         }
     }
 }

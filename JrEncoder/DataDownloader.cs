@@ -19,6 +19,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
         Console.WriteLine("[DataDownloader] Updating all records...");
         await UpdateCurrentConditions();
         await UpdateAlmanac();
+        await UpdateForecast();
     }
 
     public async Task Run()
@@ -38,8 +39,8 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             Console.WriteLine($"[DataDownloader] Updating current conditions for {star.LocationName}");
 
             // Make HTTP request
-            HttpResponseMessage httpResponseMessage = await Util.HttpClient.GetAsync(
-                $"https://api.weather.com/v3/wx/observations/current?geocode={star.Location}&units=e&language=en-US&format=json&apiKey={_config.APIKey}");
+            HttpResponseMessage httpResponseMessage =
+                await Util.HttpClient.GetAsync($"https://api.weather.com/v3/wx/observations/current?geocode={star.Location}&units=e&language=en-US&format=json&apiKey={_config.APIKey}");
 
             // Make sure the request was successful
             if (!httpResponseMessage.IsSuccessStatusCode)
@@ -58,18 +59,18 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             }
 
             // Build padding into strings 
-            string tempStr = conditionsData.Temperature.ToString().PadLeft(4, ' ');
-            string wcStr = conditionsData.TemperatureWindChill.ToString().PadLeft(3, ' ');
-            string humStr = conditionsData.RelativeHumidity.ToString().PadLeft(4, ' ');
-            string dewptStr = conditionsData.TemperatureDewPoint.ToString().PadLeft(3, ' ');
-            string presStr = conditionsData.PressureAltimeter.ToString().PadLeft(6, ' ');
-            string windDir = conditionsData.WindDirectionCardinal.PadLeft(4, ' ');
-            string windSpeedStr = conditionsData.WindSpeed.ToString().PadLeft(3, ' ');
-            string visibStr = conditionsData.Visibility.ToString().PadLeft(4, ' ');
-            string ceilingStr = conditionsData.CloudCeiling == null ? " Unlimited" : ": " + (conditionsData.CloudCeiling + " ft.").PadLeft(5, ' ');
+            string tempStr = conditionsData.Temperature.ToString().PadLeft(4);
+            string wcStr = conditionsData.TemperatureWindChill.ToString().PadLeft(3);
+            string humStr = conditionsData.RelativeHumidity.ToString().PadLeft(4);
+            string dewptStr = conditionsData.TemperatureDewPoint.ToString().PadLeft(3);
+            string presStr = conditionsData.PressureAltimeter.ToString().PadLeft(6);
+            string windDir = conditionsData.WindDirectionCardinal.PadLeft(4);
+            string windSpeedStr = conditionsData.WindSpeed.ToString().PadLeft(3);
+            string visibStr = conditionsData.Visibility.ToString().PadLeft(4);
+            string ceilingStr = conditionsData.CloudCeiling == null ? " Unlimited" : ": " + (conditionsData.CloudCeiling + " ft.").PadLeft(5);
 
             // Build page
-            DataFrame[] testPage = new PageBuilder(50, Address.FromSwitches(star.Switches), _omcw)
+            DataFrame[] ccPage = new PageBuilder((int)Page.CurrentConditions, Address.FromSwitches(star.Switches), _omcw)
                 .AddLine($"Conditions at {star.LocationName}")
                 .AddLine(conditionsData.WxPhraseLong)
                 .AddLine($"Temp:{tempStr}°F    Wind Chill:{wcStr}°F")
@@ -79,8 +80,8 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 .AddLine($"Visib:{visibStr} mi. Ceiling{ceilingStr} ft.")
                 .Build();
 
-            _dataTransmitter.AddFrame(testPage);
-            Console.WriteLine($"[DataDownloader] Page 50 sent");
+            _dataTransmitter.AddFrame(ccPage);
+            Console.WriteLine($"[DataDownloader] Page {(int)Page.CurrentConditions} sent");
         }
     }
 
@@ -112,9 +113,9 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 Console.WriteLine($"[DataDownloader] Failed to download daily almanac for {star.LocationName}");
                 continue;
             }
-            
+
             // Same but for monthly almanac
-            
+
             // Make HTTP request
             HttpResponseMessage httpResponseMessage2 =
                 await Util.HttpClient.GetAsync($"https://api.weather.com/v3/wx/almanac/monthly/1month?geocode={star.Location}&format=json&units=e&month={currentMonth}&apiKey={_config.APIKey}");
@@ -162,20 +163,89 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             };
 
             // Build page
-            DataFrame[] testPage = new PageBuilder(51, Address.FromSwitches(star.Switches), _omcw)
+            DataFrame[] almanacPage = new PageBuilder((int)Page.Almanac, Address.FromSwitches(star.Switches), _omcw)
                 .AddLine("  The Weather Channel Almanac   ")
                 .AddLine("", smallHeight)
-                .AddLine($"            {todayDayName.PadRight(-leftDayPadding)}{tomorrowDayName}")
+                .AddLine($"              {todayDayName.PadRight(leftDayPadding)}{tomorrowDayName}")
                 .AddLine("Sunrise       " + cToday.CelestialInfo.SunRise?.ToLocalTime().ToString("h:mm tt") + "   " + cTomorrow.CelestialInfo.SunRise?.ToLocalTime().ToString("h:mm tt"))
                 .AddLine("Sunset        " + cToday.CelestialInfo.SunSet?.ToLocalTime().ToString("h:mm tt") + "   " + cTomorrow.CelestialInfo.SunSet?.ToLocalTime().ToString("h:mm tt"))
-                .AddLine($"Normal Low     {almanacData.TemperatureAverageMin[0].ToString(),3} ?F    {almanacData.TemperatureAverageMin[1].ToString(),3} ?F")
-                .AddLine($"Normal High    {almanacData.TemperatureAverageMax[0].ToString(),3} ?F    {almanacData.TemperatureAverageMax[1].ToString(),3} ?F")
+                .AddLine($"Normal Low     {dailyAlmanacData.TemperatureAverageMin[0].ToString(),3} ?F    {dailyAlmanacData.TemperatureAverageMin[1].ToString(),3} ?F")
+                .AddLine($"Normal High    {dailyAlmanacData.TemperatureAverageMax[0].ToString(),3} ?F    {dailyAlmanacData.TemperatureAverageMax[1].ToString(),3} ?F")
                 .AddLine("")
                 .AddLine(precipLine)
                 .Build();
 
-            _dataTransmitter.AddFrame(testPage);
-            Console.WriteLine($"[DataDownloader] Page 51 sent");
+            _dataTransmitter.AddFrame(almanacPage);
+            Console.WriteLine($"[DataDownloader] Page {(int)Page.Almanac} sent");
+        }
+    }
+
+    private async Task UpdateForecast()
+    {
+        foreach (Config.WeatherStar star in _config.Stars)
+        {
+            Console.WriteLine($"[DataDownloader] Updating forecast for {star.LocationName}");
+
+            // Make HTTP request
+            HttpResponseMessage httpResponseMessage =
+                await Util.HttpClient.GetAsync($"https://api.weather.com/v3/wx/forecast/daily/3day?geocode={star.Location}&format=json&units=e&language=en-US&apiKey={_config.APIKey}");
+
+            // Make sure the request was successful
+            if (!httpResponseMessage.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"[DataDownloader] Failed to download forecast for {star.LocationName}");
+                continue;
+            }
+
+            string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+            Forecast? forecastData = JsonConvert.DeserializeObject<Forecast>(responseBody);
+
+            if (forecastData == null)
+            {
+                Console.WriteLine($"[DataDownloader] Failed to download forecast for {star.LocationName}");
+                continue;
+            }
+
+            TextLineAttributes smallHeight = new()
+            {
+                Color = Color.Blue,
+                Border = true,
+                Width = 0,
+                Height = 0
+            };
+
+            // Loop over daypart items
+            int curForecastPage = 0;
+            for (int i = 0; i < forecastData.Daypart[0].DaypartName.Count; i++)
+            {
+                // Make sure this isn't null
+                if (forecastData.Daypart[0].DaypartName[i] == null)
+                    continue;
+
+                // Limit to 3 pages
+                if (curForecastPage >= 3)
+                    break;
+
+                // Build narrative and word wrap it
+                string narrative = forecastData.Daypart[0].DaypartName[i] + "..." + forecastData.Daypart[0].Narrative[i];
+                narrative = Util.RemoveUnits(narrative);
+                List<string> narrativeLines = Util.WordWrap(narrative, 31);
+
+                // Build page
+                int actualPageNum = (int)Page.Forecast1 + curForecastPage;
+                PageBuilder pageBuilder = new PageBuilder(actualPageNum, Address.FromSwitches(star.Switches), _omcw)
+                    .AddLine("        Your TWC Forecast", smallHeight)
+                    .AddLine("");
+
+                // Add lines to the page
+                foreach (string line in narrativeLines)
+                    pageBuilder.AddLine(line);
+
+                _dataTransmitter.AddFrame(pageBuilder.Build());
+                Console.WriteLine($"[DataDownloader] Page {actualPageNum} sent");
+
+                curForecastPage++;
+            }
         }
     }
 }
