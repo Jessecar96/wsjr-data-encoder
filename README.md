@@ -7,11 +7,12 @@ This project is distributed under the GNU General Public License v3.0.
 - Setting the clock
 - Current conditions
 - Almanac
+- Headlines
 - Text-based 36 hour forecast
 
 ## TODO:
 - Addressing multiple weather stars
-- Headlines/Alerts
+- Severe warnings/advisories
 - Tides
 - Regional forecast
 - Extended forecast

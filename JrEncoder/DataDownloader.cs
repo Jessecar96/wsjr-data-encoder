@@ -14,9 +14,13 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
     private DataTransmitter _dataTransmitter = dataTransmitter;
     private OMCW _omcw = omcw;
 
+    // Data cache
+    private readonly Dictionary<string, HeadlinesResponse> _alertsCache = new();
+
     public async Task UpdateAll()
     {
         Console.WriteLine("[DataDownloader] Updating all records...");
+        await UpdateAlerts();
         await UpdateCurrentConditions();
         await UpdateAlmanac();
         await UpdateForecast();
@@ -29,6 +33,37 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
         while (await timer.WaitForNextTickAsync())
         {
             await UpdateCurrentConditions();
+        }
+    }
+
+    private async Task UpdateAlerts()
+    {
+        foreach (Config.WeatherStar star in _config.Stars)
+        {
+            Console.WriteLine($"[DataDownloader] Updating alerts for {star.LocationName}");
+
+            // Make HTTP request
+            HttpResponseMessage httpResponseMessage =
+                await Util.HttpClient.GetAsync($"https://api.weather.com/v3/alerts/headlines?geocode={star.Location}&format=json&language=en-US&apiKey={_config.APIKey}");
+
+            // Make sure the request was successful
+            if (!httpResponseMessage.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"[DataDownloader] Failed to download alerts for {star.LocationName}");
+                continue;
+            }
+
+            string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+            HeadlinesResponse? alertData = JsonConvert.DeserializeObject<HeadlinesResponse>(responseBody);
+
+            if (alertData == null)
+            {
+                Console.WriteLine($"[DataDownloader] No alerts for {star.LocationName}");
+                continue;
+            }
+
+            // Save locally
+            _alertsCache[star.Location] = alertData;
         }
     }
 
@@ -213,6 +248,9 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 Width = 0,
                 Height = 0
             };
+            
+            // List to hold lines that overflow onto the next page
+            List<string> overflowLines = new();
 
             // Loop over daypart items
             int curForecastPage = 0;
@@ -226,10 +264,50 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 if (curForecastPage >= 3)
                     break;
 
+                // List that will hold the lines of text for the forecast section
+                List<string> narrativeLines = new();
+
+                // Check for any headlines to show
+                // Only do this for page 0
+                if (curForecastPage == 0 && _alertsCache.ContainsKey(star.Location))
+                {
+                    // Find the saved alerts for this location
+                    HeadlinesResponse headlinesResponseData = _alertsCache[star.Location];
+                    foreach (HeadlinesResponse.Alert alert in headlinesResponseData.Alerts)
+                    {
+                        // Skip any that we don't want to show as a headline
+                        if (!alert.ShowAsHeadline()) continue;
+                        DateTime endTime = DateTimeOffset.FromUnixTimeSeconds(alert.EndTimeUTC).LocalDateTime;
+                        narrativeLines.Add("*" + Util.CenterString(alert.EventDescription, 30) + "*");
+                        narrativeLines.Add("*" + Util.CenterString("Until " + endTime.ToString("htt ddd"), 30) + "*");
+                    }
+                    
+                    // We added some alerts, so add a line of padding before the forecast
+                    if (narrativeLines.Count != 0)
+                        narrativeLines.Add("");
+                }
+                
+                // Add any overflow lines from the previous page
+                if (overflowLines.Count != 0)
+                {
+                    // Add overflowed lines to this page
+                    narrativeLines.AddRange(overflowLines);
+                    
+                    // Clear the list for this page to overflow any more lines
+                    overflowLines.Clear();
+                }
+
                 // Build narrative and word wrap it
                 string narrative = forecastData.Daypart[0].DaypartName[i] + "..." + forecastData.Daypart[0].Narrative[i];
                 narrative = Util.RemoveUnits(narrative);
-                List<string> narrativeLines = Util.WordWrap(narrative, 31);
+                narrativeLines.AddRange(Util.WordWrap(narrative, 31));
+
+                // Anything over 7 lines (total 9 lines with the title) needs to overflow to the next page
+                if (narrativeLines.Count > 7)
+                {
+                    overflowLines = narrativeLines.Slice(7, narrativeLines.Count - 7);
+                    narrativeLines.RemoveRange(7, narrativeLines.Count - 7);
+                }
 
                 // Build page
                 int actualPageNum = (int)Page.Forecast1 + curForecastPage;
