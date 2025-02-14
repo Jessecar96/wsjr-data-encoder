@@ -100,28 +100,28 @@ public class HeadlinesResponse
         public int CertaintyCode { get; set; }
 
         [JsonPropertyName("effectiveTimeLocal")]
-        public DateTime EffectiveTimeLocal { get; set; }
+        public string? EffectiveTimeLocal { get; set; }
 
         [JsonPropertyName("effectiveTimeLocalTimeZone")]
-        public string EffectiveTimeLocalTimeZone { get; set; }
+        public string? EffectiveTimeLocalTimeZone { get; set; }
 
         [JsonPropertyName("expireTimeLocal")]
-        public DateTime ExpireTimeLocal { get; set; }
+        public string? ExpireTimeLocal { get; set; }
 
         [JsonPropertyName("expireTimeLocalTimeZone")]
-        public string ExpireTimeLocalTimeZone { get; set; }
+        public string? ExpireTimeLocalTimeZone { get; set; }
 
         [JsonPropertyName("expireTimeUTC")]
         public int ExpireTimeUTC { get; set; }
 
         [JsonPropertyName("onsetTimeLocal")]
-        public DateTime OnsetTimeLocal { get; set; }
+        public string? OnsetTimeLocal { get; set; }
 
         [JsonPropertyName("onsetTimeLocalTimeZone")]
-        public string OnsetTimeLocalTimeZone { get; set; }
+        public string? OnsetTimeLocalTimeZone { get; set; }
 
         [JsonPropertyName("flood")]
-        public object Flood { get; set; }
+        public string? Flood { get; set; }
 
         [JsonPropertyName("areaTypeCode")]
         public string AreaTypeCode { get; set; }
@@ -163,10 +163,10 @@ public class HeadlinesResponse
         public object Disclaimer { get; set; }
 
         [JsonPropertyName("issueTimeLocal")]
-        public DateTime IssueTimeLocal { get; set; }
+        public string? IssueTimeLocal { get; set; }
 
         [JsonPropertyName("issueTimeLocalTimeZone")]
-        public string IssueTimeLocalTimeZone { get; set; }
+        public string? IssueTimeLocalTimeZone { get; set; }
 
         [JsonPropertyName("identifier")]
         public string Identifier { get; set; }
@@ -175,10 +175,10 @@ public class HeadlinesResponse
         public int ProcessTimeUTC { get; set; }
 
         [JsonPropertyName("endTimeLocal")]
-        public DateTime EndTimeLocal { get; set; }
+        public string? EndTimeLocal { get; set; }
 
         [JsonPropertyName("endTimeLocalTimeZone")]
-        public string EndTimeLocalTimeZone { get; set; }
+        public string? EndTimeLocalTimeZone { get; set; }
 
         [JsonPropertyName("endTimeUTC")]
         public int EndTimeUTC { get; set; }
