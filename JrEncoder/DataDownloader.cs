@@ -104,19 +104,23 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             string visibStr = conditionsData.Visibility.ToString().PadLeft(4);
             string ceilingStr = conditionsData.CloudCeiling == null ? " Unlimited" : ": " + (conditionsData.CloudCeiling + " ft.").PadLeft(5);
 
-            // Build page
-            DataFrame[] ccPage = new PageBuilder((int)Page.CurrentConditions, Address.FromSwitches(star.Switches), _omcw)
-                .AddLine($"Conditions at {star.LocationName}")
-                .AddLine(conditionsData.WxPhraseLong)
-                .AddLine($"Temp:{tempStr}°F    Wind Chill:{wcStr}°F")
-                .AddLine($"Humidity:{humStr}%   Dewpoint:{dewptStr}°F")
-                .AddLine($"Barometric Pressure:{presStr} in.")
-                .AddLine($"Wind:{windDir}{windSpeedStr} MPH")
-                .AddLine($"Visib:{visibStr} mi. Ceiling{ceilingStr} ft.")
-                .Build();
-
-            _dataTransmitter.AddFrame(ccPage);
-            Console.WriteLine($"[DataDownloader] Page {(int)Page.CurrentConditions} sent");
+            // This page gets sent to both CC and LDL (they are two different pages)
+            foreach (Page pageNum in new[] {Page.CurrentConditions, Page.LDL})
+            {
+                // Build page
+                DataFrame[] ccPage = new PageBuilder((int)pageNum, Address.FromSwitches(star.Switches), _omcw)
+                    .AddLine($"Conditions at {star.LocationName}")
+                    .AddLine(conditionsData.WxPhraseLong)
+                    .AddLine($"Temp:{tempStr}°F    Wind Chill:{wcStr}°F")
+                    .AddLine($"Humidity:{humStr}%   Dewpoint:{dewptStr}°F")
+                    .AddLine($"Barometric Pressure:{presStr} in.")
+                    .AddLine($"Wind:{windDir}{windSpeedStr} MPH")
+                    .AddLine($"Visib:{visibStr} mi. Ceiling{ceilingStr} ft.")
+                    .Build();
+                _dataTransmitter.AddFrame(ccPage);
+                Console.WriteLine($"[DataDownloader] Page {(int)pageNum} sent");
+            }
+            
         }
     }
 
