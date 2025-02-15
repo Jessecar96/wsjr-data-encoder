@@ -23,6 +23,9 @@ public class TextLineFrame : DataFrame
             frame[i] = 0x7F;
         }
 
+        // Fill out the rest of the line with spaces, this overwrites any previous data sent to that line
+        text = text.PadRight(32);
+
         // Convert the string to odd-parity ASCII and append it to the frame
         byte[] textBytes = Encoding.ASCII.GetBytes(text);
         int startIndex = 5;
