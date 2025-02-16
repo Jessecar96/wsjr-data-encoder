@@ -36,25 +36,24 @@ public struct Address(int serviceId, int zone, int county, int unit)
 
         // [zone ]
         // 0 0 0 0
-        address[1] = (byte)(zone & 0b0111100000);
+        address[1] = (byte)((zone & 0b0111100000) >> 5);
 
         // [zone ]
         // 0 0 0 0
-        address[2] = (byte)(zone & 0b0000011110);
+        address[2] = (byte)((zone & 0b0000011110) >> 1);
 
         // [z][cnty]
         // 0  0 0 0
-        address[3] = (byte)((zone & 0b0000000001) | county << 2);
+        address[3] = (byte)(((zone & 0b0000000001) << 3) | ((county & 0b11100) >> 2));
 
-        // [cn][u] 
+        // [cn][u]
         // 0 0 0 0
-        address[4] = (byte)((county & 0b11000) | unit << 4);
+        address[4] = (byte)(((county & 0b00000011) << 2) | ((unit & 0b110000) >> 4));
 
         // [unit ]
         // 0 0 0 0
         address[5] = (byte)(unit & 0b0000001111);
 
-        Console.WriteLine(Convert.ToHexString(address));
         return address;
     }
 
@@ -63,7 +62,18 @@ public struct Address(int serviceId, int zone, int county, int unit)
         if (switches.Length != 8)
             throw new Exception("Switches must be 8 characters long");
 
-        return new Address(1, 0, 0, 0);
+        byte[] switchBytes = StringToByteArray(switches);
+
+        // zone is the last 5 bits of the 2nd switch, and first 5 bits of the 3rd switch
+        int zone = ((switchBytes[1] & 0b00011111) << 5) | (switchBytes[2] >> 3);
+
+        // county is the last 3 bits of the 3rd switch, and the first 2 bits of the 4th switch
+        int county = ((switchBytes[2] & 0b00000111) << 2) | (switchBytes[3] >> 6);
+
+        // unit is the last 6 bits of the 4th switch
+        int unit = switchBytes[3] & 0b000111111;
+
+        return new Address(1, zone, county, unit);
     }
 
     public static int GetTimeZone(string switches)

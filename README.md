@@ -5,13 +5,13 @@ This project is distributed under the GNU General Public License v3.0.
 
 ## Working:
 - Setting the clock
+- Addressing multiple weather stars
 - Current conditions
 - Almanac
 - Headlines
 - Text-based 36 hour forecast
 
 ## TODO:
-- Addressing multiple weather stars
 - Severe warnings/advisories
 - Tides
 - Regional forecast
@@ -19,3 +19,4 @@ This project is distributed under the GNU General Public License v3.0.
 - Air quality
 - Latest observations
 - Travel cities forecast
+- Multiple time zones
