@@ -44,9 +44,14 @@ class Program
         // Init data downloader
         DataDownloader downloader = new(config, transmitter, omcw);
 
-        // Send date & time
-        TimeOfDayFrame todFrame = TimeOfDayFrame.Now(omcw, 0b111);
-        transmitter.AddFrame(todFrame);
+        // Send date & time to all configured stars
+        // TODO: Support multiple timezones
+        foreach (Config.WeatherStar star in config.Stars)
+        {
+            Console.WriteLine("Timezone: " + Convert.ToString(Address.GetTimeZone(star.Switches), 2));
+            TimeOfDayFrame todFrame = TimeOfDayFrame.Now(omcw, Address.GetTimeZone(star.Switches));
+            transmitter.AddFrame(todFrame);
+        }
 
         // Updating page
         DataFrame[] updatePage = new PageBuilder(41, Address.All, omcw)
