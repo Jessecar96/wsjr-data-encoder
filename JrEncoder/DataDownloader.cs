@@ -29,11 +29,24 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
     public async Task Run()
     {
         Console.WriteLine("[DataDownloader] Running...");
-        using PeriodicTimer timer = new(TimeSpan.FromMinutes(5));
-        while (await timer.WaitForNextTickAsync())
+        _ = Task.Run(async () =>
         {
-            await UpdateCurrentConditions();
-        }
+            using PeriodicTimer timer = new(TimeSpan.FromMinutes(2));
+            while (await timer.WaitForNextTickAsync())
+                await UpdateAlerts();
+        });
+        _ = Task.Run(async () =>
+        {
+            using PeriodicTimer timer = new(TimeSpan.FromMinutes(5));
+            while (await timer.WaitForNextTickAsync())
+                await UpdateCurrentConditions();
+        });
+        _ = Task.Run(async () =>
+        {
+            using PeriodicTimer timer = new(TimeSpan.FromMinutes(30));
+            while (await timer.WaitForNextTickAsync())
+                await UpdateForecast();
+        });
     }
 
     private async Task UpdateAlerts()
