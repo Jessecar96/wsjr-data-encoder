@@ -44,8 +44,13 @@ public class Config
     /// </summary>
     public void Save()
     {
-        Console.WriteLine("Saved config");
-        File.WriteAllText(Path.Combine(Util.GetExeLocation(), "config.json"), JsonSerializer.Serialize(this));
+        JsonSerializerOptions options = new() { WriteIndented = true };
+        File.WriteAllText(GetPath(), JsonSerializer.Serialize(this, options));
+    }
+
+    public static string GetPath()
+    {
+        return Path.Combine(Util.GetExeLocation(), "config.json");
     }
 
     /// <summary>
@@ -54,39 +59,30 @@ public class Config
     /// <returns></returns>
     public static Config LoadConfig()
     {
-        string configPath = Path.Combine(Util.GetExeLocation(), "config.json");
-        return LoadConfig(configPath);
-    }
-
-    /// <summary>
-    /// Load config from custom file name
-    /// </summary>
-    /// <param name="configPath">File path & name to load config from</param>
-    /// <returns></returns>
-    public static Config LoadConfig(string configPath)
-    {
+        string configPath = GetPath();
         if (!File.Exists(configPath))
-        {
-            Console.WriteLine("config.json file doesn't exist. Creating a new one.");
-            Config newConfig = new()
-            {
-                APIKey = "",
-                PageInterval = 30,
-                Stars =
-                [
-                    new WeatherStar()
-                    {
-                        Location = "Lat,Lon",
-                        LocationName = "Location Name",
-                        Switches = "00000000",
-                    }
-                ],
-            };
-            newConfig.Save();
-            return newConfig;
-        }
+            throw new InvalidOperationException("Config.json does not exist. Run program with --create-config");
 
         string fileContent = File.ReadAllText(configPath);
         return JsonSerializer.Deserialize<Config>(fileContent) ?? throw new InvalidOperationException("Invalid config.json file");
+    }
+
+    public static void CreateConfig()
+    {
+        Config newConfig = new()
+        {
+            APIKey = "",
+            PageInterval = 30,
+            Stars =
+            [
+                new WeatherStar()
+                {
+                    Location = "Lat,Lon",
+                    LocationName = "Location Name",
+                    Switches = "00000000",
+                }
+            ],
+        };
+        newConfig.Save();
     }
 }

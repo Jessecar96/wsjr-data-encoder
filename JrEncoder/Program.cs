@@ -12,6 +12,20 @@ class Program
         Console.WriteLine("Starting WeatherSTAR Data Transmitter");
         Console.WriteLine("Written by Jesse Cardone, 2024");
 
+        // Config creation parameter
+        if (args.Contains("--create-config"))
+        {
+            if (File.Exists(Config.GetPath()))
+            {
+                Console.WriteLine("config.json already exists. Please delete it to create a new one.");
+                return;
+            }
+            
+            Config.CreateConfig();
+            Console.WriteLine("Created config.json, program will now exit.");
+            return;
+        }
+
         // Load config
         Config config;
         try

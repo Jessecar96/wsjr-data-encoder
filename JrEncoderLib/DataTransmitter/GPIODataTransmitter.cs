@@ -21,7 +21,7 @@ public class GPIODataTransmitter(OMCW omcw) : DataTransmitter(omcw)
     private const int WriteEnable = 3; // A6 /W In Schematic    (Write strobe to insert 16-bits of data into the FIFO)
     private const int EmptyFifo = 4; // A5 /EF in Schematic   (Signal to indicate the FIFO is empty and ready for a new frame)
     private const int PeriphReset = 17; // A4 /RST in Schematic  (Resets both the FIFO, and DDS chip into initial states)
-    private const int Direction = 27; // A3 FLDIR in Schematic (FIFO when in reset mode reads this for cascading, or MSB/LSB indication for data direction)
+    private const int FLDirection = 27; // A3 FLDIR in Schematic (FIFO when in reset mode reads this for cascading, or MSB/LSB indication for data direction)
     private const int DdsFsync = 22; // FSYNC into DDS. Low when writing a 16 bit word, high when done.
 
     // Low byte (Fifolow)
@@ -54,7 +54,7 @@ public class GPIODataTransmitter(OMCW omcw) : DataTransmitter(omcw)
         _controller.OpenPin(WriteEnable, PinMode.Output);
         _controller.OpenPin(EmptyFifo, PinMode.Input);
         _controller.OpenPin(PeriphReset, PinMode.Output);
-        _controller.OpenPin(Direction, PinMode.Output);
+        _controller.OpenPin(FLDirection, PinMode.Output);
         _controller.OpenPin(DdsFsync, PinMode.Output);
         _controller.OpenPin(LowDataBit0, PinMode.Output);
         _controller.OpenPin(LowDataBit1, PinMode.Output);
@@ -73,12 +73,6 @@ public class GPIODataTransmitter(OMCW omcw) : DataTransmitter(omcw)
         _controller.OpenPin(HighDataBit6, PinMode.Output);
         _controller.OpenPin(HighDataBit7, PinMode.Output);
 
-        // Initial setup
-        _controller.Write(RequestToSend, PinValue.Low); // Reading not allowed
-        _controller.Write(WriteEnable, PinValue.Low); // Write not allowed
-        _controller.Write(PeriphReset, PinValue.High); // High = enable, low = RESET
-        _controller.Write(Direction, PinValue.Low); // Set our chip in to single mode
-
         // Callback when the FIFO tells us it is empty, and can accept a new byte
         _controller.RegisterCallbackForPinValueChangedEvent(EmptyFifo, PinEventTypes.Falling,
             (sender, args) => { _fifoIsEmpty = true; });
@@ -93,7 +87,8 @@ public class GPIODataTransmitter(OMCW omcw) : DataTransmitter(omcw)
             Mode = SpiMode.Mode2
         });
 
-        // Program the DDS chip 
+        // Program the DDS chip (twice because it likes that)
+        InitDds();
         InitDds();
         Console.WriteLine("DDS Init Complete");
     }
@@ -133,16 +128,17 @@ public class GPIODataTransmitter(OMCW omcw) : DataTransmitter(omcw)
 
         if (_ddsSpi == null)
             throw new Exception("DDS SPI was not initialized");
-
-        // Ensure FIFO is set up as single only
-        //controller.Write(Direction, PinValue.High);
+        
+        // The FIFO wants write high during reset 
+        _controller.Write(WriteEnable, PinValue.High);
 
         // Set DDS to RESET. It's active high and we invert this signal (stops any output and resets all registers)
+        // This also sets the FIFO into RESET
         Console.WriteLine("Resetting DDS");
         _controller.Write(PeriphReset, PinValue.Low);
-
-        // Give it 1ms to catch up
-        Thread.Sleep(10);
+        
+        // Set the FIFO "First Load" pin to low, this tells it that it is the first device in a chain (if we had multiple of them)
+        _controller.Write(FLDirection, PinValue.Low);
 
         // Good guide: https://dk7ih.de/programming-the-ad9834-dds-chip/
         // Set initial RESET state of DDS
@@ -154,13 +150,7 @@ public class GPIODataTransmitter(OMCW omcw) : DataTransmitter(omcw)
         _ddsSpi.WriteByte(0b00000000);
         _controller.Write(DdsFsync, PinValue.High);
 
-        // Give it 1ms to catch up
-        Thread.Sleep(1);
-
-        // Give it 1ms to catch up
-        Thread.Sleep(1000);
         Console.WriteLine("Writing frequencies");
-
 
         // Set Space Frequency (FREQ0) Lower 14 Bits (LSB) (when FS is high)
         // 01010111000111
@@ -191,17 +181,13 @@ public class GPIODataTransmitter(OMCW omcw) : DataTransmitter(omcw)
         _ddsSpi.WriteByte(0b01100010);
         _controller.Write(DdsFsync, PinValue.High);
 
-        // Give it 1ms to catch up
-        Thread.Sleep(1);
-
-        // Turn off DDS RESET, this enables the output of it
+        // Turn off DDS & FIFO RESET, this enables the output of it
         _controller.Write(PeriphReset, PinValue.High);
-
-        // Give it 1ms to catch up
-        Thread.Sleep(1);
-
-        // Make sure our FIFO clocks out in the correct direction
-        //controller.Write(Direction, PinValue.Low); 
+        
+        // Once out of RESET the FLDIR pin on the FIFO changes from "First Load" into DIRECTION
+        // Low/High makes it clock out in MSB or LSB first
+        _controller.Write(FLDirection, PinValue.Low);
+        
         Console.WriteLine("DDS Reset Complete");
     }
 
