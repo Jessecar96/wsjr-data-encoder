@@ -68,7 +68,6 @@ Type=simple
 Restart=always
 RestartSec=1
 User=${USER}
-ExecStartPre=/bin/sleep 30
 ExecStart=$HOME/.dotnet/dotnet $HOME/jrencoder/JrEncoder.dll
 
 [Install]
