@@ -36,10 +36,12 @@ echo "## Enabling SPI ##"
 sudo sed -i '/spi=on/s/^#//g' /boot/firmware/config.txt
 
 # git clone project
-echo "## Downloading project ##"
-cd $HOME
-git clone https://github.com/Jessecar96/wsjr-data-encoder.git $HOME/wsjr-data-encoder
-cd $HOME/wsjr-data-encoder
+if [ ! -d $HOME/wsjr-data-encoder ]; then
+  echo "## Cloning repo ##"
+  cd $HOME
+  git clone https://github.com/Jessecar96/wsjr-data-encoder.git $HOME/wsjr-data-encoder
+  cd $HOME/wsjr-data-encoder
+fi
 
 # Get new tags from remote
 git fetch --tags
@@ -48,6 +50,7 @@ git fetch --tags
 latestTag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
 
 # Checkout latest tag
+echo "## Checking out latest tag ##"
 git checkout -q $latestTag
 
 # Build project
