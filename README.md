@@ -3,6 +3,9 @@ This is the data provider for [The Weather STAR Revamped](https://github.com/Jes
 
 This project is distributed under the GNU General Public License v3.0.
 
+## Installation:
+See [INSTALL.md](INSTALL.md)
+
 ## Working:
 - Setting the clock
 - Addressing multiple weather stars
