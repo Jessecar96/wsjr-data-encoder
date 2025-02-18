@@ -8,11 +8,11 @@ fi
 # Update OS
 echo "## Updating OS ##"
 sudo apt-get update
-sudo apt-get upgrade -y
+sudo apt-get upgrade -yq
 
 # Install git
 echo "## Installing git ##"
-sudo apt-get install git
+sudo apt-get install -yq git
 
 # Check if .dotnet folder exists
 echo "## Checking for .NET ##"
