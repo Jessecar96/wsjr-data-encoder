@@ -5,44 +5,44 @@ namespace JrEncoder.Schema.TWC;
 public class AlmanacResponse
 {
     [JsonPropertyName("almanacInterval")]
-    public List<string> AlmanacInterval { get; set; }
+    public required List<string?> AlmanacInterval { get; init; }
 
     [JsonPropertyName("almanacRecordDate")]
-    public List<string> AlmanacRecordDate { get; set; }
+    public required List<string?> AlmanacRecordDate { get; init; }
 
     [JsonPropertyName("almanacRecordPeriod")]
-    public List<int> AlmanacRecordPeriod { get; set; }
+    public required List<int?> AlmanacRecordPeriod { get; init; }
 
     [JsonPropertyName("almanacRecordYearMax")]
-    public List<int> AlmanacRecordYearMax { get; set; }
+    public required List<int?> AlmanacRecordYearMax { get; init; }
 
     [JsonPropertyName("almanacRecordYearMin")]
-    public List<int> AlmanacRecordYearMin { get; set; }
+    public required List<int?> AlmanacRecordYearMin { get; init; }
 
     [JsonPropertyName("precipitationAverage")]
-    public List<double?> PrecipitationAverage { get; set; }
+    public required List<double?> PrecipitationAverage { get; init; }
 
     [JsonPropertyName("snowAccumulationAverage")]
-    public List<double?> SnowAccumulationAverage { get; set; }
+    public required List<double?> SnowAccumulationAverage { get; init; }
 
     [JsonPropertyName("stationId")]
-    public List<string> StationId { get; set; }
+    public required List<string?> StationId { get; init; }
 
     [JsonPropertyName("stationName")]
-    public List<string> StationName { get; set; }
+    public required List<string?> StationName { get; init; }
 
     [JsonPropertyName("temperatureAverageMax")]
-    public List<int> TemperatureAverageMax { get; set; }
+    public required List<int?> TemperatureAverageMax { get; init; }
 
     [JsonPropertyName("temperatureAverageMin")]
-    public List<int> TemperatureAverageMin { get; set; }
+    public required List<int?> TemperatureAverageMin { get; init; }
 
     [JsonPropertyName("temperatureMean")]
-    public List<int> TemperatureMean { get; set; }
+    public required List<int?> TemperatureMean { get; init; }
 
     [JsonPropertyName("temperatureRecordMax")]
-    public List<int> TemperatureRecordMax { get; set; }
+    public required List<int?> TemperatureRecordMax { get; init; }
 
     [JsonPropertyName("temperatureRecordMin")]
-    public List<int> TemperatureRecordMin { get; set; }
+    public required List<int?> TemperatureRecordMin { get; init; }
 }

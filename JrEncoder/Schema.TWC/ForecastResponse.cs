@@ -5,155 +5,168 @@ namespace JrEncoder.Schema.TWC;
 public class ForecastResponse
 {
     [JsonPropertyName("calendarDayTemperatureMax")]
-    public List<int> CalendarDayTemperatureMax { get; set; }
+    public required List<int?> CalendarDayTemperatureMax { get; init; }
 
     [JsonPropertyName("calendarDayTemperatureMin")]
-    public List<int> CalendarDayTemperatureMin { get; set; }
+    public required List<int?> CalendarDayTemperatureMin { get; init; }
 
     [JsonPropertyName("dayOfWeek")]
-    public List<string> DayOfWeek { get; set; }
+    public required List<string> DayOfWeek { get; init; }
 
     [JsonPropertyName("expirationTimeUtc")]
-    public List<int> ExpirationTimeUtc { get; set; }
+    public required List<int> ExpirationTimeUtc { get; init; }
 
     [JsonPropertyName("moonPhase")]
-    public List<string> MoonPhase { get; set; }
+    public required List<string?> MoonPhase { get; init; }
 
     [JsonPropertyName("moonPhaseCode")]
-    public List<string> MoonPhaseCode { get; set; }
+    public required List<string?> MoonPhaseCode { get; init; }
 
     [JsonPropertyName("moonPhaseDay")]
-    public List<int> MoonPhaseDay { get; set; }
+    public required List<int?> MoonPhaseDay { get; init; }
 
     [JsonPropertyName("moonriseTimeLocal")]
-    public List<string?> MoonriseTimeLocal { get; set; }
+    public required List<string?> MoonriseTimeLocal { get; init; }
 
     [JsonPropertyName("moonriseTimeUtc")]
-    public List<int?> MoonriseTimeUtc { get; set; }
+    public required List<int?> MoonriseTimeUtc { get; init; }
 
     [JsonPropertyName("moonsetTimeLocal")]
-    public List<string> MoonsetTimeLocal { get; set; }
+    public required List<string?> MoonsetTimeLocal { get; init; }
 
     [JsonPropertyName("moonsetTimeUtc")]
-    public List<int> MoonsetTimeUtc { get; set; }
+    public required List<int?> MoonsetTimeUtc { get; init; }
 
     [JsonPropertyName("narrative")]
-    public List<string> Narrative { get; set; }
+    public required List<string?> Narrative { get; init; }
 
     [JsonPropertyName("qpf")]
-    public List<double> Qpf { get; set; }
+    public required List<double?> Qpf { get; init; }
 
     [JsonPropertyName("qpfSnow")]
-    public List<double> QpfSnow { get; set; }
+    public required List<double?> QpfSnow { get; init; }
 
     [JsonPropertyName("sunriseTimeLocal")]
-    public List<string> SunriseTimeLocal { get; set; }
+    public required List<string?> SunriseTimeLocal { get; init; }
 
     [JsonPropertyName("sunriseTimeUtc")]
-    public List<int> SunriseTimeUtc { get; set; }
+    public required List<int?> SunriseTimeUtc { get; init; }
 
     [JsonPropertyName("sunsetTimeLocal")]
-    public List<string> SunsetTimeLocal { get; set; }
+    public required List<string?> SunsetTimeLocal { get; init; }
 
     [JsonPropertyName("sunsetTimeUtc")]
-    public List<int> SunsetTimeUtc { get; set; }
+    public required List<int?> SunsetTimeUtc { get; init; }
 
     [JsonPropertyName("temperatureMax")]
-    public List<int?> TemperatureMax { get; set; }
+    public required List<int?> TemperatureMax { get; init; }
 
     [JsonPropertyName("temperatureMin")]
-    public List<int> TemperatureMin { get; set; }
+    public required List<int?> TemperatureMin { get; init; }
 
     [JsonPropertyName("validTimeLocal")]
-    public List<string> ValidTimeLocal { get; set; }
+    public required List<string?> ValidTimeLocal { get; init; }
 
     [JsonPropertyName("validTimeUtc")]
-    public List<int> ValidTimeUtc { get; set; }
+    public required List<int?> ValidTimeUtc { get; init; }
 
     [JsonPropertyName("daypart")]
-    public List<ForecastDaypart> Daypart { get; set; }
+    public required List<ForecastDaypart> Daypart { get; init; }
 }
 
 public class ForecastDaypart
 {
     [JsonPropertyName("cloudCover")]
-    public List<int?> CloudCover { get; set; }
+    public required List<int?> CloudCover { get; init; }
 
     [JsonPropertyName("dayOrNight")]
-    public List<string?> DayOrNight { get; set; }
+    public required List<string?> DayOrNight { get; init; }
 
     [JsonPropertyName("daypartName")]
-    public List<string?> DaypartName { get; set; }
+    public required List<string?> DaypartName { get; init; }
 
     [JsonPropertyName("iconCode")]
-    public List<int?> IconCode { get; set; }
+    public required List<int?> IconCode { get; init; }
 
     [JsonPropertyName("iconCodeExtend")]
-    public List<int?> IconCodeExtend { get; set; }
+    public required List<int?> IconCodeExtend { get; init; }
 
     [JsonPropertyName("narrative")]
-    public List<string?> Narrative { get; set; }
+    public required List<string?> Narrative { get; init; }
 
     [JsonPropertyName("precipChance")]
-    public List<int?> PrecipChance { get; set; }
+    public required List<int?> PrecipChance { get; init; }
 
     [JsonPropertyName("precipType")]
-    public List<string?> PrecipType { get; set; }
+    public required List<string?> PrecipType { get; init; }
 
     [JsonPropertyName("qpf")]
-    public List<double?> Qpf { get; set; }
+    public required List<double?> Qpf { get; init; }
 
     [JsonPropertyName("qpfSnow")]
-    public List<double?> QpfSnow { get; set; }
+    public required List<double?> QpfSnow { get; init; }
 
     [JsonPropertyName("qualifierCode")]
-    public List<string?> QualifierCode { get; set; }
+    public required List<string?> QualifierCode { get; init; }
 
     [JsonPropertyName("qualifierPhrase")]
-    public List<string?> QualifierPhrase { get; set; }
+    public required List<string?> QualifierPhrase { get; init; }
 
     [JsonPropertyName("relativeHumidity")]
-    public List<int?> RelativeHumidity { get; set; }
+    public required List<int?> RelativeHumidity { get; init; }
 
     [JsonPropertyName("snowRange")]
-    public List<string?> SnowRange { get; set; }
+    public required List<string?> SnowRange { get; init; }
 
     [JsonPropertyName("temperature")]
-    public List<int?> Temperature { get; set; }
+    public required List<int?> Temperature { get; init; }
 
     [JsonPropertyName("temperatureHeatIndex")]
-    public List<int?> TemperatureHeatIndex { get; set; }
+    public required List<int?> TemperatureHeatIndex { get; init; }
 
     [JsonPropertyName("temperatureWindChill")]
-    public List<int?> TemperatureWindChill { get; set; }
+    public required List<int?> TemperatureWindChill { get; init; }
 
     [JsonPropertyName("thunderCategory")]
-    public List<string?> ThunderCategory { get; set; }
+    public required List<string?> ThunderCategory { get; init; }
 
     [JsonPropertyName("thunderIndex")]
-    public List<int?> ThunderIndex { get; set; }
+    public required List<int?> ThunderIndex { get; init; }
 
     [JsonPropertyName("uvDescription")]
-    public List<string?> UvDescription { get; set; }
+    public required List<string?> UvDescription { get; init; }
 
     [JsonPropertyName("uvIndex")]
-    public List<int?> UvIndex { get; set; }
+    public required List<int?> UvIndex { get; init; }
 
     [JsonPropertyName("windDirection")]
-    public List<int?> WindDirection { get; set; }
+    public required List<int?> WindDirection { get; init; }
 
     [JsonPropertyName("windDirectionCardinal")]
-    public List<string?> WindDirectionCardinal { get; set; }
+    public required List<string?> WindDirectionCardinal { get; init; }
 
     [JsonPropertyName("windPhrase")]
-    public List<string?> WindPhrase { get; set; }
+    public required List<string?> WindPhrase { get; init; }
 
     [JsonPropertyName("windSpeed")]
-    public List<int?> WindSpeed { get; set; }
+    public required List<int?> WindSpeed { get; init; }
 
     [JsonPropertyName("wxPhraseLong")]
-    public List<string?> WxPhraseLong { get; set; }
+    public required List<string?> WxPhraseLong { get; init; }
 
     [JsonPropertyName("wxPhraseShort")]
-    public List<string?> WxPhraseShort { get; set; }
+    public required List<string?> WxPhraseShort { get; init; }
+
+    public string GetFormattedWxPhrase(int index)
+    {
+        if (WxPhraseLong[index] == null) return "";
+        
+        string output = WxPhraseLong[index] ?? "";
+        
+        // Remove anything after the / which is usually a second condition
+        if (output.Contains('/'))
+            output = output.Substring(0, output.IndexOf("/"));
+        
+        return output;
+    }
 }
