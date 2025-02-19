@@ -13,12 +13,12 @@ See [INSTALL.md](INSTALL.md)
 - Almanac
 - Headlines
 - Text-based 36 hour forecast
+- Extended forecast
 
 ## TODO:
 - Severe warnings/advisories
 - Tides
 - Regional forecast
-- Extended forecast
 - Air quality
 - Latest observations
 - Travel cities forecast
