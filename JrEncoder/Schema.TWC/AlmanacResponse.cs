@@ -2,7 +2,7 @@
 
 namespace JrEncoder.Schema.TWC;
 
-public class Almanac
+public class AlmanacResponse
 {
     [JsonPropertyName("almanacInterval")]
     public List<string> AlmanacInterval { get; set; }

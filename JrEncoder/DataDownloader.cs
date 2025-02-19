@@ -1,10 +1,10 @@
-﻿using CoordinateSharp;
+﻿using System.Text.Json;
+using CoordinateSharp;
 using JrEncoder.Schema.TWC;
 using JrEncoderLib;
 using JrEncoderLib.DataTransmitter;
 using JrEncoderLib.Frames;
 using JrEncoderLib.StarAttributes;
-using Newtonsoft.Json;
 
 namespace JrEncoder;
 
@@ -67,7 +67,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             }
 
             string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
-            HeadlinesResponse? alertData = JsonConvert.DeserializeObject<HeadlinesResponse>(responseBody);
+            HeadlinesResponse? alertData = JsonSerializer.Deserialize<HeadlinesResponse>(responseBody);
 
             if (alertData == null)
             {
@@ -98,7 +98,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             }
 
             string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
-            Observations? conditionsData = JsonConvert.DeserializeObject<Observations>(responseBody);
+            ObservationsResponse? conditionsData = JsonSerializer.Deserialize<ObservationsResponse>(responseBody);
 
             if (conditionsData == null)
             {
@@ -158,7 +158,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             }
 
             string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
-            Almanac? dailyAlmanacData = JsonConvert.DeserializeObject<Almanac>(responseBody);
+            AlmanacResponse? dailyAlmanacData = JsonSerializer.Deserialize<AlmanacResponse>(responseBody);
 
             if (dailyAlmanacData == null)
             {
@@ -180,7 +180,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             }
 
             string responseBody2 = await httpResponseMessage2.Content.ReadAsStringAsync();
-            Almanac? monthlyAlmanacData = JsonConvert.DeserializeObject<Almanac>(responseBody2);
+            AlmanacResponse? monthlyAlmanacData = JsonSerializer.Deserialize<AlmanacResponse>(responseBody2);
 
             if (monthlyAlmanacData == null)
             {
@@ -250,7 +250,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             }
 
             string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
-            Forecast? forecastData = JsonConvert.DeserializeObject<Forecast>(responseBody);
+            ForecastResponse? forecastData = JsonSerializer.Deserialize<ForecastResponse>(responseBody);
 
             if (forecastData == null)
             {

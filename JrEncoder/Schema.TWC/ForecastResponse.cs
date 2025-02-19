@@ -2,7 +2,7 @@
 
 namespace JrEncoder.Schema.TWC;
 
-public class Forecast
+public class ForecastResponse
 {
     [JsonPropertyName("calendarDayTemperatureMax")]
     public List<int> CalendarDayTemperatureMax { get; set; }
@@ -32,7 +32,7 @@ public class Forecast
     public List<int?> MoonriseTimeUtc { get; set; }
 
     [JsonPropertyName("moonsetTimeLocal")]
-    public List<DateTime> MoonsetTimeLocal { get; set; }
+    public List<string> MoonsetTimeLocal { get; set; }
 
     [JsonPropertyName("moonsetTimeUtc")]
     public List<int> MoonsetTimeUtc { get; set; }
@@ -47,13 +47,13 @@ public class Forecast
     public List<double> QpfSnow { get; set; }
 
     [JsonPropertyName("sunriseTimeLocal")]
-    public List<DateTime> SunriseTimeLocal { get; set; }
+    public List<string> SunriseTimeLocal { get; set; }
 
     [JsonPropertyName("sunriseTimeUtc")]
     public List<int> SunriseTimeUtc { get; set; }
 
     [JsonPropertyName("sunsetTimeLocal")]
-    public List<DateTime> SunsetTimeLocal { get; set; }
+    public List<string> SunsetTimeLocal { get; set; }
 
     [JsonPropertyName("sunsetTimeUtc")]
     public List<int> SunsetTimeUtc { get; set; }
@@ -65,7 +65,7 @@ public class Forecast
     public List<int> TemperatureMin { get; set; }
 
     [JsonPropertyName("validTimeLocal")]
-    public List<DateTime> ValidTimeLocal { get; set; }
+    public List<string> ValidTimeLocal { get; set; }
 
     [JsonPropertyName("validTimeUtc")]
     public List<int> ValidTimeUtc { get; set; }

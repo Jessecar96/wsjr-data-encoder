@@ -2,7 +2,7 @@
 
 namespace JrEncoder.Schema.TWC;
 
-public class Observations
+public class ObservationsResponse
 {
     [JsonPropertyName("cloudCeiling")]
     public string? CloudCeiling { get; set; }
@@ -68,13 +68,13 @@ public class Observations
     public double Snow24Hour { get; set; }
 
     [JsonPropertyName("sunriseTimeLocal")]
-    public DateTime SunriseTimeLocal { get; set; }
+    public string SunriseTimeLocal { get; set; }
 
     [JsonPropertyName("sunriseTimeUtc")]
     public int SunriseTimeUtc { get; set; }
 
     [JsonPropertyName("sunsetTimeLocal")]
-    public DateTime SunsetTimeLocal { get; set; }
+    public string SunsetTimeLocal { get; set; }
 
     [JsonPropertyName("sunsetTimeUtc")]
     public int SunsetTimeUtc { get; set; }
@@ -113,7 +113,7 @@ public class Observations
     public int UvIndex { get; set; }
 
     [JsonPropertyName("validTimeLocal")]
-    public DateTime ValidTimeLocal { get; set; }
+    public string ValidTimeLocal { get; set; }
 
     [JsonPropertyName("validTimeUtc")]
     public int ValidTimeUtc { get; set; }
