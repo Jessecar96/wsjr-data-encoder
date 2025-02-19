@@ -26,23 +26,26 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
         await UpdateForecast();
     }
 
-    public async Task Run()
+    public void Run()
     {
         Console.WriteLine("[DataDownloader] Running...");
         _ = Task.Run(async () =>
         {
+            // Update alerts every 2 minutes
             using PeriodicTimer timer = new(TimeSpan.FromMinutes(2));
             while (await timer.WaitForNextTickAsync())
                 await UpdateAlerts();
         });
         _ = Task.Run(async () =>
         {
+            // Update current conditions every 5 minutes
             using PeriodicTimer timer = new(TimeSpan.FromMinutes(5));
             while (await timer.WaitForNextTickAsync())
                 await UpdateCurrentConditions();
         });
         _ = Task.Run(async () =>
         {
+            // Update forecast every 30 minutes
             using PeriodicTimer timer = new(TimeSpan.FromMinutes(30));
             while (await timer.WaitForNextTickAsync())
                 await UpdateForecast();
@@ -67,6 +70,13 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             }
 
             string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+
+            if (string.IsNullOrEmpty(responseBody))
+            {
+                Console.WriteLine($"[DataDownloader] No alerts for {star.LocationName}");
+                continue;
+            }
+
             HeadlinesResponse? alertData = JsonSerializer.Deserialize<HeadlinesResponse>(responseBody);
 
             if (alertData == null)
@@ -107,23 +117,23 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             }
 
             // Build padding into strings 
-            string tempStr = conditionsData.Temperature.ToString().PadLeft(4);
-            string wcStr = conditionsData.TemperatureWindChill.ToString().PadLeft(3);
-            string humStr = conditionsData.RelativeHumidity.ToString().PadLeft(4);
-            string dewptStr = conditionsData.TemperatureDewPoint.ToString().PadLeft(3);
-            string presStr = conditionsData.PressureAltimeter.ToString().PadLeft(6);
-            string windDir = conditionsData.WindDirectionCardinal.PadLeft(4);
-            string windSpeedStr = conditionsData.WindSpeed.ToString().PadLeft(3);
-            string visibStr = conditionsData.Visibility.ToString().PadLeft(4);
+            string tempStr = (conditionsData.Temperature.ToString() ?? "").PadLeft(4);
+            string wcStr = (conditionsData.TemperatureWindChill.ToString() ?? "").PadLeft(3);
+            string humStr = (conditionsData.RelativeHumidity.ToString() ?? "").PadLeft(4);
+            string dewptStr = (conditionsData.TemperatureDewPoint.ToString() ?? "").PadLeft(3);
+            string presStr = (conditionsData.PressureAltimeter.ToString() ?? "").PadLeft(6);
+            string windDir = (conditionsData.WindDirectionCardinal ?? "").PadLeft(4);
+            string windSpeedStr = (conditionsData.WindSpeed.ToString() ?? "").PadLeft(3);
+            string visibStr = (conditionsData.Visibility.ToString() ?? "").PadLeft(4);
             string ceilingStr = conditionsData.CloudCeiling == null ? " Unlimited" : ": " + (conditionsData.CloudCeiling + " ft.").PadLeft(5);
 
             // This page gets sent to both CC and LDL (they are two different pages)
-            foreach (Page pageNum in new[] {Page.CurrentConditions, Page.LDL})
+            foreach (Page pageNum in new[] { Page.CurrentConditions, Page.LDL })
             {
                 // Build page
                 DataFrame[] ccPage = new PageBuilder((int)pageNum, Address.FromSwitches(star.Switches), _omcw)
                     .AddLine($"Conditions at {star.LocationName}")
-                    .AddLine(conditionsData.WxPhraseLong)
+                    .AddLine(conditionsData.WxPhraseLong ?? "")
                     .AddLine($"Temp:{tempStr}°F    Wind Chill:{wcStr}°F")
                     .AddLine($"Humidity:{humStr}%   Dewpoint:{dewptStr}°F")
                     .AddLine($"Barometric Pressure:{presStr} in.")
@@ -133,7 +143,6 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 _dataTransmitter.AddFrame(ccPage);
                 Console.WriteLine($"[DataDownloader] Page {(int)pageNum} sent");
             }
-            
         }
     }
 
@@ -240,7 +249,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
 
             // Make HTTP request
             HttpResponseMessage httpResponseMessage =
-                await Util.HttpClient.GetAsync($"https://api.weather.com/v3/wx/forecast/daily/3day?geocode={star.Location}&format=json&units=e&language=en-US&apiKey={_config.APIKey}");
+                await Util.HttpClient.GetAsync($"https://api.weather.com/v3/wx/forecast/daily/5day?geocode={star.Location}&format=json&units=e&language=en-US&apiKey={_config.APIKey}");
 
             // Make sure the request was successful
             if (!httpResponseMessage.IsSuccessStatusCode)
@@ -258,6 +267,10 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 continue;
             }
 
+            // //
+            // Daypart forecast
+            // //
+
             TextLineAttributes smallHeight = new()
             {
                 Color = Color.Blue,
@@ -265,7 +278,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 Width = 0,
                 Height = 0
             };
-            
+
             // List to hold lines that overflow onto the next page
             List<string> overflowLines = new();
 
@@ -294,22 +307,25 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                     {
                         // Skip any that we don't want to show as a headline
                         if (!alert.ShowAsHeadline()) continue;
-                        DateTime endTime = DateTimeOffset.FromUnixTimeSeconds(alert.EndTimeUTC).LocalDateTime;
-                        narrativeLines.Add("*" + Util.CenterString(alert.EventDescription, 30) + "*");
-                        narrativeLines.Add("*" + Util.CenterString("Until " + endTime.ToString("htt ddd"), 30) + "*");
+                        narrativeLines.Add("*" + Util.CenterString(alert.EventDescription ?? "Unknown Event", 30) + "*");
+                        if (alert.EndTimeUTC != null)
+                        {
+                            DateTime endTime = DateTimeOffset.FromUnixTimeSeconds(alert.EndTimeUTC ?? 0).LocalDateTime;
+                            narrativeLines.Add("*" + Util.CenterString("Until " + endTime.ToString("htt ddd"), 30) + "*");
+                        }
                     }
-                    
+
                     // We added some alerts, so add a line of padding before the forecast
                     if (narrativeLines.Count != 0)
                         narrativeLines.Add("");
                 }
-                
+
                 // Add any overflow lines from the previous page
                 if (overflowLines.Count != 0)
                 {
                     // Add overflowed lines to this page
                     narrativeLines.AddRange(overflowLines);
-                    
+
                     // Clear the list for this page to overflow any more lines
                     overflowLines.Clear();
                 }
@@ -341,6 +357,49 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
 
                 curForecastPage++;
             }
+
+            // //
+            // Extended forecast
+            // //
+
+            // Get day names
+            string day1Name = forecastData.DayOfWeek[1]; // Start at index 1
+            string day2Name = forecastData.DayOfWeek[2];
+            string day3Name = forecastData.DayOfWeek[3];
+
+            // Get daypart conditions, we use the day part of the daypart, so we skip the odd indexes
+            // Split the text up for word wrapping too
+            List<string> day1Cond = Util.WordWrap(forecastData.Daypart[0].GetFormattedWxPhrase(2), 10);
+            List<string> day2Cond = Util.WordWrap(forecastData.Daypart[0].GetFormattedWxPhrase(4), 10);
+            List<string> day3Cond = Util.WordWrap(forecastData.Daypart[0].GetFormattedWxPhrase(6), 10);
+
+            // Get defaults for each line of the conditions
+            string day1CondLine1 = day1Cond.ElementAtOrDefault(0) ?? "";
+            string day1CondLine2 = day1Cond.ElementAtOrDefault(1) ?? "";
+            string day2CondLine1 = day2Cond.ElementAtOrDefault(0) ?? "";
+            string day2CondLine2 = day2Cond.ElementAtOrDefault(1) ?? "";
+            string day3CondLine1 = day3Cond.ElementAtOrDefault(0) ?? "";
+            string day3CondLine2 = day3Cond.ElementAtOrDefault(1) ?? "";
+
+            string day1Hi = forecastData.TemperatureMax[1].ToString() ?? "";
+            string day1Lo = forecastData.TemperatureMin[1].ToString() ?? "";
+            string day2Hi = forecastData.TemperatureMax[2].ToString() ?? "";
+            string day2Lo = forecastData.TemperatureMin[2].ToString() ?? "";
+            string day3Hi = forecastData.TemperatureMax[3].ToString() ?? "";
+            string day3Lo = forecastData.TemperatureMin[3].ToString() ?? "";
+
+            PageBuilder extForecastPage = new PageBuilder((int)Page.ExtendedForecast, Address.FromSwitches(star.Switches), _omcw)
+                .AddLine("       Extended Forecast")
+                .AddLine("")
+                .AddLine($" {day1Name,-11}{day2Name,-11}{day3Name,-11}")
+                .AddLine($" {day1CondLine1,-11}{day2CondLine1,-11}{day3CondLine1,-11}")
+                .AddLine($" {day1CondLine2,-11}{day2CondLine2,-11}{day3CondLine2,-11}")
+                .AddLine("")
+                .AddLine($" Lo: {day1Lo,-3}    Lo: {day2Lo,-3}    Lo: {day3Lo,-3}")
+                .AddLine($" Hi: {day1Hi,-3}    Hi: {day2Hi,-3}    Hi: {day3Hi,-3}");
+
+            _dataTransmitter.AddFrame(extForecastPage.Build());
+            Console.WriteLine($"[DataDownloader] Page {(int)Page.ExtendedForecast} sent");
         }
     }
 }

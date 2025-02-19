@@ -53,7 +53,7 @@ class Program
         transmitter.Init();
 
         // Background thread for data transmission
-        Task.Run(() => transmitter.Run());
+        _ = Task.Run(() => transmitter.Run());
 
         // Init data downloader
         DataDownloader downloader = new(config, transmitter, omcw);
@@ -62,7 +62,7 @@ class Program
         // TODO: Support multiple timezones
         foreach (Config.WeatherStar star in config.Stars)
         {
-            Console.WriteLine("Timezone: " + Convert.ToString(Address.GetTimeZone(star.Switches), 2));
+            Console.WriteLine("Sending time for timezone: " + Address.GetTimeZone(star.Switches));
             TimeOfDayFrame todFrame = TimeOfDayFrame.Now(omcw, Address.GetTimeZone(star.Switches));
             transmitter.AddFrame(todFrame);
         }
@@ -90,22 +90,21 @@ class Program
         await downloader.UpdateAll();
 
         // Background thread for data downloading
-        _ = Task.Run(async () =>
+        try
         {
-            try
-            {
-                await downloader.Run();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-        });
+            downloader.Run();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
+        await Task.Delay(500);
 
         // Start looping pages
         while (true)
         {
-            for (int i = 1; i <= 5; i++)
+            for (int i = 1; i <= 6; i++)
             {
                 omcw.TopPage(i).Commit();
                 Thread.Sleep(config.PageInterval * 1000);
