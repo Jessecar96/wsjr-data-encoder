@@ -363,15 +363,15 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             // //
 
             // Get day names
-            string day1Name = forecastData.DayOfWeek[1]; // Start at index 1
-            string day2Name = forecastData.DayOfWeek[2];
-            string day3Name = forecastData.DayOfWeek[3];
+            string day1Name = forecastData.DayOfWeek[2]; // Start at index 2
+            string day2Name = forecastData.DayOfWeek[3];
+            string day3Name = forecastData.DayOfWeek[4];
 
             // Get daypart conditions, we use the day part of the daypart, so we skip the odd indexes
             // Split the text up for word wrapping too
-            List<string> day1Cond = Util.WordWrap(forecastData.Daypart[0].GetFormattedWxPhrase(2), 10);
-            List<string> day2Cond = Util.WordWrap(forecastData.Daypart[0].GetFormattedWxPhrase(4), 10);
-            List<string> day3Cond = Util.WordWrap(forecastData.Daypart[0].GetFormattedWxPhrase(6), 10);
+            List<string> day1Cond = Util.WordWrap(forecastData.Daypart[0].GetFormattedWxPhrase(4), 10);
+            List<string> day2Cond = Util.WordWrap(forecastData.Daypart[0].GetFormattedWxPhrase(6), 10);
+            List<string> day3Cond = Util.WordWrap(forecastData.Daypart[0].GetFormattedWxPhrase(8), 10);
 
             // Get defaults for each line of the conditions
             string day1CondLine1 = day1Cond.ElementAtOrDefault(0) ?? "";
@@ -381,12 +381,12 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             string day3CondLine1 = day3Cond.ElementAtOrDefault(0) ?? "";
             string day3CondLine2 = day3Cond.ElementAtOrDefault(1) ?? "";
 
-            string day1Hi = forecastData.TemperatureMax[1].ToString() ?? "";
-            string day1Lo = forecastData.TemperatureMin[1].ToString() ?? "";
-            string day2Hi = forecastData.TemperatureMax[2].ToString() ?? "";
-            string day2Lo = forecastData.TemperatureMin[2].ToString() ?? "";
-            string day3Hi = forecastData.TemperatureMax[3].ToString() ?? "";
-            string day3Lo = forecastData.TemperatureMin[3].ToString() ?? "";
+            string day1Hi = forecastData.TemperatureMax[2].ToString() ?? "";  // Start at index 2
+            string day1Lo = forecastData.TemperatureMin[2].ToString() ?? "";
+            string day2Hi = forecastData.TemperatureMax[3].ToString() ?? "";
+            string day2Lo = forecastData.TemperatureMin[3].ToString() ?? "";
+            string day3Hi = forecastData.TemperatureMax[4].ToString() ?? "";
+            string day3Lo = forecastData.TemperatureMin[4].ToString() ?? "";
 
             PageBuilder extForecastPage = new PageBuilder((int)Page.ExtendedForecast, Address.FromSwitches(star.Switches), _omcw)
                 .AddLine("       Extended Forecast")
