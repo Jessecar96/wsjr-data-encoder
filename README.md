@@ -14,12 +14,12 @@ See [INSTALL.md](INSTALL.md)
 - Headlines
 - Text-based 36 hour forecast
 - Extended forecast
+- Latest observations
 
 ## TODO:
 - Severe warnings/advisories
 - Tides
 - Regional forecast
 - Air quality
-- Latest observations
 - Travel cities forecast
 - Multiple time zones
