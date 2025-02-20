@@ -8,5 +8,6 @@ public enum Page
     Forecast2 = 4, // 36 hour forecast, page 2
     Forecast3 = 5, // 36 hour forecast, page 3
     ExtendedForecast = 6,
+    LatestObservations = 7, // The current weather, temperature, and winds in seven nearby cities
     LDL = 50, // LDL page, shows current conditions
 }

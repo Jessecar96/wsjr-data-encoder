@@ -39,7 +39,7 @@ public class Util
 
         return list;
     }
-    
+
     /// <summary>
     /// Center a string by adding padding within the specified with
     /// </summary>
@@ -57,6 +57,43 @@ public class Util
         int rightPadding = width - s.Length - leftPadding;
 
         return new string(' ', leftPadding) + s + new string(' ', rightPadding);
+    }
+
+    /// <summary>
+    /// Format wind and speed for use on "Latest Hourly Observations"
+    /// </summary>
+    /// <param name="windDir"></param>
+    /// <param name="windSpeed"></param>
+    /// <returns></returns>
+    public static string FormatWindAndSpeed(string windDir, string windSpeed)
+    {
+        if (int.Parse(windSpeed) == 0) return "Calm";
+
+        if (windDir.Length == 3 && windSpeed.Length == 1)
+            return windDir + windSpeed;
+        if (windDir.Length == 3 && windSpeed.Length == 2)
+            // Remove first char from direction to fit
+            return windDir.Remove(0, 1) + windSpeed;
+        if (windDir.Length == 3 && windSpeed.Length == 3)
+            // Remove first 2 chars from direction to fit
+            return windDir.Remove(0, 2) + windSpeed;
+
+        if (windDir.Length == 2 && windSpeed.Length == 1)
+            return windDir + " " + windSpeed;
+        if (windDir.Length == 2 && windSpeed.Length == 2)
+            return windDir + windSpeed;
+        if (windDir.Length == 2 && windSpeed.Length == 3)
+            // Remove first char from direction to fit
+            return windDir.Remove(0, 1) + windSpeed;
+
+        if (windDir.Length == 1 && windSpeed.Length == 1)
+            return windDir + "  " + windSpeed;
+        if (windDir.Length == 1 && windSpeed.Length == 2)
+            return windDir + " " + windSpeed;
+        if (windDir.Length == 1 && windSpeed.Length == 3)
+            return windDir + windSpeed;
+
+        return windSpeed;
     }
 
     public static string RemoveUnits(string text)

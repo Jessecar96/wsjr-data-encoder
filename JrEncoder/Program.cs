@@ -104,7 +104,7 @@ class Program
         // Start looping pages
         while (true)
         {
-            for (int i = 1; i <= 6; i++)
+            for (int i = 1; i <= 7; i++)
             {
                 omcw.TopPage(i).Commit();
                 Thread.Sleep(config.PageInterval * 1000);

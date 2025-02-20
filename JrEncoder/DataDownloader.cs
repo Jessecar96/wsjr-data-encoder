@@ -96,53 +96,111 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
         {
             Console.WriteLine($"[DataDownloader] Updating current conditions for {star.LocationName}");
 
+            // Build list of locations to get current conditions for
+            List<string> locations = [];
+            // Add primary location
+            locations.Add(star.Location);
+            // Add nearby cities
+            locations
+                .AddRange((star.NearbyCities ?? [])
+                .Select(city => city.Location));
+
             // Make HTTP request
+            string locationsString = string.Join(';', locations);
             HttpResponseMessage httpResponseMessage =
-                await Util.HttpClient.GetAsync($"https://api.weather.com/v3/wx/observations/current?geocode={star.Location}&units=e&language=en-US&format=json&apiKey={_config.APIKey}");
+                await Util.HttpClient.GetAsync($"https://api.weather.com/v3/aggcommon/v3-wx-observations-current?geocodes={locationsString}&language=en-US&format=json&units=e&apiKey={_config.APIKey}");
 
             // Make sure the request was successful
             if (!httpResponseMessage.IsSuccessStatusCode)
             {
-                Console.WriteLine($"[DataDownloader] Failed to download current conditions for {star.LocationName}");
+                Console.WriteLine($"[DataDownloader] Failed to download current conditions");
                 continue;
             }
 
             string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
-            ObservationsResponse? conditionsData = JsonSerializer.Deserialize<ObservationsResponse>(responseBody);
+            List<AggregateResponse>? conditionsDatas = JsonSerializer.Deserialize<List<AggregateResponse>>(responseBody);
 
+            if (conditionsDatas == null)
+            {
+                Console.WriteLine($"[DataDownloader] Failed to download current conditions");
+                continue;
+            }
+            
+            // Primary location conditions
+            ObservationsResponse? conditionsData = conditionsDatas.FirstOrDefault(item => item.Id == star.Location)?.ObservationsResponse;
+            
             if (conditionsData == null)
             {
                 Console.WriteLine($"[DataDownloader] Failed to download current conditions for {star.LocationName}");
-                continue;
             }
-
-            // Build padding into strings 
-            string tempStr = (conditionsData.Temperature.ToString() ?? "").PadLeft(4);
-            string wcStr = (conditionsData.TemperatureWindChill.ToString() ?? "").PadLeft(3);
-            string humStr = (conditionsData.RelativeHumidity.ToString() ?? "").PadLeft(4);
-            string dewptStr = (conditionsData.TemperatureDewPoint.ToString() ?? "").PadLeft(3);
-            string presStr = (conditionsData.PressureAltimeter.ToString() ?? "").PadLeft(6);
-            string windDir = (conditionsData.WindDirectionCardinal ?? "").PadLeft(4);
-            string windSpeedStr = (conditionsData.WindSpeed.ToString() ?? "").PadLeft(3);
-            string visibStr = (conditionsData.Visibility.ToString() ?? "").PadLeft(4);
-            string ceilingStr = conditionsData.CloudCeiling == null ? " Unlimited" : ": " + (conditionsData.CloudCeiling + " ft.").PadLeft(5);
-
-            // This page gets sent to both CC and LDL (they are two different pages)
-            foreach (Page pageNum in new[] { Page.CurrentConditions, Page.LDL })
+            else
             {
-                // Build page
-                DataFrame[] ccPage = new PageBuilder((int)pageNum, Address.FromSwitches(star.Switches), _omcw)
-                    .AddLine($"Conditions at {star.LocationName}")
-                    .AddLine(conditionsData.WxPhraseLong ?? "")
-                    .AddLine($"Temp:{tempStr}°F    Wind Chill:{wcStr}°F")
-                    .AddLine($"Humidity:{humStr}%   Dewpoint:{dewptStr}°F")
-                    .AddLine($"Barometric Pressure:{presStr} in.")
-                    .AddLine($"Wind:{windDir}{windSpeedStr} MPH")
-                    .AddLine($"Visib:{visibStr} mi. Ceiling{ceilingStr} ft.")
-                    .Build();
-                _dataTransmitter.AddFrame(ccPage);
-                Console.WriteLine($"[DataDownloader] Page {(int)pageNum} sent");
+                // Build padding into strings
+                string tempStr = (conditionsData.Temperature.ToString() ?? "").PadLeft(4);
+                string wcStr = (conditionsData.TemperatureWindChill.ToString() ?? "").PadLeft(3);
+                string humStr = (conditionsData.RelativeHumidity.ToString() ?? "").PadLeft(4);
+                string dewptStr = (conditionsData.TemperatureDewPoint.ToString() ?? "").PadLeft(3);
+                string presStr = (conditionsData.PressureAltimeter.ToString() ?? "").PadLeft(6);
+                string windDir = (conditionsData.WindDirectionCardinal ?? "").PadLeft(4);
+                string windSpeedStr = (conditionsData.WindSpeed.ToString() ?? "").PadLeft(3);
+                string visibStr = (conditionsData.Visibility.ToString() ?? "").PadLeft(4);
+                string ceilingStr = conditionsData.CloudCeiling == null ? " Unlimited" : ": " + (conditionsData.CloudCeiling + " ft.").PadLeft(5);
+
+                // This page gets sent to both CC and LDL (they are two different pages)
+                foreach (Page pageNum in new[] { Page.CurrentConditions, Page.LDL })
+                {
+                    // Build page
+                    DataFrame[] ccPage = new PageBuilder((int)pageNum, Address.FromSwitches(star.Switches), _omcw)
+                        .AddLine($"Conditions at {star.LocationName}")
+                        .AddLine(conditionsData.WxPhraseLong ?? "")
+                        .AddLine($"Temp:{tempStr}°F    Wind Chill:{wcStr}°F")
+                        .AddLine($"Humidity:{humStr}%   Dewpoint:{dewptStr}°F")
+                        .AddLine($"Barometric Pressure:{presStr} in.")
+                        .AddLine($"Wind:{windDir}{windSpeedStr} MPH")
+                        .AddLine($"Visib:{visibStr} mi. Ceiling{ceilingStr} ft.")
+                        .Build();
+                    _dataTransmitter.AddFrame(ccPage);
+                    Console.WriteLine($"[DataDownloader] Page {(int)pageNum} sent");
+                }
+            } // end conditionsData null check
+            
+            // // 
+            // Nearby Observations
+            // //
+            
+            TextLineAttributes smallHeight = new()
+            {
+                Color = Color.Blue,
+                Border = true,
+                Width = 0,
+                Height = 0
+            };
+
+            PageBuilder nearbyObs = new PageBuilder((int)Page.LatestObservations, Address.FromSwitches(star.Switches), _omcw);
+            nearbyObs.AddLine("   Latest Hourly Observations");
+            nearbyObs.AddLine("LOCATION       ?F WEATHER   WIND", smallHeight);
+            
+            foreach (Config.NearbyLocation city in star.NearbyCities ?? [])
+            {
+                conditionsData = conditionsDatas.FirstOrDefault(item => item.Id == city.Location)?.ObservationsResponse;
+                if (conditionsData == null)
+                {
+                    nearbyObs.AddLine($"{city.LocationName,-14}    No Report");
+                }
+                else
+                {
+                    string temp = (conditionsData.Temperature.ToString() ?? "").PadLeft(3);
+                    string cond = (conditionsData.WxPhraseShort ?? "").PadRight(10);
+                    string windDir = conditionsData.WindDirectionCardinal ?? "";
+                    string windSpeed = conditionsData.WindSpeed.ToString() ?? "";
+                    string windAndSpeed = Util.FormatWindAndSpeed(windDir, windSpeed);
+                    nearbyObs.AddLine($"{city.LocationName,-14}{temp} {cond}{windAndSpeed}");
+                }
             }
+            
+            _dataTransmitter.AddFrame(nearbyObs.Build());
+            Console.WriteLine($"[DataDownloader] Page {(int)Page.LatestObservations} sent");
+            
         }
     }
 

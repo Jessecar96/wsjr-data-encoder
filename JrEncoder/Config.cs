@@ -25,6 +25,12 @@ public class Config
 
         [JsonPropertyName("location_name")]
         public required string LocationName { get; set; }
+        
+        [JsonPropertyName("nearby_cities")]
+        public List<NearbyLocation>? NearbyCities { get; set; }
+        
+        [JsonPropertyName("regional_cities")]
+        public List<NearbyLocation>? RegionalCities { get; set; }
 
         public double GetLat()
         {
@@ -37,6 +43,15 @@ public class Config
             string[] latLon = Location.Split(',');
             return double.Parse(latLon[1]);
         }
+    }
+
+    public class NearbyLocation
+    {
+        [JsonPropertyName("location")]
+        public required string Location { get; set; }
+
+        [JsonPropertyName("location_name")]
+        public required string LocationName { get; set; }
     }
 
     /// <summary>
