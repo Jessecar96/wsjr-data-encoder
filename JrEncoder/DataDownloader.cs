@@ -102,8 +102,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             locations.Add(star.Location);
             // Add nearby cities
             locations
-                .AddRange((star.NearbyCities ?? [])
-                    .Select(city => city.Location));
+                .AddRange(star.NearbyCities?.Geocodes ?? []);
 
             // Make HTTP request
             string locationsString = string.Join(';', locations);
@@ -190,12 +189,14 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             nearbyObs.AddLine("   Latest Hourly Observations");
             nearbyObs.AddLine("LOCATION       ?F WEATHER   WIND", smallHeight);
 
-            foreach (Config.NearbyLocation city in star.NearbyCities ?? [])
+            for (int i = 0; i < star.NearbyCities?.Locations.Count; i++)
             {
-                conditionsData = conditionsDatas.FirstOrDefault(item => item.Id == city.Location)?.ObservationsResponse;
+                string locationName = star.NearbyCities.Locations[i];
+                string geocode = star.NearbyCities.Geocodes[i];
+                conditionsData = conditionsDatas.FirstOrDefault(item => item.Id == geocode)?.ObservationsResponse;
                 if (conditionsData == null)
                 {
-                    nearbyObs.AddLine($"{city.LocationName,-14}    No Report");
+                    nearbyObs.AddLine($"{locationName,-14}    No Report");
                 }
                 else
                 {
@@ -204,7 +205,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                     string windDir = conditionsData.WindDirectionCardinal ?? "";
                     string windSpeed = conditionsData.WindSpeed.ToString() ?? "";
                     string windAndSpeed = Util.FormatWindAndSpeed(windDir, windSpeed);
-                    nearbyObs.AddLine($"{city.LocationName,-14}{temp} {cond}{windAndSpeed}");
+                    nearbyObs.AddLine($"{locationName,-14}{temp} {cond}{windAndSpeed}");
                 }
             }
 
@@ -235,9 +236,10 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             Height = 0
         });
 
-        foreach (Config.NearbyLocation city in star.NearbyCities ?? [])
+        for (int i = 0; i < star.NearbyCities?.Locations.Count; i++)
         {
-            nearbyObs.AddLine($"{city.LocationName,-14}    No Report");
+            string locationName = star.NearbyCities.Locations[i];
+            nearbyObs.AddLine($"{locationName,-14}    No Report");
         }
 
         _dataTransmitter.AddFrame(nearbyObs.Build());

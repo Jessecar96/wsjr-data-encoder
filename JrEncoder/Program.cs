@@ -34,8 +34,7 @@ class Program
         }
         catch (Exception e)
         {
-            Console.WriteLine("Failed to load config");
-            Console.WriteLine(e);
+            Console.WriteLine("Failed to load config: " + e.Message);
             return;
         }
 

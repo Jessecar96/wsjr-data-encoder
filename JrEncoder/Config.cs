@@ -27,10 +27,10 @@ public class Config
         public required string LocationName { get; set; }
         
         [JsonPropertyName("nearby_cities")]
-        public List<NearbyLocation>? NearbyCities { get; set; }
+        public NearbyLocations? NearbyCities { get; set; }
         
         [JsonPropertyName("regional_cities")]
-        public List<NearbyLocation>? RegionalCities { get; set; }
+        public NearbyLocations? RegionalCities { get; set; }
 
         public double GetLat()
         {
@@ -45,13 +45,13 @@ public class Config
         }
     }
 
-    public class NearbyLocation
+    public class NearbyLocations
     {
-        [JsonPropertyName("location")]
-        public required string Location { get; set; }
-
         [JsonPropertyName("location_name")]
-        public required string LocationName { get; set; }
+        public required List<string> Locations { get; set; }
+
+        [JsonPropertyName("geocode")]
+        public required List<string> Geocodes { get; set; }
     }
 
     /// <summary>
