@@ -103,7 +103,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             // Add nearby cities
             locations
                 .AddRange((star.NearbyCities ?? [])
-                .Select(city => city.Location));
+                    .Select(city => city.Location));
 
             // Make HTTP request
             string locationsString = string.Join(';', locations);
@@ -113,25 +113,35 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             // Make sure the request was successful
             if (!httpResponseMessage.IsSuccessStatusCode)
             {
-                Console.WriteLine($"[DataDownloader] Failed to download current conditions");
+                Console.WriteLine("[DataDownloader] Failed to download current conditions");
+                SendCcNoReportPage(star);
+                SendObsNoReportPage(star);
                 continue;
             }
 
             string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
             List<AggregateResponse>? conditionsDatas = JsonSerializer.Deserialize<List<AggregateResponse>>(responseBody);
 
+            // Make sure conditions didn't parse as null
             if (conditionsDatas == null)
             {
-                Console.WriteLine($"[DataDownloader] Failed to download current conditions");
+                Console.WriteLine("[DataDownloader] Failed to download current conditions");
+                SendCcNoReportPage(star);
+                SendObsNoReportPage(star);
                 continue;
             }
-            
+
+            // // 
+            // Primary location current conditions
+            // //
+
             // Primary location conditions
             ObservationsResponse? conditionsData = conditionsDatas.FirstOrDefault(item => item.Id == star.Location)?.ObservationsResponse;
-            
+
             if (conditionsData == null)
             {
                 Console.WriteLine($"[DataDownloader] Failed to download current conditions for {star.LocationName}");
+                SendCcNoReportPage(star);
             }
             else
             {
@@ -163,11 +173,11 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                     Console.WriteLine($"[DataDownloader] Page {(int)pageNum} sent");
                 }
             } // end conditionsData null check
-            
+
             // // 
             // Nearby Observations
             // //
-            
+
             TextLineAttributes smallHeight = new()
             {
                 Color = Color.Blue,
@@ -179,7 +189,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             PageBuilder nearbyObs = new PageBuilder((int)Page.LatestObservations, Address.FromSwitches(star.Switches), _omcw);
             nearbyObs.AddLine("   Latest Hourly Observations");
             nearbyObs.AddLine("LOCATION       ?F WEATHER   WIND", smallHeight);
-            
+
             foreach (Config.NearbyLocation city in star.NearbyCities ?? [])
             {
                 conditionsData = conditionsDatas.FirstOrDefault(item => item.Id == city.Location)?.ObservationsResponse;
@@ -197,11 +207,41 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                     nearbyObs.AddLine($"{city.LocationName,-14}{temp} {cond}{windAndSpeed}");
                 }
             }
-            
+
             _dataTransmitter.AddFrame(nearbyObs.Build());
             Console.WriteLine($"[DataDownloader] Page {(int)Page.LatestObservations} sent");
-            
         }
+    }
+
+    private void SendCcNoReportPage(Config.WeatherStar star)
+    {
+        DataFrame[] ccPage = new PageBuilder((int)Page.CurrentConditions, Address.FromSwitches(star.Switches), _omcw)
+            .AddLine($"Conditions at {star.LocationName}")
+            .AddLine("No Current Report")
+            .Build();
+        _dataTransmitter.AddFrame(ccPage);
+        Console.WriteLine($"[DataDownloader] Page {(int)Page.CurrentConditions} sent");
+    }
+
+    private void SendObsNoReportPage(Config.WeatherStar star)
+    {
+        PageBuilder nearbyObs = new PageBuilder((int)Page.LatestObservations, Address.FromSwitches(star.Switches), _omcw);
+        nearbyObs.AddLine("   Latest Hourly Observations");
+        nearbyObs.AddLine("LOCATION       ?F WEATHER   WIND", new TextLineAttributes
+        {
+            Color = Color.Blue,
+            Border = true,
+            Width = 0,
+            Height = 0
+        });
+
+        foreach (Config.NearbyLocation city in star.NearbyCities ?? [])
+        {
+            nearbyObs.AddLine($"{city.LocationName,-14}    No Report");
+        }
+
+        _dataTransmitter.AddFrame(nearbyObs.Build());
+        Console.WriteLine($"[DataDownloader] Page {(int)Page.LatestObservations} sent");
     }
 
     private async Task UpdateAlmanac()
@@ -439,7 +479,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             string day3CondLine1 = day3Cond.ElementAtOrDefault(0) ?? "";
             string day3CondLine2 = day3Cond.ElementAtOrDefault(1) ?? "";
 
-            string day1Hi = forecastData.TemperatureMax[2].ToString() ?? "";  // Start at index 2
+            string day1Hi = forecastData.TemperatureMax[2].ToString() ?? ""; // Start at index 2
             string day1Lo = forecastData.TemperatureMin[2].ToString() ?? "";
             string day2Hi = forecastData.TemperatureMax[3].ToString() ?? "";
             string day2Lo = forecastData.TemperatureMin[3].ToString() ?? "";
