@@ -81,12 +81,16 @@ public class TimeOfDayFrame : ControlFrame
     /// <summary>
     /// Creates a TimeOfDayFrame using the current time as the starting timestamp.
     /// </summary>
-    /// <param name="omcw"></param>
-    /// <param name="timeZone"></param>
+    /// <param name="omcw">current OMCW</param>
+    /// <param name="timeZone">bits of the star address for this time zone</param>
+    /// <param name="timeZoneInfo">Time zone for this star</param>
     /// <returns></returns>
-    public static TimeOfDayFrame Now(OMCW omcw, int timeZone)
+    public static TimeOfDayFrame Now(OMCW omcw, int timeZone, TimeZoneInfo timeZoneInfo)
     {
-        DateTime currentTime = DateTime.Now;
+        // Using the current time, convert it to the star's time zone
+        DateTime currentTime = TimeZoneInfo.ConvertTime(DateTime.Now, timeZoneInfo);
+
+        // Build the TimeOfDayFrame
         return new TimeOfDayFrame(
             omcw,
             timeZone,

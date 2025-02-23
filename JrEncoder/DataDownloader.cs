@@ -252,8 +252,10 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
         {
             Console.WriteLine($"[DataDownloader] Updating almanac for {star.LocationName}");
 
-            int currentDay = DateTime.Now.Day;
-            int currentMonth = DateTime.Now.Month;
+            // Get local time for this star's location
+            DateTime localStarTime = TimeZoneInfo.ConvertTime(DateTime.Now, star.GetTimeZoneInfo());
+            int currentDay = localStarTime.Day;
+            int currentMonth = localStarTime.Month;
 
             // Make HTTP request
             HttpResponseMessage httpResponseMessage =
@@ -298,11 +300,11 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             }
 
             // Build padding into strings
-            string todayDayName = DateTime.Today.ToString("dddd");
-            string tomorrowDayName = DateTime.Today.AddDays(1).ToString("dddd");
-            string monthName = DateTime.Today.ToString("MMMM");
+            string todayDayName = localStarTime.Date.ToString("dddd");
+            string tomorrowDayName = localStarTime.Date.AddDays(1).ToString("dddd");
+            string monthName = localStarTime.Date.ToString("MMMM");
             // When it's Tuesday, Wednesday needs to be moved over 1 character left
-            int leftDayPadding = DateTime.Today.DayOfWeek == DayOfWeek.Tuesday ? 9 : 10;
+            int leftDayPadding = localStarTime.Date.DayOfWeek == DayOfWeek.Tuesday ? 9 : 10;
 
             string precipLine = "";
             if (monthlyAlmanacData.PrecipitationAverage[0] != null)
@@ -312,8 +314,8 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             }
 
             // Get sunset and sunrise
-            Coordinate cToday = new(star.GetLat(), star.GetLon(), DateTime.Now);
-            Coordinate cTomorrow = new(star.GetLat(), star.GetLon(), DateTime.Now.AddDays(1));
+            Coordinate cToday = new(star.GetLat(), star.GetLon(), localStarTime);
+            Coordinate cTomorrow = new(star.GetLat(), star.GetLon(), localStarTime.AddDays(1));
 
             TextLineAttributes smallHeight = new()
             {
@@ -322,14 +324,20 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 Width = 0,
                 Height = 0
             };
+            
+            // We also need to convert these values to the star's time zone 
+            DateTime todaySunRise = TimeZoneInfo.ConvertTime(cToday.CelestialInfo.SunRise ?? DateTime.MinValue, star.GetTimeZoneInfo()).ToLocalTime();
+            DateTime todaySunSet = TimeZoneInfo.ConvertTime(cToday.CelestialInfo.SunSet ?? DateTime.MinValue, star.GetTimeZoneInfo()).ToLocalTime();
+            DateTime tomorrowSunRise = TimeZoneInfo.ConvertTime(cTomorrow.CelestialInfo.SunRise ?? DateTime.MinValue, star.GetTimeZoneInfo()).ToLocalTime();
+            DateTime tomorrowSunSet = TimeZoneInfo.ConvertTime(cTomorrow.CelestialInfo.SunSet ?? DateTime.MinValue, star.GetTimeZoneInfo()).ToLocalTime();
 
             // Build page
             DataFrame[] almanacPage = new PageBuilder((int)Page.Almanac, Address.FromSwitches(star.Switches), _omcw)
                 .AddLine("  The Weather Channel Almanac   ")
                 .AddLine("", smallHeight)
                 .AddLine($"              {todayDayName.PadRight(leftDayPadding)}{tomorrowDayName}")
-                .AddLine("Sunrise      " + cToday.CelestialInfo.SunRise?.ToLocalTime().ToString("h:mm tt").PadLeft(8) + "  " + cTomorrow.CelestialInfo.SunRise?.ToLocalTime().ToString("h:mm tt").PadLeft(8))
-                .AddLine("Sunset       " + cToday.CelestialInfo.SunSet?.ToLocalTime().ToString("h:mm tt").PadLeft(8) + "  " + cTomorrow.CelestialInfo.SunSet?.ToLocalTime().ToString("h:mm tt").PadLeft(8))
+                .AddLine("Sunrise      " + todaySunRise.ToString("h:mm tt").PadLeft(8) + "  " + tomorrowSunRise.ToString("h:mm tt").PadLeft(8))
+                .AddLine("Sunset       " + todaySunSet.ToString("h:mm tt").PadLeft(8) + "  " + tomorrowSunSet.ToString("h:mm tt").PadLeft(8))
                 .AddLine($"Normal Low     {dailyAlmanacData.TemperatureAverageMin[0].ToString(),3} ?F    {dailyAlmanacData.TemperatureAverageMin[1].ToString(),3} ?F")
                 .AddLine($"Normal High    {dailyAlmanacData.TemperatureAverageMax[0].ToString(),3} ?F    {dailyAlmanacData.TemperatureAverageMax[1].ToString(),3} ?F")
                 .AddLine("")

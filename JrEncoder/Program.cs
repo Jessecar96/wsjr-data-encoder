@@ -61,8 +61,8 @@ class Program
         // TODO: Support multiple timezones
         foreach (Config.WeatherStar star in config.Stars)
         {
-            Console.WriteLine("Sending time for timezone: " + Address.GetTimeZone(star.Switches));
-            TimeOfDayFrame todFrame = TimeOfDayFrame.Now(omcw, Address.GetTimeZone(star.Switches));
+            Console.WriteLine($"Star {star.LocationName} is using time zone {star.GetTimeZoneIdentifier()}");
+            TimeOfDayFrame todFrame = TimeOfDayFrame.Now(omcw, Address.GetTimeZone(star.Switches), star.GetTimeZoneInfo());
             transmitter.AddFrame(todFrame);
         }
 

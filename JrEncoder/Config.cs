@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using GeoTimeZone;
 
 namespace JrEncoder;
 
@@ -42,6 +43,29 @@ public class Config
         {
             string[] latLon = Location.Split(',');
             return double.Parse(latLon[1]);
+        }
+
+        /// <summary>
+        /// Returns an IANA time zone identifier (such as "Europe/London")
+        /// </summary>
+        /// <returns></returns>
+        public string GetTimeZoneIdentifier()
+        {
+            return TimeZoneLookup.GetTimeZone(GetLat(), GetLon()).Result;
+        }
+
+        public TimeZoneInfo GetTimeZoneInfo()
+        {
+            try
+            {
+                return TimeZoneInfo.FindSystemTimeZoneById(GetTimeZoneIdentifier());
+            }
+            catch (Exception ex)
+            {
+                // Failed to find time zone, use the local system time zone
+                Console.WriteLine("Failed to find time zone: " + ex.Message);
+                return TimeZoneInfo.Local;
+            }
         }
     }
 
