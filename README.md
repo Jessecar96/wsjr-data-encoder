@@ -8,6 +8,7 @@ See [INSTALL.md](INSTALL.md)
 
 ## Working:
 - Setting the clock
+- Multiple time zones
 - Addressing multiple weather stars
 - Current conditions
 - Almanac
@@ -22,4 +23,3 @@ See [INSTALL.md](INSTALL.md)
 - Regional forecast
 - Air quality
 - Travel cities forecast
-- Multiple time zones
