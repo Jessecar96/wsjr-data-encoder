@@ -45,6 +45,7 @@ if [ ! -d $HOME/wsjr-data-encoder ]; then
 fi
 
 # Get new tags from remote
+echo "## Checking out latest version ##"
 cd $HOME/wsjr-data-encoder
 git fetch --tags
 
@@ -52,7 +53,6 @@ git fetch --tags
 latestTag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
 
 # Checkout latest tag
-echo "## Checking out latest tag ##"
 git checkout -q $latestTag
 
 # Build project
