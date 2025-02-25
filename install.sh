@@ -45,6 +45,7 @@ if [ ! -d $HOME/wsjr-data-encoder ]; then
 fi
 
 # Get new tags from remote
+cd $HOME/wsjr-data-encoder
 git fetch --tags
 
 # Get latest tag name
