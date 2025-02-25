@@ -105,7 +105,19 @@ class Program
         {
             for (int i = 1; i <= 7; i++)
             {
-                omcw.TopPage(i).Commit();
+                omcw.TopPage((int)Page.CurrentConditions).Commit();
+                Thread.Sleep(config.PageInterval * 1000);
+                omcw.TopPage((int)Page.Almanac).Commit();
+                Thread.Sleep(config.PageInterval * 1000);
+                omcw.TopPage((int)Page.Forecast1).LDL(LDLStyle.LocalCrawl).Commit();
+                Thread.Sleep(config.PageInterval * 1000);
+                omcw.TopPage((int)Page.Forecast2).Commit();
+                Thread.Sleep(config.PageInterval * 1000);
+                omcw.TopPage((int)Page.Forecast3).Commit();
+                Thread.Sleep(config.PageInterval * 1000);
+                omcw.TopPage((int)Page.ExtendedForecast).LDL(LDLStyle.DateTime).Commit();
+                Thread.Sleep(config.PageInterval * 1000);
+                omcw.TopPage((int)Page.LatestObservations).Commit();
                 Thread.Sleep(config.PageInterval * 1000);
             }
         }
