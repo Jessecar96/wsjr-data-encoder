@@ -59,7 +59,7 @@ git checkout -q $latestTag
 # Must be built as debug, release does not work for some reason
 echo "## Building project ##"
 mkdir -p $HOME/jrencoder
-dotnet build --nologo --configuration Debug --property:OutputPath=$HOME/jrencoder/ -property:WarningLevel=0 $HOME/wsjr-data-encoder/JrEncoder.sln
+$HOME/.dotnet/dotnet build --nologo --configuration Debug --property:OutputPath=$HOME/jrencoder/ -property:WarningLevel=0 $HOME/wsjr-data-encoder/JrEncoder.sln
 
 # Create systemd service
 echo "## Installing service ##"
