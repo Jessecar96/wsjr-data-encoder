@@ -191,9 +191,15 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
 
             for (int i = 0; i < star.NearbyCities?.Locations.Count; i++)
             {
+                if (i > 6) break; // Only 7 cities are allowed
                 string locationName = star.NearbyCities.Locations[i];
                 string geocode = star.NearbyCities.Geocodes[i];
                 conditionsData = conditionsDatas.FirstOrDefault(item => item.Id == geocode)?.ObservationsResponse;
+
+                // Limit city name to 14 chars
+                if (locationName.Length > 14)
+                    locationName = locationName.Substring(0, 14);
+
                 if (conditionsData == null)
                 {
                     nearbyObs.AddLine($"{locationName,-14}    No Report");
@@ -324,7 +330,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 Width = 0,
                 Height = 0
             };
-            
+
             // We also need to convert these values to the star's time zone 
             DateTime todaySunRise = TimeZoneInfo.ConvertTime(cToday.CelestialInfo.SunRise ?? DateTime.MinValue, star.GetTimeZoneInfo()).ToLocalTime();
             DateTime todaySunSet = TimeZoneInfo.ConvertTime(cToday.CelestialInfo.SunSet ?? DateTime.MinValue, star.GetTimeZoneInfo()).ToLocalTime();
