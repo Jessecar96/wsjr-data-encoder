@@ -16,7 +16,8 @@ sudo apt-get install -yq git
 
 # Check if .dotnet folder exists
 echo "## Checking for .NET ##"
-if [ ! -d $HOME/.dotnet ]; then
+if ! command -v dotnet 2>&1 >/dev/null
+then
 
   # Install .NET LTS
   echo "## Installing .NET ##"
