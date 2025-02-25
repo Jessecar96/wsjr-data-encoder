@@ -7,11 +7,23 @@ using System.Text.Json;
 
 public class Config
 {
+    /// <summary>
+    /// weather.com API key
+    /// </summary>
     [JsonPropertyName("apikey")]
     public required string APIKey { get; set; }
 
+    /// <summary>
+    /// Seconds between changing pages
+    /// </summary>
     [JsonPropertyName("page_interval")]
     public required int PageInterval { get; set; }
+
+    /// <summary>
+    /// Make all time zones be the same
+    /// </summary>
+    [JsonPropertyName("force_clock_set")]
+    public bool ForceClockSet { get; set; } = true;
 
     [JsonPropertyName("stars")]
     public required WeatherStar[] Stars { get; set; }
@@ -120,6 +132,7 @@ public class Config
         {
             APIKey = "",
             PageInterval = 30,
+            ForceClockSet = false,
             Stars =
             [
                 new WeatherStar()

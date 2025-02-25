@@ -394,7 +394,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             };
 
             // List to hold lines that overflow onto the next page
-            List<string> overflowLines = new();
+            List<string> overflowLines = [];
 
             // Loop over daypart items
             int curForecastPage = 0;
@@ -409,7 +409,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                     break;
 
                 // List that will hold the lines of text for the forecast section
-                List<string> narrativeLines = new();
+                List<string> narrativeLines = [];
 
                 // Check for any headlines to show
                 // Only do this for page 0
