@@ -26,12 +26,20 @@ public class Config
 
         [JsonPropertyName("location_name")]
         public required string LocationName { get; set; }
-        
+
         [JsonPropertyName("nearby_cities")]
-        public NearbyLocations? NearbyCities { get; set; }
-        
+        public NearbyLocations? NearbyCities { get; set; } = new NearbyLocations
+        {
+            Locations = [],
+            Geocodes = []
+        };
+
         [JsonPropertyName("regional_cities")]
-        public NearbyLocations? RegionalCities { get; set; }
+        public NearbyLocations? RegionalCities { get; set; } = new NearbyLocations
+        {
+            Locations = [],
+            Geocodes = []
+        };
 
         public double GetLat()
         {
