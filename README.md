@@ -16,10 +16,11 @@ See [INSTALL.md](INSTALL.md)
 - Text-based 36 hour forecast
 - Extended forecast
 - Latest observations
+- Regional observations
+- Regional forecast
 
 ## TODO:
 - Severe warnings/advisories
 - Tides
-- Regional forecast
 - Air quality
 - Travel cities forecast
