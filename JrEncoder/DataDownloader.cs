@@ -24,6 +24,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
         await UpdateCurrentConditions();
         await UpdateAlmanac();
         await UpdateForecast();
+        await UpdateTravelCitiesForecast();
     }
 
     public void Run()
@@ -657,5 +658,149 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             _dataTransmitter.AddFrame(regionalFcst.Build());
             Console.WriteLine($"[DataDownloader] Page {(int)Page.RegionalForecast} sent");
         }
+    }
+
+    private async Task UpdateTravelCitiesForecast()
+    {
+        Console.WriteLine($"[DataDownloader] Updating Travel Cities Forecast");
+
+        // List of cities
+        List<(string City, string Geocode)> cities =
+        [
+            ("Atlanta", "33.74,-84.38"),
+            ("Boston", "42.36,-71.05"),
+            ("Chicago/O'Hare", "41.87,-87.62"),
+            ("Cleveland", "41.49,-81.69"),
+            ("Dallas/Ft Wrth", "32.77,-96.79"),
+            ("Denver", "39.73,-104.99"),
+            ("Detroit", "42.33,-83.04"),
+            ("Hartford", "41.76,-72.67"),
+            ("Indianapolis", "39.76,-86.15"),
+            ("Los Angeles", "34.05,-118.24"),
+            ("Miami", "25.76,-80.19"),
+            ("Minneapolis", "44.97,-93.26"),
+            ("New York", "40.71,-74.00"),
+            ("Norfolk", "36.85,-76.28"),
+            ("Orlando", "28.53,-81.37"),
+            ("Philadelphia", "39.95,-75.16"),
+            ("Pittsburg", "40.44,-79.99"),
+            ("Saint Louis", "38.62,-90.19"),
+            ("San Francisco", "37.77,-122.41"),
+            ("Seattle-Tacoma", "47.60,-122.33")
+        ];
+        List<string> geocodes = cities.Select(item => item.Geocode).ToList();
+        string locationsString = string.Join(';', geocodes);
+
+        // Make HTTP request
+        HttpResponseMessage httpResponseMessage =
+            await Util.HttpClient.GetAsync($"https://api.weather.com/v3/aggcommon/v3-wx-forecast-daily-3day?geocodes={locationsString}&language=en-US&format=json&units=e&apiKey={_config.APIKey}");
+
+        // Make sure the request was successful
+        if (!httpResponseMessage.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"[DataDownloader] Failed to download travel cities forecast: HTTP " + (int)httpResponseMessage.StatusCode);
+            return;
+        }
+
+        // Parse response as JSON
+        string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+        List<AggregateResponse>? forecastDatas = JsonSerializer.Deserialize<List<AggregateResponse>?>(responseBody);
+
+        // Make sure we have any response
+        if (forecastDatas == null)
+        {
+            Console.WriteLine($"[DataDownloader] Failed to download travel cities forecast");
+            return;
+        }
+
+        // List that will store each line
+        List<string> forecastLines = [];
+
+        // Loop over each city to build each line
+        foreach ((string City, string Geocode) city in cities)
+        {
+            // Find entry in the API data
+            ForecastResponse? forecastData = forecastDatas.FirstOrDefault(item => item.Id == city.Geocode)?.DailyForecast3DayResponse;
+            if (forecastData == null)
+            {
+                forecastLines.Add($"{city.City,-14}No Report");
+            }
+            else
+            {
+                // Build the line
+                string cond = (forecastData.Daypart[0].WxPhraseShort[2] ?? "").PadRight(9);
+                if (cond.Length > 9) cond = cond.Substring(0, 9); // Limit to 9 chars
+                string tempLo = (forecastData.TemperatureMin[1].ToString() ?? "").PadLeft(3);
+                string tempHi = (forecastData.TemperatureMax[1].ToString() ?? "").PadLeft(3);
+                forecastLines.Add($"{city.City,-14} {cond} {tempLo} {tempHi}");
+            }
+        }
+
+        // Attributes for title
+        TextLineAttributes titleAttr = new()
+        {
+            Color = Color.Gray,
+            Border = true,
+            Width = 1,
+            Height = 2
+        };
+
+        // Attributes for every other line
+        TextLineAttributes attr = new()
+        {
+            Color = Color.Gray,
+            Border = true,
+            Width = 0,
+            Height = 2
+        };
+
+        int currentCityIndex = 0;
+        int currentPageExtra = 1;
+        bool morePages;
+
+        // Start with the first page
+        PageBuilder tcfPage1 = new PageBuilder((int)Page.TravelCitiesForecast1, Address.All, _omcw);
+        tcfPage1.Attributes(new PageAttributes { Chain = true, Roll = true });
+        tcfPage1.AddLine(" Travel Cities Forecast", titleAttr);
+        tcfPage1.AddLine("", attr);
+        tcfPage1.AddLine("City           Weather   Low  Hi", attr);
+        
+        // Add lines until it's filled up (9 lines max)
+        for (; tcfPage1.LineCount < 9; currentCityIndex++)
+        {
+            tcfPage1.AddLine(forecastLines[currentCityIndex], attr);
+        }
+
+        // Send it
+        _dataTransmitter.AddFrame(tcfPage1.Build());
+        Console.WriteLine($"[DataDownloader] Page {tcfPage1.PageNumber} sent");
+
+        // Use a loop to add the rest of the lines to multiple pages
+        do
+        {
+            PageBuilder tcfPage = new PageBuilder((int)Page.TravelCitiesForecast1 + currentPageExtra, Address.All, _omcw);
+            currentPageExtra++;
+
+            // More than 9 cities left, we'll need to add another page
+            int citiesRemaining = cities.Count - currentCityIndex;
+            morePages = citiesRemaining > 9;
+
+            // Set Chain attribute based on if we have more pages to add
+            tcfPage.Attributes(new PageAttributes { Chain = morePages, Roll = true });
+            
+            // Add the lines
+            for (; tcfPage.LineCount < 9; currentCityIndex++)
+            {
+                if (cities.Count - currentCityIndex == 0) break; // No more cities!
+                tcfPage.AddLine(forecastLines[currentCityIndex], attr);
+            }
+
+            // Send it
+            _dataTransmitter.AddFrame(tcfPage.Build());
+            Console.WriteLine($"[DataDownloader] Page {tcfPage.PageNumber} sent");
+            
+        } while (morePages);
+
+        Console.WriteLine($"[DataDownloader] Sent Travel Cities Forecast");
     }
 }

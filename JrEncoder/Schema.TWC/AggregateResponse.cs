@@ -16,4 +16,7 @@ public class AggregateResponse
     
     [JsonPropertyName("v3-wx-forecast-daily-5day")]
     public ForecastResponse? DailyForecast5DayResponse { get; init; }
+    
+    [JsonPropertyName("v3-wx-forecast-daily-3day")]
+    public ForecastResponse? DailyForecast3DayResponse { get; init; }
 }

@@ -11,5 +11,8 @@ public enum Page
     LatestObservations = 7, // The current weather, temperature, and winds in seven nearby cities
     RegionalObservations = 8,
     RegionalForecast = 9,
+    TravelCitiesForecast1 = 10,
+    TravelCitiesForecast2 = 11,
+    TravelCitiesForecast3 = 12,
     LDL = 50, // LDL page, shows current conditions
 }

@@ -10,6 +10,8 @@ public class PageBuilder(int pageNumber, Address address, OMCW omcw)
     private PageAttributes _attributes;
     private readonly TextLineAttributes[] _lineAttributes = new TextLineAttributes[8];
     private readonly List<TextLineFrame> _textFrames = [];
+    public int LineCount => _textFrames.Count;
+    public int PageNumber => pageNumber;
 
     /// <summary>
     /// Adds a new line of text to the page.
