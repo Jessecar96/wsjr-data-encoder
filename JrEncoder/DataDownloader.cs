@@ -49,7 +49,10 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             // Update forecast every 30 minutes
             using PeriodicTimer timer = new(TimeSpan.FromMinutes(30));
             while (await timer.WaitForNextTickAsync())
+            {
                 await UpdateForecast();
+                await UpdateTravelCitiesForecast();
+            }
         });
     }
 
