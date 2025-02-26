@@ -14,5 +14,6 @@ public enum Page
     TravelCitiesForecast1 = 10,
     TravelCitiesForecast2 = 11,
     TravelCitiesForecast3 = 12,
+    Error = 49, // Used for error messages
     LDL = 50, // LDL page, shows current conditions
 }

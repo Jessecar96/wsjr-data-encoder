@@ -46,7 +46,7 @@ public class Util
     /// <param name="s"></param>
     /// <param name="width"></param>
     /// <returns></returns>
-    public static string CenterString(string s, int width)
+    public static string CenterString(string s, int width = 32)
     {
         if (s.Length >= width)
         {

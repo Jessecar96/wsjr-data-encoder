@@ -23,4 +23,10 @@
       <ProjectReference Include="..\JrEncoderLib\JrEncoderLib.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Flavors.xml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

@@ -14,16 +14,16 @@ public class Config
     public required string APIKey { get; set; }
 
     /// <summary>
-    /// Seconds between changing pages
-    /// </summary>
-    [JsonPropertyName("page_interval")]
-    public required int PageInterval { get; set; }
-
-    /// <summary>
     /// Make all time zones be the same
     /// </summary>
     [JsonPropertyName("force_clock_set")]
     public bool ForceClockSet { get; set; } = true;
+
+    /// <summary>
+    /// Loop a flavor, if desired
+    /// </summary>
+    [JsonPropertyName("loop_flavor")]
+    public string? LoopFlavor { get; set; } = "L";
 
     [JsonPropertyName("stars")]
     public required WeatherStar[] Stars { get; set; }
@@ -142,7 +142,7 @@ public class Config
         Config newConfig = new()
         {
             APIKey = "",
-            PageInterval = 30,
+            LoopFlavor = "L",
             ForceClockSet = false,
             Stars =
             [
@@ -152,7 +152,7 @@ public class Config
                     LocationName = "Location Name",
                     Switches = "00000000",
                 }
-            ],
+            ]
         };
         newConfig.Save();
     }

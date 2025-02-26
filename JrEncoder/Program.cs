@@ -1,4 +1,6 @@
-﻿using JrEncoderLib;
+﻿using System.Xml.Serialization;
+using System.Linq;
+using JrEncoderLib;
 using JrEncoderLib.DataTransmitter;
 using JrEncoderLib.Frames;
 using JrEncoderLib.StarAttributes;
@@ -7,6 +9,9 @@ namespace JrEncoder;
 
 class Program
 {
+    private static OMCW omcw;
+    private static GPIODataTransmitter transmitter;
+
     static async Task Main(string[] args)
     {
         Console.WriteLine("Starting WeatherSTAR Data Transmitter");
@@ -39,7 +44,7 @@ class Program
         }
 
         // Build our OMCW of defaults
-        OMCW omcw = OMCW.Create()
+        omcw = OMCW.Create()
             .BottomSolid(false)
             .TopSolid(false)
             .TopPage(0)
@@ -48,7 +53,7 @@ class Program
             .Commit();
 
         // Init data transmitter, sets up DDS module
-        GPIODataTransmitter transmitter = new(omcw);
+        transmitter = new(omcw);
         transmitter.Init();
 
         // Background thread for data transmission
@@ -130,28 +135,110 @@ class Program
 
         await Task.Delay(500);
 
-        // Start looping pages
+        // Load flavor config
+        string flavorsFilePath = Path.Combine(Util.GetExeLocation(), "Flavors.xml");
+        Flavors? flavors = null;
+        if (File.Exists(flavorsFilePath))
+        {
+            XmlSerializer serializer = new(typeof(Flavors));
+            using StreamReader reader = new(flavorsFilePath);
+            flavors = (Flavors?)serializer.Deserialize(reader);
+        }
+
+        if (flavors == null)
+        {
+            // No flavors :((
+            Console.WriteLine("ERROR: Failed to load Flavors.xml");
+            ShowErrorMessage("Failed to load Flavors.xml");
+            return;
+        }
+
+        // Check if looping is configured
+        if (config.LoopFlavor != null)
+        {
+            // Find the flavor defined in Flavors.xml
+            Flavor? flavor = flavors.Flavor.FirstOrDefault(el => el.Name == config.LoopFlavor);
+
+            // Could not find that flavor
+            if (flavor == null)
+            {
+                Console.WriteLine($"ERROR: Flavor \"{config.LoopFlavor}\" does not exist in Flavors.xml");
+                ShowErrorMessage($"Flavor \"{config.LoopFlavor}\" does not exist in Flavors.xml");
+                return;
+            }
+
+            // Start looping that flavor
+            while (true)
+            {
+                foreach (FlavorPage page in flavor.Page)
+                {
+                    // Make sure that page exists
+                    if (!Enum.TryParse(page.Name, out Page newPage))
+                    {
+                        Console.WriteLine($"ERROR: Invalid page \"{page.Name}\"");
+                        ShowErrorMessage($"Invalid page \"{page.Name}\"");
+                        return;
+                    }
+                    
+                    // Check if this page is changing LDL style
+                    if (!string.IsNullOrEmpty(page.LDL))
+                    {
+                        // Make sure that LDL style exists
+                        if (!Enum.TryParse(page.LDL, out LDLStyle ldlStyle))
+                        {
+                            ShowErrorMessage($"Invalid LDL Style \"{page.LDL}\"");
+                            return;
+                        }
+                        // Set that LDL style
+                        omcw.LDL(ldlStyle);
+                    }
+
+                    // Switch to that page
+                    omcw
+                        .TopSolid(true)
+                        .TopPage((int)newPage);
+
+                    omcw.Commit();
+                    
+                    Console.WriteLine("Switched to page " + newPage);
+                    
+                    // Wait for its duration
+                    Thread.Sleep(page.Duration * 1000);
+                }
+            }
+        } // end looping check
+        
+    }
+
+    /// <summary>
+    /// Show an error message page forever
+    /// Use only when a fatal error has occurred
+    /// </summary>
+    /// <param name="message"></param>
+    private static void ShowErrorMessage(string message)
+    {
+        PageBuilder page = new PageBuilder((int)Page.Error, Address.All, omcw)
+            .AddLine(Util.CenterString("ATTENTION CABLE OPERATOR"), new TextLineAttributes { Color = Color.Diarrhea })
+            .AddLine(Util.CenterString("An Error Has Occurred"), new TextLineAttributes { Color = Color.Diarrhea })
+            .AddLine(Util.CenterString("Restart Software Once Corrected"), new TextLineAttributes { Color = Color.Diarrhea })
+            .AddLine("", new TextLineAttributes { Color = Color.Diarrhea, Height = 0});
+
+        // Word wrap message and add it
+        List<string> messages = Util.WordWrap(message, 32);
+        foreach (string s in messages)
+            page.AddLine(Util.CenterString(s), new TextLineAttributes { Color = Color.Diarrhea });
+        
+        transmitter.AddFrame(page.Build());
+        
+        Thread.Sleep(500);
+        omcw.TopSolid(true).TopPage(0).Commit();
+        Thread.Sleep(500);
+
+        // Loop forever
         while (true)
         {
-            // "L" Flavor... I'll make this better soon
-            omcw.TopPage((int)Page.CurrentConditions).Commit();
-            Thread.Sleep(config.PageInterval * 1000);
-            omcw.TopPage((int)Page.LatestObservations).Commit();
-            Thread.Sleep(config.PageInterval * 1000);
-            omcw.TopPage((int)Page.RegionalObservations).Commit();
-            Thread.Sleep(config.PageInterval * 1000);
-            omcw.TopPage((int)Page.RegionalForecast).Commit();
-            Thread.Sleep(config.PageInterval * 1000);
-            omcw.TopPage((int)Page.Almanac).Commit();
-            Thread.Sleep(config.PageInterval * 1000);
-            omcw.TopPage((int)Page.Forecast1).LDL(LDLStyle.LocalCrawl).Commit();
-            Thread.Sleep(config.PageInterval * 1000);
-            omcw.TopPage((int)Page.Forecast2).Commit();
-            Thread.Sleep(config.PageInterval * 1000);
-            omcw.TopPage((int)Page.Forecast3).Commit();
-            Thread.Sleep(config.PageInterval * 1000);
-            omcw.TopPage((int)Page.ExtendedForecast).LDL(LDLStyle.DateTime).Commit();
-            Thread.Sleep(config.PageInterval * 1000);
+            omcw.TopSolid(true).TopPage((int)Page.Error).Commit();
+            Thread.Sleep(10000);
         }
     }
 }
