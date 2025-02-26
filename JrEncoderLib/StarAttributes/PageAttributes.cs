@@ -38,14 +38,24 @@ public struct PageAttributes
     public bool Chain;
 
     /// <summary>
+    /// Mark this page as a warning crawl - when the star receives it the page will immediately crawl on the LDL for 2 minutes
+    /// </summary>
+    public bool WarningCrawl;
+
+    /// <summary>
+    /// Unused bit, not sure what it does
+    /// </summary>
+    public bool Unused2;
+
+    /// <summary>
     /// Returns the two-byte packet for this PageAttributes.
     /// </summary>
     /// <returns></returns>
     public byte[] ToBytes()
     {
         byte[] attributes = new byte[2];
-        attributes[0] = (byte)((Freeze ? 1 : 0) << 2 | (Advisory ? 1 : 0) << 1 | (Warning ? 1 : 0));
-        attributes[1] = (byte)((Flip ? 1 : 0) << 2 | (Roll ? 1 : 0) << 1 | (Chain ? 1 : 0));
+        attributes[0] = (byte)((WarningCrawl ? 1 : 0) << 3 | (Freeze ? 1 : 0) << 2 | (Advisory ? 1 : 0) << 1 | (Warning ? 1 : 0));
+        attributes[1] = (byte)((Unused2 ? 1 : 0) << 3 | (Flip ? 1 : 0) << 2 | (Roll ? 1 : 0) << 1 | (Chain ? 1 : 0));
         return attributes;
     }
 }
