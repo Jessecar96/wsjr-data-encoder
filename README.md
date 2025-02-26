@@ -18,9 +18,9 @@ See [INSTALL.md](INSTALL.md)
 - Latest observations
 - Regional observations
 - Regional forecast
+- Travel cities forecast
 
 ## TODO:
 - Severe warnings/advisories
 - Tides
 - Air quality
-- Travel cities forecast
