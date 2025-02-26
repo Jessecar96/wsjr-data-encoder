@@ -96,6 +96,17 @@ public class Config
 
         [JsonPropertyName("geocode")]
         public required List<string> Geocodes { get; set; }
+
+        /// <summary>
+        /// Get location name limited by length
+        /// </summary>
+        /// <param name="i">index</param>
+        /// <param name="limit">Length to limit string to</param>
+        /// <returns></returns>
+        public string GetLocationName(int i, int limit = 14)
+        {
+            return Locations[i].Length > limit ? Locations[i].Substring(0, limit) : Locations[i];
+        }
     }
 
     /// <summary>

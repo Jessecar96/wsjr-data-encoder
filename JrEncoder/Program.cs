@@ -20,7 +20,7 @@ class Program
                 Console.WriteLine("config.json already exists. Please delete it to create a new one.");
                 return;
             }
-            
+
             Config.CreateConfig();
             Console.WriteLine("Created config.json, program will now exit.");
             return;
@@ -63,7 +63,7 @@ class Program
             // Set all time zones to the zone of the first star defined
             Config.WeatherStar star = config.Stars[0];
             Console.WriteLine($"Using time zone {star.GetTimeZoneIdentifier()}");
-            
+
             // There are 8 possible time zones 0-7
             for (int i = 0; i < 7; i++)
             {
@@ -86,11 +86,11 @@ class Program
                     Console.WriteLine($"ERROR: Star {star.LocationName} has the same time zone address as another. Time will not be set.");
                     continue;
                 }
-                
+
                 // Send the time for this zone
                 TimeOfDayFrame todFrame = TimeOfDayFrame.Now(omcw, timezone, star.GetTimeZoneInfo());
                 transmitter.AddFrame(todFrame);
-                
+
                 // Add this to our list of used time zones
                 usedTimeZones.Add(timezone);
             }
@@ -133,23 +133,25 @@ class Program
         // Start looping pages
         while (true)
         {
-            for (int i = 1; i <= 7; i++)
-            {
-                omcw.TopPage((int)Page.CurrentConditions).Commit();
-                Thread.Sleep(config.PageInterval * 1000);
-                omcw.TopPage((int)Page.Almanac).Commit();
-                Thread.Sleep(config.PageInterval * 1000);
-                omcw.TopPage((int)Page.Forecast1).LDL(LDLStyle.LocalCrawl).Commit();
-                Thread.Sleep(config.PageInterval * 1000);
-                omcw.TopPage((int)Page.Forecast2).Commit();
-                Thread.Sleep(config.PageInterval * 1000);
-                omcw.TopPage((int)Page.Forecast3).Commit();
-                Thread.Sleep(config.PageInterval * 1000);
-                omcw.TopPage((int)Page.ExtendedForecast).LDL(LDLStyle.DateTime).Commit();
-                Thread.Sleep(config.PageInterval * 1000);
-                omcw.TopPage((int)Page.LatestObservations).Commit();
-                Thread.Sleep(config.PageInterval * 1000);
-            }
+            // "L" Flavor... I'll make this better soon
+            omcw.TopPage((int)Page.CurrentConditions).Commit();
+            Thread.Sleep(config.PageInterval * 1000);
+            omcw.TopPage((int)Page.LatestObservations).Commit();
+            Thread.Sleep(config.PageInterval * 1000);
+            omcw.TopPage((int)Page.RegionalObservations).Commit();
+            Thread.Sleep(config.PageInterval * 1000);
+            omcw.TopPage((int)Page.RegionalForecast).Commit();
+            Thread.Sleep(config.PageInterval * 1000);
+            omcw.TopPage((int)Page.Almanac).Commit();
+            Thread.Sleep(config.PageInterval * 1000);
+            omcw.TopPage((int)Page.Forecast1).LDL(LDLStyle.LocalCrawl).Commit();
+            Thread.Sleep(config.PageInterval * 1000);
+            omcw.TopPage((int)Page.Forecast2).Commit();
+            Thread.Sleep(config.PageInterval * 1000);
+            omcw.TopPage((int)Page.Forecast3).Commit();
+            Thread.Sleep(config.PageInterval * 1000);
+            omcw.TopPage((int)Page.ExtendedForecast).LDL(LDLStyle.DateTime).Commit();
+            Thread.Sleep(config.PageInterval * 1000);
         }
     }
 }
