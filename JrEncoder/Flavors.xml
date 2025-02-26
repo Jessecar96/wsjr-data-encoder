@@ -1,13 +1,14 @@
 ﻿<Flavors>
     <Flavor Name="L">
         <Page Name="CurrentConditions" Duration="10"/>
-        <Page Name="LatestObservations" Duration="10"/>
-        <Page Name="RegionalObservations" Duration="10"/>
-        <Page Name="RegionalForecast" Duration="10"/>
+        <Page Name="LatestObservations" Duration="12"/>
+        <Page Name="RegionalObservations" Duration="12"/>
+        <Page Name="RegionalForecast" Duration="12"/>
         <Page Name="Almanac" Duration="10"/>
         <Page Name="Forecast1" Duration="10" LDL="LocalCrawl"/>
         <Page Name="Forecast2" Duration="10"/>
         <Page Name="Forecast3" Duration="10"/>
         <Page Name="ExtendedForecast" Duration="10" LDL="DateTime"/>
+        <Page Name="TravelCitiesForecast1" Duration="42"/>
     </Flavor>
 </Flavors>

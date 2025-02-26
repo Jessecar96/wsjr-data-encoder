@@ -166,6 +166,8 @@ class Program
                 ShowErrorMessage($"Flavor \"{config.LoopFlavor}\" does not exist in Flavors.xml");
                 return;
             }
+            
+            Console.WriteLine($"Running Flavor: {flavor.Name}");
 
             // Start looping that flavor
             while (true)
