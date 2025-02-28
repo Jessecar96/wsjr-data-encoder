@@ -686,7 +686,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             ("Norfolk", "36.85,-76.28"),
             ("Orlando", "28.53,-81.37"),
             ("Philadelphia", "39.95,-75.16"),
-            ("Pittsburg", "40.44,-79.99"),
+            ("Pittsburgh", "40.44,-79.99"),
             ("Saint Louis", "38.62,-90.19"),
             ("San Francisco", "37.77,-122.41"),
             ("Seattle-Tacoma", "47.60,-122.33")
