@@ -59,47 +59,12 @@ class Program
         // Background thread for data transmission
         _ = Task.Run(() => transmitter.Run());
 
+        // Init time updater
+        TimeUpdater timeUpdater = new(config, transmitter, omcw);
+        timeUpdater.Run();
+
         // Init data downloader
         DataDownloader downloader = new(config, transmitter, omcw);
-
-        // Send date & time
-        if (config.ForceClockSet)
-        {
-            // Set all time zones to the zone of the first star defined
-            Config.WeatherStar star = config.Stars[0];
-            Console.WriteLine($"Using time zone {star.GetTimeZoneIdentifier()}");
-
-            // There are 8 possible time zones 0-7
-            for (int i = 0; i < 7; i++)
-            {
-                TimeOfDayFrame todFrame = TimeOfDayFrame.Now(omcw, i, star.GetTimeZoneInfo());
-                transmitter.AddFrame(todFrame);
-            }
-        }
-        else
-        {
-            // Set the time zone of each star individually
-            List<int> usedTimeZones = [];
-            foreach (Config.WeatherStar star in config.Stars)
-            {
-                int timezone = Address.GetTimeZone(star.Switches);
-                Console.WriteLine($"Star {star.LocationName} is using time zone {star.GetTimeZoneIdentifier()} with address {timezone}");
-
-                // Check if this time zone address was already used, if so don't send it again
-                if (usedTimeZones.Contains(timezone))
-                {
-                    Console.WriteLine($"ERROR: Star {star.LocationName} has the same time zone address as another. Time will not be set.");
-                    continue;
-                }
-
-                // Send the time for this zone
-                TimeOfDayFrame todFrame = TimeOfDayFrame.Now(omcw, timezone, star.GetTimeZoneInfo());
-                transmitter.AddFrame(todFrame);
-
-                // Add this to our list of used time zones
-                usedTimeZones.Add(timezone);
-            }
-        }
 
         // Updating page
         DataFrame[] updatePage = new PageBuilder(41, Address.All, omcw)

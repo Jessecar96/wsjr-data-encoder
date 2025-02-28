@@ -17,7 +17,7 @@ public class Config
     /// Make all time zones be the same
     /// </summary>
     [JsonPropertyName("force_clock_set")]
-    public bool ForceClockSet { get; set; } = true;
+    public bool ForceClockSet { get; set; } = false;
 
     /// <summary>
     /// Loop a flavor, if desired
