@@ -27,15 +27,15 @@ public class TimeUpdater(Config config, DataTransmitter dataTransmitter, OMCW om
     {
         Console.WriteLine("[TimeUpdater] Sending time update");
         
-        // Send date & time
-        if (_config.ForceClockSet)
+        // Look if any stars have all 0 switches, or config is set to force clock set
+        if (_config.ForceClockSet || _config.Stars.Any(star => star.Switches == "00000000"))
         {
             // Set all time zones to the zone of the first star defined
             Config.WeatherStar star = _config.Stars[0];
             Console.WriteLine($"[TimeUpdater] Using global time zone {star.GetTimeZoneIdentifier()}");
 
             // There are 8 possible time zones 0-7
-            for (int i = 0; i < 7; i++)
+            for (int i = 0; i <= 7; i++)
             {
                 TimeOfDayFrame todFrame = TimeOfDayFrame.Now(_omcw, i, star.GetTimeZoneInfo());
                 _dataTransmitter.AddFrame(todFrame);
