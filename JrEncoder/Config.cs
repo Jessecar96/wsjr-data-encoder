@@ -133,8 +133,14 @@ public class Config
         if (!File.Exists(configPath))
             throw new InvalidOperationException("Config.json does not exist. Run program with --create-config");
 
+        // Options to allow trailing commas in config.json
+        JsonSerializerOptions options = new JsonSerializerOptions()
+        {
+            AllowTrailingCommas = true
+        };
+
         string fileContent = File.ReadAllText(configPath);
-        return JsonSerializer.Deserialize<Config>(fileContent) ?? throw new InvalidOperationException("Invalid config.json file");
+        return JsonSerializer.Deserialize<Config>(fileContent, options) ?? throw new InvalidOperationException("Invalid config.json file");
     }
 
     public static void CreateConfig()
