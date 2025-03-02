@@ -14,7 +14,7 @@ public enum Color
     Chartreuse = 9,
     Indigo = 10,
     Salmon = 11,
-    Diarrhea = 12,
+    Diarrhea = 12, // im sorry
     Cyan = 13,
     Orange = 14,
     White = 15,

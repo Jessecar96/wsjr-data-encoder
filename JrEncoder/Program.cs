@@ -11,6 +11,8 @@ class Program
 {
     private static OMCW omcw;
     private static GPIODataTransmitter transmitter;
+    private static Flavors? flavors;
+    private static bool flavorRunning = false;
 
     static async Task Main(string[] args)
     {
@@ -66,6 +68,14 @@ class Program
         // Init data downloader
         DataDownloader downloader = new(config, transmitter, omcw);
 
+        // Start MQTT server
+        MQTTServer server = new();
+        _ = Task.Run(() => server.Run());
+
+        // MQTT Client
+        MQTTClient client = new(omcw);
+        _ = Task.Run(() => client.Run());
+
         // Updating page
         DataFrame[] updatePage = new PageBuilder(41, Address.All, omcw)
             .AddLine("                                ")
@@ -102,7 +112,6 @@ class Program
 
         // Load flavor config
         string flavorsFilePath = Path.Combine(Util.GetExeLocation(), "Flavors.xml");
-        Flavors? flavors = null;
         if (File.Exists(flavorsFilePath))
         {
             XmlSerializer serializer = new(typeof(Flavors));
@@ -121,65 +130,154 @@ class Program
         // Check if looping is configured
         if (config.LoopFlavor != null)
         {
-            // Find the flavor defined in Flavors.xml
-            Flavor? flavor = flavors.Flavor.FirstOrDefault(el => el.Name == config.LoopFlavor);
+            // Loop that flavor forever
+            while (true)
+                RunFlavor(config.LoopFlavor);
+        }
 
-            // Could not find that flavor
-            if (flavor == null)
+        // Default no loop state
+        omcw.TopSolid(false)
+            .TopPage(0)
+            .BottomSolid(false)
+            .RegionSeparator(false)
+            .LDL(LDLStyle.DateTime)
+            .Commit();
+
+        Console.WriteLine("Ready for commands! Looping is not enabled.");
+
+        // Forever...
+        while (true)
+            Thread.Sleep(1000);
+    }
+
+    public static void RunFlavor(string flavorName)
+    {
+        if (flavorRunning)
+        {
+            Console.WriteLine("ERROR: Flavor is already running. Not running another!");
+            return;
+        }
+
+        // Make sure flavors are defined
+        if (flavors == null)
+        {
+            Console.WriteLine("ERROR: Flavors were not loaded");
+            ShowErrorMessage("Flavors were not loaded");
+            return;
+        }
+
+        // Find the flavor defined in Flavors.xml
+        Flavor? flavor = flavors.Flavor.FirstOrDefault(el => el.Name == flavorName);
+
+        // Could not find that flavor
+        if (flavor == null)
+        {
+            Console.WriteLine($"ERROR: Flavor \"{flavorName}\" does not exist in Flavors.xml");
+            ShowErrorMessage($"Flavor \"{flavorName}\" does not exist in Flavors.xml");
+            return;
+        }
+
+        Console.WriteLine($"Running flavor \"{flavor.Name}\"");
+        flavorRunning = true;
+
+        // TODO: Save OMCW state to restore to after
+
+        foreach (FlavorPage page in flavor.Page)
+        {
+            // Make sure that page exists
+            if (!Enum.TryParse(page.Name, out Page newPage))
             {
-                Console.WriteLine($"ERROR: Flavor \"{config.LoopFlavor}\" does not exist in Flavors.xml");
-                ShowErrorMessage($"Flavor \"{config.LoopFlavor}\" does not exist in Flavors.xml");
+                Console.WriteLine($"ERROR: Invalid page \"{page.Name}\"");
+                ShowErrorMessage($"Invalid page \"{page.Name}\"");
                 return;
             }
-            
-            Console.WriteLine($"Running Flavor: {flavor.Name}");
 
-            // Start looping that flavor
-            while (true)
+            // Check if this page is changing LDL style
+            if (!string.IsNullOrEmpty(page.LDL))
             {
-                foreach (FlavorPage page in flavor.Page)
+                // Make sure that LDL style exists
+                if (!Enum.TryParse(page.LDL, out LDLStyle ldlStyle))
                 {
-                    // Make sure that page exists
-                    if (!Enum.TryParse(page.Name, out Page newPage))
-                    {
-                        Console.WriteLine($"ERROR: Invalid page \"{page.Name}\"");
-                        ShowErrorMessage($"Invalid page \"{page.Name}\"");
-                        return;
-                    }
-                    
-                    // Check if this page is changing LDL style
-                    if (!string.IsNullOrEmpty(page.LDL))
-                    {
-                        // Make sure that LDL style exists
-                        if (!Enum.TryParse(page.LDL, out LDLStyle ldlStyle))
-                        {
-                            ShowErrorMessage($"Invalid LDL Style \"{page.LDL}\"");
-                            return;
-                        }
-                        // Set that LDL style
-                        omcw.LDL(ldlStyle);
-                    }
-
-                    // Switch to that page
-                    omcw
-                        .TopSolid(true)
-                        .TopPage((int)newPage);
-
-                    omcw.Commit();
-                    
-                    Console.WriteLine("Switched to page " + newPage);
-                    
-                    // Wait for its duration
-                    Thread.Sleep(page.Duration * 1000);
+                    ShowErrorMessage($"Invalid LDL Style \"{page.LDL}\"");
+                    return;
                 }
+
+                // Set that LDL style
+                omcw.LDL(ldlStyle);
             }
-        } // end looping check
+
+            // Switch to that page
+            omcw
+                .TopSolid(true)
+                .BottomSolid(true)
+                .RegionSeparator(true)
+                .TopPage((int)newPage);
+
+            omcw.Commit();
+
+            Console.WriteLine("Switched to page " + newPage);
+
+            // Wait for its duration
+            Thread.Sleep(page.Duration * 1000);
+        }
+
+        // we done!
+        flavorRunning = false;
+        Console.WriteLine($"Flavor \"{flavor.Name}\" complete");
+
+        // Default no loop state
+        omcw.TopSolid(false)
+            .TopPage(0)
+            .BottomSolid(false)
+            .RegionSeparator(false)
+            .LDL(LDLStyle.DateTime)
+            .Commit();
+    }
+
+    public static void ShowWxWarning(string message, Address address, OMCW omcw)
+    {
+        // TODO: Really need word wrapping here
+        var strLines = message.Split('\n');
         
+        // Split that into chunks of 9 lines each
+        string[][] chunks = strLines.Chunk(9).ToArray();
+
+        int pageOffset = 0;
+        for (int i = 0; i < chunks.Length; i++)
+        {
+            // Make a new page
+            PageBuilder page = new PageBuilder((int)Page.WxWarning + pageOffset, address, omcw);
+
+            // Determine if this will be the last page
+            bool lastPage = (i == chunks.Length - 1);
+            if (lastPage)
+            {
+                // Mark this one as a warning, will activate the star warning mode
+                page.Attributes(new PageAttributes { Warning = true, Roll = true });
+            }
+            else
+            {
+                // Every other page, just set it as roll & chain
+                page.Attributes(new PageAttributes { Roll = true, Chain = true});
+            }
+            
+            // Add all the chunked lines
+            foreach (string line in chunks[i])
+                page.AddLine(line, new TextLineAttributes { Color = Color.Red });
+
+            // Add to offset for the next loop
+            pageOffset++;
+
+            // Send it
+            transmitter.AddFrame(page.Build());
+            Console.WriteLine("Sent page " + page.PageNumber);
+        }
+        
+        Console.WriteLine("Weather warning activated");
     }
 
     /// <summary>
-    /// Show an error message page forever
-    /// Use only when a fatal error has occurred
+    /// Show an error message page
     /// </summary>
     /// <param name="message"></param>
     private static void ShowErrorMessage(string message)
@@ -188,24 +286,33 @@ class Program
             .AddLine(Util.CenterString("ATTENTION CABLE OPERATOR"), new TextLineAttributes { Color = Color.Diarrhea })
             .AddLine(Util.CenterString("An Error Has Occurred"), new TextLineAttributes { Color = Color.Diarrhea })
             .AddLine(Util.CenterString("Restart Software Once Corrected"), new TextLineAttributes { Color = Color.Diarrhea })
-            .AddLine("", new TextLineAttributes { Color = Color.Diarrhea, Height = 0});
+            .AddLine("", new TextLineAttributes { Color = Color.Diarrhea, Height = 0 });
 
         // Word wrap message and add it
         List<string> messages = Util.WordWrap(message, 32);
         foreach (string s in messages)
             page.AddLine(Util.CenterString(s), new TextLineAttributes { Color = Color.Diarrhea });
-        
+
         transmitter.AddFrame(page.Build());
-        
-        Thread.Sleep(500);
-        omcw.TopSolid(true).TopPage(0).Commit();
+
+        // Wait for the page to load into memory...
         Thread.Sleep(500);
 
-        // Loop forever
-        while (true)
-        {
-            omcw.TopSolid(true).TopPage((int)Page.Error).Commit();
-            Thread.Sleep(10000);
-        }
+        // Show blank page
+        omcw.TopSolid(true)
+            .BottomSolid(true)
+            .RegionSeparator(true)
+            .TopPage(0)
+            .Commit();
+
+        // Wait for that to happen...
+        Thread.Sleep(500);
+
+        // Show error page
+        omcw.TopSolid(true)
+            .BottomSolid(true)
+            .RegionSeparator(true)
+            .TopPage((int)Page.Error)
+            .Commit();
     }
 }

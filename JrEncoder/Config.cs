@@ -23,7 +23,7 @@ public class Config
     /// Loop a flavor, if desired
     /// </summary>
     [JsonPropertyName("loop_flavor")]
-    public string? LoopFlavor { get; set; } = "L";
+    public string? LoopFlavor { get; set; } = null;
 
     [JsonPropertyName("stars")]
     public required WeatherStar[] Stars { get; set; }
