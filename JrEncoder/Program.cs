@@ -12,7 +12,9 @@ class Program
     private static OMCW omcw;
     private static GPIODataTransmitter transmitter;
     private static Flavors? flavors;
-    private static bool flavorRunning = false;
+    private static bool flavorRunning;
+    private static Config config;
+    public static DataDownloader downloader;
 
     static async Task Main(string[] args)
     {
@@ -49,25 +51,15 @@ class Program
         // Background thread for data transmission
         _ = Task.Run(() => transmitter.Run());
 
-        // Load config
-        Config config;
-        try
-        {
-            config = Config.LoadConfig();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine("Failed to load config: " + e.Message);
-            ShowErrorMessage("Failed to load config.json: " + e.Message, true);
-            return;
-        }
+        // Load config.json
+        LoadConfig("config.json");
 
         // Init time updater
         TimeUpdater timeUpdater = new(config, transmitter, omcw);
         timeUpdater.Run();
 
         // Init data downloader
-        DataDownloader downloader = new(config, transmitter, omcw);
+        downloader = new(config, transmitter, omcw);
 
         // Start MQTT server
         MQTTServer server = new();
@@ -150,6 +142,23 @@ class Program
         // Forever...
         while (true)
             Thread.Sleep(1000);
+    }
+
+    /// <summary>
+    /// Load a config file
+    /// </summary>
+    public static void LoadConfig(string fileName)
+    {
+        try
+        {
+            config = Config.LoadConfig(fileName);
+            Console.WriteLine("Loaded config file " + fileName);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Failed to load {fileName}: " + e.Message);
+            ShowErrorMessage($"Failed to load {fileName}: " + e.Message, true);
+        }
     }
 
     public static void RunFlavor(string flavorName)
@@ -315,7 +324,7 @@ class Program
             .RegionSeparator(true)
             .TopPage((int)Page.Error)
             .Commit();
-        
+
         // Fatal error will cause the program to stop here forever
         if (fatal)
             while (true)

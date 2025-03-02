@@ -34,7 +34,7 @@ public class MQTTClient(OMCW _omcw)
             await Task.Delay(1000);
     }
 
-    private Task MqttClientOnApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs arg)
+    private async Task MqttClientOnApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs arg)
     {
         ReadOnlySequence<byte> payload = arg.ApplicationMessage.Payload;
         string payloadStr = Encoding.UTF8.GetString(payload.ToArray());
@@ -57,13 +57,28 @@ public class MQTTClient(OMCW _omcw)
                 else
                     Console.WriteLine("[MQTTClient] Failed to parse LDL style: " + payloadStr);
                 break;
-            
+
+            // Show a warning roll
             case "jrencoder/warning":
                 Program.ShowWxWarning(payloadStr, Address.All, _omcw);
                 break;
-        }
 
-        return Task.CompletedTask;
+            // Trigger the wx warning relay for 1 second
+            case "jrencoder/beep":
+                _omcw.WxWarning(true).Commit();
+                await Task.Delay(1000);
+                _omcw.WxWarning(false).Commit();
+                break;
+
+            case "jrencoder/load-config":
+                Program.LoadConfig(payloadStr);
+                break;
+
+            case "jrencoder/reload-data":
+                await Program.downloader.UpdateAll();
+                Console.WriteLine("[MQTTClient] All data reloaded");
+                break;
+        }
     }
 
     private Task MqttClientOnConnectedAsync(MqttClientConnectedEventArgs arg)

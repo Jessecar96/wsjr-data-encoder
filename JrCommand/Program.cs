@@ -44,7 +44,7 @@ namespace JrCommand
         private static void ArgumentsParsed(Options options)
         {
             // Finally we can work with everything
-            
+
             if (options.Flavor != null)
             {
                 mqttClient.PublishStringAsync("jrencoder/LF", options.Flavor);
@@ -75,7 +75,25 @@ namespace JrCommand
             {
                 mqttClient.PublishStringAsync("jrencoder/warning", options.Warning);
                 Console.WriteLine("Warning sent");
-            }
+            } // warning
+
+            if (options.Beep)
+            {
+                mqttClient.PublishStringAsync("jrencoder/beep", "");
+                Console.WriteLine("Beep sent");
+            } // beep
+
+            if (options.LoadConfig != null)
+            {
+                mqttClient.PublishStringAsync("jrencoder/load-config", options.LoadConfig);
+                Console.WriteLine("Loading config " + options.LoadConfig);
+            } // load config
+
+            if (options.ReloadData)
+            {
+                mqttClient.PublishStringAsync("jrencoder/reload-data", "");
+                Console.WriteLine("Data reload sent");
+            } // data reload
         }
     }
 }

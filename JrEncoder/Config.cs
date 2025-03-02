@@ -118,20 +118,20 @@ public class Config
         File.WriteAllText(GetPath(), JsonSerializer.Serialize(this, options));
     }
 
-    public static string GetPath()
+    public static string GetPath(string fileName = "config.json")
     {
-        return Path.Combine(Util.GetExeLocation(), "config.json");
+        return Path.Combine(Util.GetExeLocation(), fileName);
     }
 
     /// <summary>
     /// Load config from config.json
     /// </summary>
     /// <returns></returns>
-    public static Config LoadConfig()
+    public static Config LoadConfig(string fileName = "config.json")
     {
-        string configPath = GetPath();
+        string configPath = GetPath(fileName);
         if (!File.Exists(configPath))
-            throw new InvalidOperationException("Config.json does not exist. Run program with --create-config");
+            throw new InvalidOperationException(fileName + " does not exist. Run program with --create-config");
 
         // Options to allow trailing commas in config.json
         JsonSerializerOptions options = new JsonSerializerOptions()
