@@ -238,7 +238,7 @@ class Program
     {
         // TODO: Really need word wrapping here
         var strLines = message.Split('\n');
-        
+
         // Split that into chunks of 9 lines each
         string[][] chunks = strLines.Chunk(9).ToArray();
 
@@ -248,19 +248,17 @@ class Program
             // Make a new page
             PageBuilder page = new PageBuilder((int)Page.WxWarning + pageOffset, address, omcw);
 
-            // Determine if this will be the last page
-            bool lastPage = (i == chunks.Length - 1);
-            if (lastPage)
+            // Set page attributes
+            bool firstPage = i == 0;
+            bool lastPage = i == chunks.Length - 1;
+            bool multiPage = chunks.Length != 1;
+            page.Attributes(new PageAttributes
             {
-                // Mark this one as a warning, will activate the star warning mode
-                page.Attributes(new PageAttributes { Warning = true, Roll = true });
-            }
-            else
-            {
-                // Every other page, just set it as roll & chain
-                page.Attributes(new PageAttributes { Roll = true, Chain = true});
-            }
-            
+                Warning = firstPage, // Only the first page in the chain gets the warning bit set
+                Roll = true, // Every page needs to roll
+                Chain = (multiPage && !lastPage) // Set chain when we have more than 1 page, and it's not the last page
+            });
+
             // Add all the chunked lines
             foreach (string line in chunks[i])
                 page.AddLine(line, new TextLineAttributes { Color = Color.Red });
@@ -272,7 +270,7 @@ class Program
             transmitter.AddFrame(page.Build());
             Console.WriteLine("Sent page " + page.PageNumber);
         }
-        
+
         Console.WriteLine("Weather warning activated");
     }
 
