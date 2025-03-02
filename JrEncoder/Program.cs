@@ -33,18 +33,6 @@ class Program
             return;
         }
 
-        // Load config
-        Config config;
-        try
-        {
-            config = Config.LoadConfig();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine("Failed to load config: " + e.Message);
-            return;
-        }
-
         // Build our OMCW of defaults
         omcw = OMCW.Create()
             .BottomSolid(false)
@@ -60,6 +48,19 @@ class Program
 
         // Background thread for data transmission
         _ = Task.Run(() => transmitter.Run());
+
+        // Load config
+        Config config;
+        try
+        {
+            config = Config.LoadConfig();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Failed to load config: " + e.Message);
+            ShowErrorMessage("Failed to load config.json: " + e.Message, true);
+            return;
+        }
 
         // Init time updater
         TimeUpdater timeUpdater = new(config, transmitter, omcw);
@@ -105,6 +106,7 @@ class Program
         }
         catch (Exception e)
         {
+            ShowErrorMessage("Download failed: " + e.Message, true);
             Console.WriteLine(e);
         }
 
@@ -123,7 +125,7 @@ class Program
         {
             // No flavors :((
             Console.WriteLine("ERROR: Failed to load Flavors.xml");
-            ShowErrorMessage("Failed to load Flavors.xml");
+            ShowErrorMessage("Failed to load Flavors.xml", true);
             return;
         }
 
@@ -278,7 +280,8 @@ class Program
     /// Show an error message page
     /// </summary>
     /// <param name="message"></param>
-    private static void ShowErrorMessage(string message)
+    /// <param name="fatal">If this message should show forever, locking up the program</param>
+    private static void ShowErrorMessage(string message, bool fatal = false)
     {
         PageBuilder page = new PageBuilder((int)Page.Error, Address.All, omcw)
             .AddLine(Util.CenterString("ATTENTION CABLE OPERATOR"), new TextLineAttributes { Color = Color.Diarrhea })
@@ -312,5 +315,10 @@ class Program
             .RegionSeparator(true)
             .TopPage((int)Page.Error)
             .Commit();
+        
+        // Fatal error will cause the program to stop here forever
+        if (fatal)
+            while (true)
+                Thread.Sleep(1000);
     }
 }
