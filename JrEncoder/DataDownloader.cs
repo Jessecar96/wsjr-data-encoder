@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
+using System.Text.RegularExpressions;
 using CoordinateSharp;
+using JrEncoder.Schema.NWS;
 using JrEncoder.Schema.TWC;
 using JrEncoderLib;
 using JrEncoderLib.DataTransmitter;
@@ -15,7 +17,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
     private OMCW _omcw = omcw;
 
     // Data cache
-    private readonly Dictionary<string, HeadlinesResponse> _alertsCache = new();
+    private readonly Dictionary<string, List<NWSFeature>> _alertsCache = new();
 
     public async Task UpdateAll()
     {
@@ -64,12 +66,14 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
 
             // Make HTTP request
             HttpResponseMessage httpResponseMessage =
-                await Util.HttpClient.GetAsync($"https://api.weather.com/v3/alerts/headlines?geocode={star.Location}&format=json&language=en-US&apiKey={_config.APIKey}");
+                await Util.HttpClient.GetAsync($"https://api.weather.gov/alerts/active?point={star.Location}&limit=500");
 
             // Make sure the request was successful
-            if (!httpResponseMessage.IsSuccessStatusCode)
+            // NWS returns 304 not modified :/
+            if (!httpResponseMessage.IsSuccessStatusCode
+                && httpResponseMessage.StatusCode != System.Net.HttpStatusCode.NotModified)
             {
-                Console.WriteLine($"[DataDownloader] Failed to download alerts for {star.LocationName}");
+                Console.WriteLine($"[DataDownloader] Failed to download alerts for {star.LocationName}: HTTP {httpResponseMessage.StatusCode}");
                 continue;
             }
 
@@ -81,16 +85,16 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 continue;
             }
 
-            HeadlinesResponse? alertData = JsonSerializer.Deserialize<HeadlinesResponse>(responseBody);
+            NWSResponse? nwsResponse = JsonSerializer.Deserialize<NWSResponse>(responseBody);
 
-            if (alertData == null)
+            if (nwsResponse == null)
             {
                 Console.WriteLine($"[DataDownloader] No alerts for {star.LocationName}");
                 continue;
             }
 
-            // Save locally
-            _alertsCache[star.Location] = alertData;
+            // Save locally for headlines on forecast page
+            _alertsCache[star.Location] = nwsResponse.Features;
         }
     }
 
@@ -522,27 +526,52 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
 
                     // List that will hold the lines of text for the forecast section
                     List<string> narrativeLines = [];
+                    List<string> headlines = new List<string>();
 
                     // Check for any headlines to show
                     // Only do this for page 0
                     if (curForecastPage == 0 && _alertsCache.ContainsKey(star.Location))
                     {
                         // Find the saved alerts for this location
-                        HeadlinesResponse headlinesResponseData = _alertsCache[star.Location];
-                        foreach (HeadlinesResponse.Alert alert in headlinesResponseData.Alerts)
+                        List<NWSFeature> nwsFeatures = _alertsCache[star.Location];
+                        foreach (NWSFeature nwsFeature in nwsFeatures)
                         {
-                            // Skip any that we don't want to show as a headline
-                            if (!alert.ShowAsHeadline()) continue;
-                            narrativeLines.Add("*" + Util.CenterString(alert.EventDescription ?? "Unknown Event", 30) + "*");
-                            if (alert.EndTimeUTC != null)
+                            // Get the headline text
+                            string nwsHeadline = nwsFeature.Properties.Parameters.NWSheadline[0];
+                            
+                            // Clean it up 
+                            string pattern = @"(.+(?:UNTIL|TO) (?:.+?).(?:C|S)T (?:MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY)?)";
+                            MatchCollection m = Regex.Matches(nwsHeadline, pattern);
+                            if (m.Count != 0 && m[0].Groups.Count != 0)
                             {
-                                DateTime endTime = DateTimeOffset.FromUnixTimeSeconds(alert.EndTimeUTC ?? 0).LocalDateTime;
-                                narrativeLines.Add("*" + Util.CenterString("Until " + endTime.ToString("htt ddd"), 30) + "*");
+                                // If that regex matches use group 1 to extract the clean version
+                                nwsHeadline = m[0].Groups[1].Value;
+                            }
+                            
+                            // Trim any extra space off the ends
+                            nwsHeadline = nwsHeadline.Trim();
+
+                            // We already added this one with the same text, skip it
+                            if (headlines.Contains(nwsHeadline))
+                                continue;
+                            
+                            // Add to our list to check for dupes
+                            headlines.Add(nwsHeadline);
+
+                            // Word wrap it (max length 30 to account for **)
+                            List<string> headlineLines = Util.WordWrap(nwsHeadline, 28);
+
+                            // Add each line
+                            foreach (string headlineLine in headlineLines)
+                            {
+                                // Center it between the two * *
+                                narrativeLines.Add("* " + Util.CenterString(headlineLine, 28) + " *");
                             }
                         }
 
                         // We added some alerts, so add a line of padding before the forecast
-                        if (narrativeLines.Count != 0)
+                        // Only do this if it's not the last line in a page
+                        if (narrativeLines.Count != 0 && narrativeLines.Count != 7)
                             narrativeLines.Add("");
                     }
 
@@ -767,7 +796,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
         tcfPage1.AddLine(" Travel Cities Forecast", titleAttr);
         tcfPage1.AddLine("", attr);
         tcfPage1.AddLine("City           Weather   Low  Hi", attr);
-        
+
         // Add lines until it's filled up (9 lines max)
         for (; tcfPage1.LineCount < 9; currentCityIndex++)
         {
@@ -790,7 +819,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
 
             // Set Chain attribute based on if we have more pages to add
             tcfPage.Attributes(new PageAttributes { Chain = morePages, Roll = true });
-            
+
             // Add the lines
             for (; tcfPage.LineCount < 9; currentCityIndex++)
             {
@@ -801,7 +830,6 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             // Send it
             _dataTransmitter.AddFrame(tcfPage.Build());
             Console.WriteLine($"[DataDownloader] Page {tcfPage.PageNumber} sent");
-            
         } while (morePages);
 
         Console.WriteLine($"[DataDownloader] Sent Travel Cities Forecast");

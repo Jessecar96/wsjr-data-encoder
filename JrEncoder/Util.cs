@@ -13,6 +13,42 @@ public class Util
     {
         return Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly()?.Location) ?? string.Empty;
     }
+    
+    public static List<string> WordWrapAlert(string text, int maxLineLength = 32)
+    {
+        // Fix windows (UGH) line endings
+        text = text.Replace("\r\n", "\n");
+        
+        // Split text into paragraphs
+        string[] paragraphs = text.Split(new string[] { "\n\n" }, StringSplitOptions.None);
+        
+        // 2D list, paragraph[lines in paragraph]
+        List<List<string>> parahraphsList = new();
+
+        for (int i = 0; i < paragraphs.Length; i++)
+        {
+            // Remove line breaks in the paragraph
+            paragraphs[i] = paragraphs[i].Replace("\n", "");
+            
+            // Remove any double spaces caused by NWS indenting the text
+            paragraphs[i] = paragraphs[i].Replace("  ", " ");
+            
+            // Word wrap to line length
+            parahraphsList.Add(WordWrap(paragraphs[i], maxLineLength));
+        }
+
+        // Now join the lists with blank entries in between them
+        List<string> output = new();
+        for (int i = 0; i < parahraphsList.Count; i++)
+        {
+            output.AddRange(parahraphsList[i]);
+            // If this is not the last element, add a blank line between the paragraphs
+            if (i != parahraphsList.Count - 1)
+                output.Add("");
+        }
+
+        return output;
+    }
 
     /// <summary>
     /// Word wrap text

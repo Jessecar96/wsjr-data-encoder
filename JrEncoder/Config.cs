@@ -136,7 +136,8 @@ public class Config
         // Options to allow trailing commas in config.json
         JsonSerializerOptions options = new JsonSerializerOptions()
         {
-            AllowTrailingCommas = true
+            AllowTrailingCommas = true,
+            ReadCommentHandling = JsonCommentHandling.Skip
         };
 
         string fileContent = File.ReadAllText(configPath);

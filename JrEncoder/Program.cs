@@ -34,6 +34,9 @@ class Program
             Console.WriteLine("Created config.json, program will now exit.");
             return;
         }
+        
+        // Setup http client
+        Util.HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd("JrEncoder/1.0");
 
         // Build our OMCW of defaults
         omcw = OMCW.Create()
