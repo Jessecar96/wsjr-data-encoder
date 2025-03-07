@@ -14,7 +14,7 @@ public enum Page
     TravelCitiesForecast1 = 10,
     TravelCitiesForecast2 = 11,
     TravelCitiesForecast3 = 12,
-    WxWarning = 40, // Used for weather warnings, can go up to 8 pages (40-48)
+    WxWarning = 20, // Used for weather warnings, these can be many pages long
     Error = 49, // Used for error messages
     LDL = 50, // LDL page, shows current conditions
 }

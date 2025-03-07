@@ -214,7 +214,8 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 else
                 {
                     string temp = (conditionsData.Temperature.ToString() ?? "").PadLeft(3);
-                    string cond = (conditionsData.WxPhraseShort ?? "").PadRight(10);
+                    string cond = (conditionsData.GetFormattedWxPhraseShort() ?? "").PadRight(10);
+                    if (cond.Length > 10) cond = cond.Substring(0, 10); // limit to 10 chars
                     string windDir = conditionsData.WindDirectionCardinal ?? "";
                     string windSpeed = conditionsData.WindSpeed.ToString() ?? "";
                     string windAndSpeed = Util.FormatWindAndSpeed(windDir, windSpeed);
@@ -247,7 +248,8 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 else
                 {
                     string temp = (conditionsData.Temperature.ToString() ?? "").PadLeft(3);
-                    string cond = (conditionsData.WxPhraseShort ?? "").PadRight(9);
+                    string cond = (conditionsData.GetFormattedWxPhraseShort() ?? "").PadRight(9);
+                    if (cond.Length > 9) cond = cond.Substring(0, 9); // limit to 9 chars
                     regionalObs.AddLine($"{locationName,-19} {cond}{temp}");
                 }
             }
@@ -679,7 +681,8 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 else
                 {
                     // We use the 2 index on everything here so we get tomorrow's forecast (0 is today, 1 is tonight, 2 is tomorrow)
-                    string cond = (forecastData.Daypart[0].WxPhraseShort[2] ?? "").PadRight(10);
+                    string cond = (forecastData.Daypart[0].GetFormattedWxPhraseShort(2) ?? "").PadRight(10);
+                    if (cond.Length > 10) cond = cond.Substring(0, 10); // limit to 10 chars
                     // Use index 1 here to get tomorrow's hi and low temp (0 = today, 1 = tomorrow)
                     string lowTemp = (forecastData.TemperatureMin[1].ToString() ?? "").PadRight(3);
                     string hiTemp = (forecastData.TemperatureMax[1].ToString() ?? "").PadRight(3);
@@ -760,7 +763,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             else
             {
                 // Build the line
-                string cond = (forecastData.Daypart[0].WxPhraseShort[2] ?? "").PadRight(9);
+                string cond = (forecastData.Daypart[0].GetFormattedWxPhraseShort(2) ?? "").PadRight(9);
                 if (cond.Length > 9) cond = cond.Substring(0, 9); // Limit to 9 chars
                 string tempLo = (forecastData.TemperatureMin[1].ToString() ?? "").PadLeft(3);
                 string tempHi = (forecastData.TemperatureMax[1].ToString() ?? "").PadLeft(3);
