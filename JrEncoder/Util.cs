@@ -13,26 +13,26 @@ public class Util
     {
         return Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly()?.Location) ?? string.Empty;
     }
-    
+
     public static List<string> WordWrapAlert(string text, int maxLineLength = 32)
     {
         // Fix windows (UGH) line endings
         text = text.Replace("\r\n", "\n");
-        
+
         // Split text into paragraphs
         string[] paragraphs = text.Split(new string[] { "\n\n" }, StringSplitOptions.None);
-        
+
         // 2D list, paragraph[lines in paragraph]
         List<List<string>> parahraphsList = new();
 
         for (int i = 0; i < paragraphs.Length; i++)
         {
             // Remove line breaks in the paragraph
-            paragraphs[i] = paragraphs[i].Replace("\n", "");
-            
-            // Remove any double spaces caused by NWS indenting the text
-            paragraphs[i] = paragraphs[i].Replace("  ", " ");
-            
+            paragraphs[i] = paragraphs[i].Replace("\n", " ");
+
+            // Remove any multi-spaces caused by NWS indenting the text
+            paragraphs[i] = Regex.Replace(paragraphs[i], @"\s+", " ");
+
             // Word wrap to line length
             parahraphsList.Add(WordWrap(paragraphs[i], maxLineLength));
         }

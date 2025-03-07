@@ -34,7 +34,7 @@ class Program
             Console.WriteLine("Created config.json, program will now exit.");
             return;
         }
-        
+
         // Setup http client
         Util.HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd("JrEncoder/1.0");
 
@@ -250,11 +250,13 @@ class Program
 
     public static void ShowWxWarning(string message, Address address, OMCW omcw)
     {
-        // TODO: Really need word wrapping here
-        var strLines = message.Split('\n');
+        ShowWxWarning(message.Split('\n').ToList(), address, omcw);
+    }
 
+    public static void ShowWxWarning(List<string> message, Address address, OMCW omcw)
+    {
         // Split that into chunks of 9 lines each
-        string[][] chunks = strLines.Chunk(9).ToArray();
+        string[][] chunks = message.Chunk(9).ToArray();
 
         int pageOffset = 0;
         for (int i = 0; i < chunks.Length; i++)
