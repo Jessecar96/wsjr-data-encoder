@@ -248,12 +248,12 @@ class Program
             .Commit();
     }
 
-    public static void ShowWxWarning(string message, Address address, OMCW omcw)
+    public static void ShowWxWarning(string message, WarningType type, Address address, OMCW omcw)
     {
-        ShowWxWarning(message.Split('\n').ToList(), address, omcw);
+        ShowWxWarning(message.Split('\n').ToList(), type, address, omcw);
     }
 
-    public static void ShowWxWarning(List<string> message, Address address, OMCW omcw)
+    public static void ShowWxWarning(List<string> message, WarningType type, Address address, OMCW omcw)
     {
         // Split that into chunks of 9 lines each
         string[][] chunks = message.Chunk(9).ToArray();
@@ -268,16 +268,26 @@ class Program
             bool firstPage = i == 0;
             bool lastPage = i == chunks.Length - 1;
             bool multiPage = chunks.Length != 1;
-            page.Attributes(new PageAttributes
+            PageAttributes pageAttributes = new PageAttributes
             {
-                Warning = firstPage, // Only the first page in the chain gets the warning bit set
                 Roll = true, // Every page needs to roll
                 Chain = (multiPage && !lastPage) // Set chain when we have more than 1 page, and it's not the last page
-            });
+            };
+
+            // Set warning/advistory depending on type
+            if (type == WarningType.Warning)
+                pageAttributes.Warning = firstPage; // Only the first page in the chain gets the warning bit set
+            else if (type == WarningType.Advisory)
+                pageAttributes.Advisory = firstPage; // Only the first page in the chain gets the warning bit set
+
+            page.Attributes(pageAttributes);
 
             // Add all the chunked lines
             foreach (string line in chunks[i])
-                page.AddLine(line, new TextLineAttributes { Color = Color.Red });
+                page.AddLine(line, new TextLineAttributes
+                {
+                    Color = type == WarningType.Warning ? Color.Red : Color.Brown
+                });
 
             // Add to offset for the next loop
             pageOffset++;

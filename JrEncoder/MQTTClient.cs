@@ -60,7 +60,12 @@ public class MQTTClient(OMCW _omcw)
 
             // Show a warning roll
             case "jrencoder/warning":
-                Program.ShowWxWarning(payloadStr, Address.All, _omcw);
+                Program.ShowWxWarning(payloadStr, WarningType.Warning, Address.All, _omcw);
+                break;
+            
+            // Show a warning roll
+            case "jrencoder/advisory":
+                Program.ShowWxWarning(payloadStr, WarningType.Advisory, Address.All, _omcw);
                 break;
 
             // Trigger the wx warning relay for 1 second

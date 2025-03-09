@@ -121,7 +121,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                     }
 
                     // Send it!
-                    Program.ShowWxWarning(Util.WordWrapAlert(fullAlertText), Address.FromSwitches(star.Switches), _omcw);
+                    Program.ShowWxWarning(Util.WordWrapAlert(fullAlertText), WarningType.Warning, Address.FromSwitches(star.Switches), _omcw);
 
                     // Break out of the loop so we don't send multiple at once
                     break;
