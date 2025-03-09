@@ -34,8 +34,8 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
         Console.WriteLine("[DataDownloader] Running...");
         _ = Task.Run(async () =>
         {
-            // Update alerts every 2 minutes
-            using PeriodicTimer timer = new(TimeSpan.FromMinutes(2));
+            // Update alerts every minute
+            using PeriodicTimer timer = new(TimeSpan.FromMinutes(1));
             while (await timer.WaitForNextTickAsync())
                 await UpdateAlerts();
         });
@@ -77,20 +77,55 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 continue;
             }
 
+            // Read the response body
             string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
-
             if (string.IsNullOrEmpty(responseBody))
+            {
+                Console.WriteLine($"[DataDownloader] Empty alert response for {star.LocationName}");
+                continue;
+            }
+
+            // Deserialize from json
+            NWSResponse? nwsResponse = JsonSerializer.Deserialize<NWSResponse>(responseBody);
+            if (nwsResponse == null)
             {
                 Console.WriteLine($"[DataDownloader] No alerts for {star.LocationName}");
                 continue;
             }
 
-            NWSResponse? nwsResponse = JsonSerializer.Deserialize<NWSResponse>(responseBody);
-
-            if (nwsResponse == null)
+            // Check if we've ever saved alerts, and if they changed
+            if (_alertsCache.ContainsKey(star.LocationName) && _alertsCache[star.Location] != nwsResponse.Features)
             {
-                Console.WriteLine($"[DataDownloader] No alerts for {star.LocationName}");
-                continue;
+                Console.WriteLine($"[DataDownloader] There are {nwsResponse.Features.Count} alerts for {star.LocationName}");
+
+                // Alerts have changed, process any that need to roll
+                foreach (NWSFeature nwsFeature in nwsResponse.Features)
+                {
+                    // Build the text we're going to roll
+                    string fullAlertText = "";
+
+                    // Start off with the headline
+                    if (nwsFeature.Properties.Parameters.NWSheadline != null)
+                    {
+                        fullAlertText += nwsFeature.Properties.Parameters.NWSheadline[0] + "\n\n";
+                    }
+
+                    // Add description
+                    fullAlertText += nwsFeature?.Properties?.Description + "\n\n";
+
+                    // Add instruction
+                    if (nwsFeature?.Properties?.Instruction != null)
+                    {
+                        fullAlertText += "PRECAUTIONARY/PREPAREDNESS ACTIONS...\n\n";
+                        fullAlertText += nwsFeature.Properties.Instruction;
+                    }
+
+                    // Send it!
+                    Program.ShowWxWarning(Util.WordWrapAlert(fullAlertText), Address.FromSwitches(star.Switches), _omcw);
+
+                    // Break out of the loop so we don't send multiple at once
+                    break;
+                }
             }
 
             // Save locally for headlines on forecast page
@@ -538,9 +573,12 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                         List<NWSFeature> nwsFeatures = _alertsCache[star.Location];
                         foreach (NWSFeature nwsFeature in nwsFeatures)
                         {
+                            // Make sure headline exists
+                            if (nwsFeature.Properties.Parameters.NWSheadline == null) continue;
+                            
                             // Get the headline text
                             string nwsHeadline = nwsFeature.Properties.Parameters.NWSheadline[0];
-                            
+
                             // Clean it up 
                             string pattern = @"(.+(?:UNTIL|TO) (?:.+?).(?:C|S)T (?:MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY)?)";
                             MatchCollection m = Regex.Matches(nwsHeadline, pattern);
@@ -549,14 +587,14 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                                 // If that regex matches use group 1 to extract the clean version
                                 nwsHeadline = m[0].Groups[1].Value;
                             }
-                            
+
                             // Trim any extra space off the ends
                             nwsHeadline = nwsHeadline.Trim();
 
                             // We already added this one with the same text, skip it
                             if (headlines.Contains(nwsHeadline))
                                 continue;
-                            
+
                             // Add to our list to check for dupes
                             headlines.Add(nwsHeadline);
 

@@ -35,7 +35,7 @@ public class Parameters
     public List<string> WMOidentifier { get; set; }
 
     [JsonPropertyName("NWSheadline")]
-    public List<string> NWSheadline { get; set; }
+    public List<string>? NWSheadline { get; set; }
 
     [JsonPropertyName("BLOCKCHANNEL")]
     public List<string> BLOCKCHANNEL { get; set; }
