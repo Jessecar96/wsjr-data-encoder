@@ -120,8 +120,15 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                         fullAlertText += nwsFeature.Properties.Instruction;
                     }
 
+                    // Set warning type
+                    WarningType type;
+                    if (nwsFeature?.Properties?.Severity == "Severe")
+                        type = WarningType.Warning;
+                    else
+                        type = WarningType.Advisory;
+
                     // Send it!
-                    Program.ShowWxWarning(Util.WordWrapAlert(fullAlertText), WarningType.Warning, Address.FromSwitches(star.Switches), _omcw);
+                    Program.ShowWxWarning(Util.WordWrapAlert(fullAlertText), type, Address.FromSwitches(star.Switches), _omcw);
 
                     // Break out of the loop so we don't send multiple at once
                     break;
@@ -575,7 +582,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                         {
                             // Make sure headline exists
                             if (nwsFeature.Properties.Parameters.NWSheadline == null) continue;
-                            
+
                             // Get the headline text
                             string nwsHeadline = nwsFeature.Properties.Parameters.NWSheadline[0];
 
