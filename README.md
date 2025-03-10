@@ -50,9 +50,10 @@ The first run of the install script will generate a config.json file in `$HOME/j
 - Setting the clock
 - Multiple time zones
 - Addressing multiple weather stars
+- NWS Headlines
+- Severe warnings/advisories
 - Current conditions
 - Almanac
-- Headlines
 - Text-based 36 hour forecast
 - Extended forecast
 - Latest observations
@@ -61,6 +62,5 @@ The first run of the install script will generate a config.json file in `$HOME/j
 - Travel cities forecast
 
 ## TODO
-- Severe warnings/advisories
 - Tides
 - Air quality
