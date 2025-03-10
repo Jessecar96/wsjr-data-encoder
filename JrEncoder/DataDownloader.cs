@@ -587,7 +587,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                             string nwsHeadline = nwsFeature.Properties.Parameters.NWSheadline[0];
 
                             // Clean it up 
-                            string pattern = @"(.+(?:UNTIL|TO) (?:.+?).(?:C|S)T (?:MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY)?)";
+                            string pattern = @"(.+(?:UNTIL|TO) (?:.+?).(?:D|S)T (?:MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY)?)";
                             MatchCollection m = Regex.Matches(nwsHeadline, pattern);
                             if (m.Count != 0 && m[0].Groups.Count != 0)
                             {
