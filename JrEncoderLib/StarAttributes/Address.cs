@@ -62,6 +62,10 @@ public struct Address(int serviceId, int zone, int county, int unit)
         if (switches.Length != 8)
             throw new Exception("Switches must be 8 characters long");
 
+        // All zero switches means all stars
+        if (switches == "00000000")
+            return All;
+
         byte[] switchBytes = StringToByteArray(switches);
 
         // zone is the last 5 bits of the 2nd switch, and first 5 bits of the 3rd switch
