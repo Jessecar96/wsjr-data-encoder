@@ -305,7 +305,7 @@ class Program
     /// </summary>
     /// <param name="message"></param>
     /// <param name="fatal">If this message should show forever, locking up the program</param>
-    private static void ShowErrorMessage(string message, bool fatal = false)
+    public static void ShowErrorMessage(string message, bool fatal = false)
     {
         PageBuilder page = new PageBuilder((int)Page.Error, Address.All, omcw)
             .AddLine(Util.CenterString("ATTENTION CABLE OPERATOR"), new TextLineAttributes { Color = Color.Diarrhea })

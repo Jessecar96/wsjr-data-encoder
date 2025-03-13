@@ -86,7 +86,18 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             }
 
             // Deserialize from json
-            NWSResponse? nwsResponse = JsonSerializer.Deserialize<NWSResponse>(responseBody);
+            NWSResponse? nwsResponse = null;
+            try
+            {
+                nwsResponse = JsonSerializer.Deserialize<NWSResponse>(responseBody);
+            }
+            catch (Exception ex)
+            {
+                // Failed to parse json, halt program and show error
+                Program.ShowErrorMessage(ex.Message);
+            }
+
+            // Make sure it's not null
             if (nwsResponse == null)
             {
                 Console.WriteLine($"[DataDownloader] No alerts for {star.LocationName}");

@@ -86,7 +86,7 @@ public class Properties
     public DateTime Expires { get; set; }
 
     [JsonPropertyName("ends")]
-    public DateTime Ends { get; set; }
+    public DateTime? Ends { get; set; }
 
     [JsonPropertyName("status")]
     public string Status { get; set; }
