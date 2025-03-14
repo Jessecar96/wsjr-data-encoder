@@ -19,6 +19,9 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
     // Data cache
     private readonly Dictionary<string, List<NWSFeature>> _alertsCache = new();
 
+    // Holds the ids of alerts that we already have sent
+    private readonly Dictionary<string, List<string>> _sentAlertIds = new();
+
     public async Task UpdateAll()
     {
         Console.WriteLine("[DataDownloader] Updating all records...");
@@ -104,46 +107,68 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 continue;
             }
 
-            // Check if we've ever saved alerts, and if they changed
-            if (_alertsCache.ContainsKey(star.LocationName) && _alertsCache[star.Location] != nwsResponse.Features)
-            {
-                Console.WriteLine($"[DataDownloader] There are {nwsResponse.Features.Count} alerts for {star.LocationName}");
+            Console.WriteLine($"[DataDownloader] There are {nwsResponse.Features.Count} alerts for {star.LocationName}");
+            
+            // Init _sentAlertIds for this star location
+            if (!_sentAlertIds.ContainsKey(star.Location))
+                _sentAlertIds[star.Location] = new List<string>();
 
-                // Alerts have changed, process any that need to roll
+            // First time downloading these alerts, save all ids so we don't roll them when the program first starts
+            if (!_alertsCache.ContainsKey(star.Location))
+            {
                 foreach (NWSFeature nwsFeature in nwsResponse.Features)
                 {
-                    // Build the text we're going to roll
-                    string fullAlertText = "";
-
-                    // Start off with the headline
-                    if (nwsFeature.Properties.Parameters.NWSheadline != null)
-                    {
-                        fullAlertText += nwsFeature.Properties.Parameters.NWSheadline[0] + "\n\n";
-                    }
-
-                    // Add description
-                    fullAlertText += nwsFeature?.Properties?.Description + "\n\n";
-
-                    // Add instruction
-                    if (nwsFeature?.Properties?.Instruction != null)
-                    {
-                        fullAlertText += "PRECAUTIONARY/PREPAREDNESS ACTIONS...\n\n";
-                        fullAlertText += nwsFeature.Properties.Instruction;
-                    }
-
-                    // Set warning type
-                    WarningType type;
-                    if (nwsFeature?.Properties?.Severity == "Severe")
-                        type = WarningType.Warning;
-                    else
-                        type = WarningType.Advisory;
-
-                    // Send it!
-                    Program.ShowWxWarning(Util.WordWrapAlert(fullAlertText), type, Address.FromSwitches(star.Switches), _omcw);
-
-                    // Break out of the loop so we don't send multiple at once
-                    break;
+                    Console.WriteLine($"[DataDownloader] Marking alert sent: {nwsFeature.Properties.Event} for {star.LocationName}");
+                    _sentAlertIds[star.Location].Add(nwsFeature.Id);
                 }
+            }
+
+            // Alerts have changed, process any that need to roll
+            foreach (NWSFeature nwsFeature in nwsResponse.Features)
+            {
+                // Alert already sent, do not send again
+                if (_sentAlertIds[star.Location].Contains(nwsFeature.Id))
+                {
+                    Console.WriteLine($"[DataDownloader] Alert already sent: {nwsFeature.Properties.Event} for {star.LocationName}");
+                    continue;
+                }
+
+                Console.WriteLine($"[DataDownloader] New alert: {nwsFeature.Properties.Event} for {star.LocationName}");
+                
+                // Build the text we're going to roll
+                string fullAlertText = "";
+
+                // Start off with the headline
+                if (nwsFeature.Properties.Parameters.NWSheadline != null)
+                {
+                    fullAlertText += nwsFeature.Properties.Parameters.NWSheadline[0] + "\n\n";
+                }
+
+                // Add description
+                fullAlertText += nwsFeature?.Properties?.Description + "\n\n";
+
+                // Add instruction
+                if (nwsFeature?.Properties?.Instruction != null)
+                {
+                    fullAlertText += "PRECAUTIONARY/PREPAREDNESS ACTIONS...\n\n";
+                    fullAlertText += nwsFeature.Properties.Instruction;
+                }
+
+                // Set warning type
+                WarningType type;
+                if (nwsFeature?.Properties?.Severity == "Severe")
+                    type = WarningType.Warning;
+                else
+                    type = WarningType.Advisory;
+
+                // Send it!
+                Program.ShowWxWarning(Util.WordWrapAlert(fullAlertText), type, Address.FromSwitches(star.Switches), _omcw);
+                
+                // Save this alert ID so we don't send it again
+                _sentAlertIds[star.Location].Add(nwsFeature.Id);
+
+                // Break out of the loop so we don't send multiple at once
+                break;
             }
 
             // Save locally for headlines on forecast page

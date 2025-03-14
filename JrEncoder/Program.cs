@@ -286,7 +286,7 @@ class Program
             foreach (string line in chunks[i])
                 page.AddLine(line, new TextLineAttributes
                 {
-                    Color = type == WarningType.Warning ? Color.Red : Color.Brown
+                    Color = (type == WarningType.Warning) ? Color.Red : Color.Brown
                 });
 
             // Add to offset for the next loop
