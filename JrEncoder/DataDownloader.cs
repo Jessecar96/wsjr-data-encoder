@@ -592,7 +592,18 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                         foreach (NWSFeature nwsFeature in nwsFeatures)
                         {
                             // Make sure headline exists
-                            if (nwsFeature.Properties.Parameters.NWSheadline == null) continue;
+                            if (nwsFeature.Properties.Parameters.NWSheadline == null)
+                                continue;
+
+                            // Ignore some marine ones
+                            string[] ignoreEvents =
+                            [
+                                "Marine Weather Statement", "High Surf Advisory", "High Surf Warning", "Gale Warning",
+                                "Storm Watch", "Heavy Freezing Spray Warning", "Small Craft Advisory", "Rip Current Statement",
+                                "Beach Hazards Statement", "Hazardous Seas Watch"
+                            ];
+                            if (ignoreEvents.Contains(nwsFeature.Properties.Event))
+                                continue;
 
                             // Get the headline text
                             string nwsHeadline = nwsFeature.Properties.Parameters.NWSheadline[0];
