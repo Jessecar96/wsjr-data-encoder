@@ -49,11 +49,20 @@ echo "## Checking out latest version ##"
 cd $HOME/wsjr-data-encoder
 git fetch --tags
 
+# Reset any changes so there's no issues checking out a new version
+git reset --hard
+
 # Get latest tag name
 latestTag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
 
 # Checkout latest tag
 git checkout -q $latestTag
+
+# Stop service
+if [ ! -f /etc/systemd/system/jrencoder.service ]; then
+  echo "## Stopping service ##"
+  sudo systemctl stop jrencoder.service
+fi
 
 # Build project
 # Must be built as debug, release does not work for some reason
@@ -61,9 +70,11 @@ echo "## Building project ##"
 mkdir -p $HOME/jrencoder
 $HOME/.dotnet/dotnet build --nologo --configuration Debug --property:OutputPath=$HOME/jrencoder/ -property:WarningLevel=0 $HOME/wsjr-data-encoder/JrEncoder.sln
 
-# Create systemd service
-echo "## Installing service ##"
-cat << EOL | sudo tee /etc/systemd/system/jrencoder.service
+if [ ! -f /etc/systemd/system/jrencoder.service ]; then
+  # Create systemd service
+  echo "## Installing service ##"
+  service_installed=true
+  cat << EOL | sudo tee /etc/systemd/system/jrencoder.service
 [Unit]
 Description=Weather Star Data Encoder
 After=network.target
@@ -78,6 +89,7 @@ ExecStart=$HOME/.dotnet/dotnet $HOME/jrencoder/JrEncoder.dll
 [Install]
 WantedBy=multi-user.target
 EOL
+fi
 
 # Reload systemctl
 sudo systemctl daemon-reload
@@ -90,6 +102,21 @@ echo "## Generating config file ##"
 cd $HOME/jrencoder
 $HOME/.dotnet/dotnet $HOME/jrencoder/JrEncoder.dll --create-config
 
-printf "\n\nInstall complete!\n"
-echo "config.json file was created in $HOME/jrencoder/"
-echo "Edit your config.json file using nano/vi/vim then reboot your pi to start the program"
+# Check if the service was just installed for the first time
+if [ "$service_installed" = true ] ; then
+
+  # Service was just installed, a reboot is required
+  printf "\n\nInstall complete!\n"
+  echo "config.json file was created in $HOME/jrencoder/"
+  echo "Edit your config.json file using nano/vi/vim then reboot your pi to start the program"
+
+else
+
+  echo "## Starting service ##"
+  sudo systemctl start jrencoder.service
+
+  printf "\n\nInstall complete!\n"
+
+fi
+
+
