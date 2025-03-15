@@ -108,7 +108,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             }
 
             Console.WriteLine($"[DataDownloader] There are {nwsResponse.Features.Count} alerts for {star.LocationName}");
-            
+
             // Init _sentAlertIds for this star location
             if (!_sentAlertIds.ContainsKey(star.Location))
                 _sentAlertIds[star.Location] = new List<string>();
@@ -134,7 +134,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 }
 
                 Console.WriteLine($"[DataDownloader] New alert: {nwsFeature.Properties.Event} for {star.LocationName}");
-                
+
                 // Build the text we're going to roll
                 string fullAlertText = "";
 
@@ -163,7 +163,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
 
                 // Send it!
                 Program.ShowWxWarning(Util.WordWrapAlert(fullAlertText), type, Address.FromSwitches(star.Switches), _omcw);
-                
+
                 // Save this alert ID so we don't send it again
                 _sentAlertIds[star.Location].Add(nwsFeature.Id);
 
@@ -617,8 +617,10 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                         foreach (NWSFeature nwsFeature in nwsFeatures)
                         {
                             // Make sure headline exists
-                            if (nwsFeature.Properties.Parameters.NWSheadline == null)
-                                continue;
+                            //if (nwsFeature.Properties.Parameters.NWSheadline == null)
+                            //    continue;
+
+                            string headlinePattern = @"(.+(?:UNTIL|TO|THROUGH)(?: (?:.+?).(?:D|S)T)? (?:MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY)?(?: (?:AFTERNOON|NIGHT|MORNING))?)";
 
                             // Ignore some marine ones
                             string[] ignoreEvents =
@@ -630,17 +632,39 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                             if (ignoreEvents.Contains(nwsFeature.Properties.Event))
                                 continue;
 
-                            // Get the headline text
-                            string nwsHeadline = nwsFeature.Properties.Parameters.NWSheadline[0];
+                            // This will store our headline
+                            string? nwsHeadline = null;
 
-                            // Clean it up 
-                            string pattern = @"(.+(?:UNTIL|TO|THROUGH)(?: (?:.+?).(?:D|S)T)? (?:MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY)?(?: (?:AFTERNOON|NIGHT|MORNING))?)";
-                            MatchCollection m = Regex.Matches(nwsHeadline, pattern);
-                            if (m.Count != 0 && m[0].Groups.Count != 0)
+                            if (nwsFeature.Properties.Parameters.NWSheadline != null)
                             {
-                                // If that regex matches use group 1 to extract the clean version
-                                nwsHeadline = m[0].Groups[1].Value;
+                                // Use headline given by the NWS API
+                                nwsHeadline = nwsFeature.Properties.Parameters.NWSheadline[0];
+
+                                // Clean it up 
+                                MatchCollection m = Regex.Matches(nwsHeadline, headlinePattern);
+                                if (m.Count != 0 && m[0].Groups.Count != 0)
+                                {
+                                    // If that regex matches use group 1 to extract the clean version
+                                    nwsHeadline = m[0].Groups[1].Value;
+                                }
                             }
+                            else
+                            {
+                                // Try to use description text, there's no headline
+                                string description = nwsFeature.Properties.Description;
+
+                                // Clean it up 
+                                MatchCollection m = Regex.Matches(description, headlinePattern);
+                                if (m.Count != 0 && m[0].Groups.Count != 0)
+                                {
+                                    // If that regex matches use group 1 to extract the clean version
+                                    nwsHeadline = m[0].Groups[1].Value;
+                                }
+                            }
+
+                            // Could not find anything, skip
+                            if (nwsHeadline == null)
+                                continue;
 
                             // Trim any extra space off the ends
                             nwsHeadline = nwsHeadline.Trim();
