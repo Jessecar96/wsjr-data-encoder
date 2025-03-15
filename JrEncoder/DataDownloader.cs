@@ -22,9 +22,13 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
     // Holds the ids of alerts that we already have sent
     private readonly Dictionary<string, List<string>> _sentAlertIds = new();
 
+    // Stores NWS zones/counties for locations
+    private readonly Dictionary<string, List<string>> _nwsZones = new();
+
     public async Task UpdateAll()
     {
         Console.WriteLine("[DataDownloader] Updating all records...");
+        await GetNWSZones();
         await UpdateAlerts();
         await UpdateCurrentConditions();
         await UpdateAlmanac();
@@ -61,15 +65,94 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
         });
     }
 
+    private async Task GetNWSZones()
+    {
+        foreach (Config.WeatherStar star in _config.Stars)
+        {
+            Console.WriteLine($"[DataDownloader] Getting NWS zones for {star.LocationName}");
+
+            // Make HTTP request
+            HttpResponseMessage httpResponseMessage =
+                await Util.HttpClient.GetAsync($"https://api.weather.gov/points/{star.Location}");
+
+            // Make sure the request was successful
+            if (!httpResponseMessage.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"[DataDownloader] Failed to download NWS zones for {star.LocationName}: HTTP {httpResponseMessage.StatusCode}");
+                continue;
+            }
+
+            // Read the response body
+            string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+            if (string.IsNullOrEmpty(responseBody))
+            {
+                Console.WriteLine($"[DataDownloader] Empty NWS zones response for {star.LocationName}");
+                continue;
+            }
+
+            // Deserialize from json
+            NWSPointResponse? nwsResponse = null;
+            try
+            {
+                nwsResponse = JsonSerializer.Deserialize<NWSPointResponse>(responseBody);
+            }
+            catch (Exception ex)
+            {
+                // Failed to parse json, halt program and show error
+                Console.WriteLine($"[DataDownloader] Failed to get NWS s for {star.LocationName}: " + ex.Message);
+            }
+
+            // Make sure it's not null
+            if (nwsResponse == null)
+            {
+                Console.WriteLine($"[DataDownloader] Failed to get NWS zones for {star.LocationName}");
+                continue;
+            }
+
+            // Get zone
+            string nwsZone = nwsResponse.Properties.ForecastZone.Split('/').Last();
+
+            // Get county
+            string county = nwsResponse.Properties.County.Split('/').Last();
+
+            // Make sure this is a list
+            if (!_nwsZones.ContainsKey(star.Location))
+                _nwsZones.Add(star.Location, new List<string>());
+
+            // Save zone locally
+            _nwsZones[star.Location].Add(nwsZone);
+
+            // Save zone locally
+            _nwsZones[star.Location].Add(county);
+
+            string zones = string.Join(",", _nwsZones[star.Location]);
+            Console.WriteLine($"[DataDownloader] Got zones for {star.LocationName}: " + zones);
+        }
+    }
+
     private async Task UpdateAlerts()
     {
         foreach (Config.WeatherStar star in _config.Stars)
         {
             Console.WriteLine($"[DataDownloader] Updating alerts for {star.LocationName}");
 
+            // Build URL for getting NWS alerts
+            string url;
+            if (_nwsZones.ContainsKey(star.Location))
+            {
+                // Use zones if we know them
+                string zones = string.Join(",", _nwsZones[star.Location]);
+                Console.WriteLine($"[DataDownloader] Using NWS zones " + zones);
+                url = $"https://api.weather.gov/alerts/active?zone={zones}&limit=500";
+            }
+            else
+            {
+                // Use point location
+                url = $"https://api.weather.gov/alerts/active?point={star.Location}&limit=500";
+            }
+
             // Make HTTP request
-            HttpResponseMessage httpResponseMessage =
-                await Util.HttpClient.GetAsync($"https://api.weather.gov/alerts/active?point={star.Location}&limit=500");
+            HttpResponseMessage httpResponseMessage = await Util.HttpClient.GetAsync(url);
 
             // Make sure the request was successful
             // NWS returns 304 not modified :/
@@ -89,10 +172,10 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
             }
 
             // Deserialize from json
-            NWSResponse? nwsResponse = null;
+            NWSAlertResponse? nwsResponse = null;
             try
             {
-                nwsResponse = JsonSerializer.Deserialize<NWSResponse>(responseBody);
+                nwsResponse = JsonSerializer.Deserialize<NWSAlertResponse>(responseBody);
             }
             catch (Exception ex)
             {

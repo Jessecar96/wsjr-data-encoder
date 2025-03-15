@@ -146,7 +146,7 @@ public class Reference
     public DateTime Sent { get; set; }
 }
 
-public class NWSResponse
+public class NWSAlertResponse
 {
     //[JsonPropertyName("@context")]
     //public List<object> Context { get; set; }
