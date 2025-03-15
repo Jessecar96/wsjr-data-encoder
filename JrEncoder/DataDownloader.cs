@@ -156,7 +156,8 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
 
                 // Set warning type
                 WarningType type;
-                if (nwsFeature?.Properties?.Severity == "Severe")
+                string[] warningSeverity = new string[] { "Severe", "Extreme" };
+                if (warningSeverity.Contains(nwsFeature?.Properties?.Severity))
                     type = WarningType.Warning;
                 else
                     type = WarningType.Advisory;
