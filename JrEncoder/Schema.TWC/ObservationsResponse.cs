@@ -141,17 +141,9 @@ public class ObservationsResponse
 
     [JsonPropertyName("wxPhraseShort")]
     public string? WxPhraseShort { get; init; }
-    
+
     public string GetFormattedWxPhraseShort()
     {
-        if (WxPhraseShort == null) return "";
-
-        string output = WxPhraseShort ?? "";
-
-        // Remove anything after the / which is usually a second condition
-        if (output.Contains('/'))
-            output = output.Substring(0, output.IndexOf("/"));
-
-        return output;
+        return Mappings.GetObsMapping(IconCodeExtend ?? 0);
     }
 }

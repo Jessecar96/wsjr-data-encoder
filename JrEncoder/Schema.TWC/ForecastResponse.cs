@@ -172,14 +172,6 @@ public class ForecastDaypart
 
     public string GetFormattedWxPhraseShort(int index)
     {
-        if (WxPhraseShort[index] == null) return "";
-
-        string output = WxPhraseShort[index] ?? "";
-
-        // Remove anything after the / which is usually a second condition
-        if (output.Contains('/'))
-            output = output.Substring(0, output.IndexOf("/"));
-
-        return output;
+        return Mappings.GetFcstMapping(IconCodeExtend[index] ?? 0);
     }
 }
