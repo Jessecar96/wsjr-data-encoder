@@ -221,6 +221,14 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 // Build the text we're going to roll
                 string fullAlertText = "";
 
+                // We need to rebuild the header of the alert since the NWS does not include it in the API
+                List<string> alertHeader = new List<string>();
+                alertHeader.AddRange(Util.WordWrap(nwsFeature.Properties.Event.ToUpper()));
+                alertHeader.AddRange(Util.WordWrap(nwsFeature.Properties.SenderName.Replace("NWS", "National Weather Service").ToUpper()));
+                string tzAbrev = Util.GetTimeZoneAbbreviation(star.GetTimeZoneInfo());
+                alertHeader.AddRange(Util.WordWrap(nwsFeature.Properties.Sent.ToString("hmm tt '" + tzAbrev + "' ddd MMM d yyyy").ToUpper()));
+                alertHeader.Add("");
+
                 // Start off with the headline
                 if (nwsFeature.Properties.Parameters.NWSheadline != null)
                 {
@@ -245,8 +253,12 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 else
                     type = WarningType.Advisory;
 
+                // Add the rest of the text to our header
+                alertHeader.AddRange(Util.WordWrapAlert(fullAlertText));
+
                 // Send it!
-                Program.ShowWxWarning(Util.WordWrapAlert(fullAlertText), type, Address.FromSwitches(star.Switches), _omcw);
+                Program.ShowWxWarning(alertHeader,
+                    type, Address.FromSwitches(star.Switches), _omcw);
 
                 // Save this alert ID so we don't send it again
                 _sentAlertIds[star.Location].Add(nwsFeature.Id);

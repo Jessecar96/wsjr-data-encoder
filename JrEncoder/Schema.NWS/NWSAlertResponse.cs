@@ -74,19 +74,19 @@ public class Properties
     public List<Reference> References { get; set; }
 
     [JsonPropertyName("sent")]
-    public DateTime Sent { get; set; }
+    public DateTimeOffset Sent { get; set; }
 
     [JsonPropertyName("effective")]
-    public DateTime Effective { get; set; }
+    public DateTimeOffset Effective { get; set; }
 
     [JsonPropertyName("onset")]
-    public DateTime Onset { get; set; }
+    public DateTimeOffset Onset { get; set; }
 
     [JsonPropertyName("expires")]
-    public DateTime Expires { get; set; }
+    public DateTimeOffset Expires { get; set; }
 
     [JsonPropertyName("ends")]
-    public DateTime? Ends { get; set; }
+    public DateTimeOffset? Ends { get; set; }
 
     [JsonPropertyName("status")]
     public string Status { get; set; }

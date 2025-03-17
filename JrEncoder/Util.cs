@@ -57,7 +57,7 @@ public class Util
     /// <param name="text"></param>
     /// <param name="maxLineLength"></param>
     /// <returns></returns>
-    public static List<string> WordWrap(string text, int maxLineLength)
+    public static List<string> WordWrap(string text, int maxLineLength = 32)
     {
         var list = new List<string>();
 
@@ -140,5 +140,19 @@ public class Util
 
         Regex regex = new Regex(pattern, options);
         return regex.Replace(text, substitution);
+    }
+    
+    /// <summary>
+    /// Get time zone abbreviation (EST, CST) from TimeZoneInfo
+    /// </summary>
+    /// <param name="timeZoneInfo"></param>
+    /// <returns></returns>
+    public static string GetTimeZoneAbbreviation(TimeZoneInfo timeZoneInfo)
+    {
+        string timeZoneName = timeZoneInfo.IsDaylightSavingTime(DateTime.Now)
+            ? timeZoneInfo.DaylightName
+            : timeZoneInfo.StandardName;
+
+        return Regex.Replace(timeZoneName, "[^A-Z]", "");
     }
 }
