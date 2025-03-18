@@ -223,7 +223,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
 
                 // We need to rebuild the header of the alert since the NWS does not include it in the API
                 List<string> alertHeader = new List<string>();
-                alertHeader.AddRange(Util.WordWrap(nwsFeature.Properties.Event.ToUpper()));
+                //alertHeader.AddRange(Util.WordWrap(nwsFeature.Properties.Event.ToUpper()));
                 alertHeader.AddRange(Util.WordWrap(nwsFeature.Properties.SenderName.Replace("NWS", "National Weather Service").ToUpper()));
                 string tzAbrev = Util.GetTimeZoneAbbreviation(star.GetTimeZoneInfo());
                 alertHeader.AddRange(Util.WordWrap(nwsFeature.Properties.Sent.ToString("hmm tt '" + tzAbrev + "' ddd MMM d yyyy").ToUpper()));
