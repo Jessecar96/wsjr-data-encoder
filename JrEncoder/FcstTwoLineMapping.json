@@ -1,0 +1,1198 @@
+{
+	"300": [
+		"Strong",
+		"Storms"
+	],
+	"310": [
+		"Strong",
+		"Storms"
+	],
+	"400": [
+		"T'Storms",
+		""
+	],
+	"402": [
+		"Heavy",
+		"T'Storms"
+	],
+	"410": [
+		"T'Storms",
+		"Wind"
+	],
+	"412": [
+		"Heavy",
+		"T'Storms"
+	],
+	"500": [
+		"Rain",
+		"Snow"
+	],
+	"510": [
+		"Rain/Snow",
+		"Wind"
+	],
+	"600": [
+		"Rain",
+		"Sleet"
+	],
+	"601": [
+		"Light Rain",
+		"Sleet"
+	],
+	"610": [
+		"Rain/Sleet",
+		"Wind"
+	],
+	"611": [
+		"Light Rain",
+		"Sleet/Wind"
+	],
+	"700": [
+		"Wintry",
+		"Mix"
+	],
+	"701": [
+		"Light",
+		"Wintry Mix"
+	],
+	"710": [
+		"Wintry Mix",
+		"Wind"
+	],
+	"711": [
+		"Lgt Wintry",
+		"Mix/Wind"
+	],
+	"800": [
+		"Freezing",
+		"Drizzle"
+	],
+	"810": [
+		"Freezing",
+		"Drizzle"
+	],
+	"850": [
+		"Freezing",
+		"Drizzle"
+	],
+	"900": [
+		"Drizzle",
+		""
+	],
+	"910": [
+		"Drizzle",
+		"Wind"
+	],
+	"950": [
+		"Drizzle",
+		"Fog"
+	],
+	"1000": [
+		"Freezing",
+		"Rain"
+	],
+	"1001": [
+		"Light Frz",
+		"Rain"
+	],
+	"1002": [
+		"Heavy Frz",
+		"Rain"
+	],
+	"1010": [
+		"Freezing",
+		"Rain/Wind"
+	],
+	"1011": [
+		"Light Frz",
+		"Rain/Wind"
+	],
+	"1012": [
+		"Heavy Frz",
+		"Rain/Wind"
+	],
+	"1051": [
+		"Light Frz",
+		"Rain/Fog"
+	],
+	"1100": [
+		"Showers",
+		""
+	],
+	"1110": [
+		"Showers",
+		"Wind"
+	],
+	"1140": [
+		"T'Showers",
+		""
+	],
+	"1170": [
+		"T'Showers",
+		"Wind"
+	],
+	"1200": [
+		"Rain",
+		""
+	],
+	"1201": [
+		"Light",
+		"Rain"
+	],
+	"1210": [
+		"Rain",
+		"Wind"
+	],
+	"1211": [
+		"Light Rain",
+		"Wind"
+	],
+	"1240": [
+		"Rain",
+		"Thunder"
+	],
+	"1251": [
+		"Light Rain",
+		"Fog"
+	],
+	"1270": [
+		"Rain/Wind",
+		"Thunder"
+	],
+	"1300": [
+		"Flurries",
+		""
+	],
+	"1310": [
+		"Flurries",
+		"Wind"
+	],
+	"1400": [
+		"Snow",
+		"Showers"
+	],
+	"1410": [
+		"Snow",
+		"Showers"
+	],
+	"1600": [
+		"Snow",
+		""
+	],
+	"1601": [
+		"Light",
+		"Snow"
+	],
+	"1610": [
+		"Snow",
+		"Wind"
+	],
+	"1611": [
+		"Light Snow",
+		"Wind"
+	],
+	"1651": [
+		"Light Snow",
+		"Fog"
+	],
+	"1800": [
+		"Sleet",
+		""
+	],
+	"1801": [
+		"Light",
+		"Sleet"
+	],
+	"1810": [
+		"Sleet",
+		"Wind"
+	],
+	"1811": [
+		"Lgt Sleet",
+		"Wind"
+	],
+	"2000": [
+		"Foggy",
+		""
+	],
+	"2010": [
+		"Foggy",
+		"Wind"
+	],
+	"2100": [
+		"Hazy",
+		""
+	],
+	"2110": [
+		"Hazy",
+		"Wind"
+	],
+	"2600": [
+		"Cloudy",
+		""
+	],
+	"2610": [
+		"Cloudy",
+		"Wind"
+	],
+	"2700": [
+		"Mostly",
+		"Cloudy"
+	],
+	"2710": [
+		"M Cloudy",
+		"Wind"
+	],
+	"2800": [
+		"Mostly",
+		"Cloudy"
+	],
+	"2810": [
+		"M Cloudy",
+		"Wind"
+	],
+	"2900": [
+		"Partly",
+		"Cloudy"
+	],
+	"2910": [
+		"P Cloudy",
+		"Wind"
+	],
+	"3000": [
+		"Partly",
+		"Cloudy"
+	],
+	"3010": [
+		"P Cloudy",
+		"Wind"
+	],
+	"3100": [
+		"Clear",
+		""
+	],
+	"3110": [
+		"Clear",
+		"Wind"
+	],
+	"3200": [
+		"Sunny",
+		""
+	],
+	"3210": [
+		"Sunny",
+		"Wind"
+	],
+	"3300": [
+		"Mostly",
+		"Clear"
+	],
+	"3310": [
+		"M Clear",
+		"Wind"
+	],
+	"3400": [
+		"Mostly",
+		"Sunny"
+	],
+	"3410": [
+		"M Sunny",
+		"Wind"
+	],
+	"3700": [
+		"Isolated",
+		"T'Storms"
+	],
+	"3709": [
+		"Isolated",
+		"T'Storms"
+	],
+	"3710": [
+		"Isolated",
+		"T'Storms"
+	],
+	"3719": [
+		"Isolated",
+		"T'Storms"
+	],
+	"3800": [
+		"Scattered",
+		"T'Storms"
+	],
+	"3809": [
+		"Scattered",
+		"T'Storms"
+	],
+	"3810": [
+		"Scattered",
+		"T'Storms"
+	],
+	"3819": [
+		"Scattered",
+		"T'Storms"
+	],
+	"3900": [
+		"Scattered",
+		"Showers"
+	],
+	"3909": [
+		"Scattered",
+		"Showers"
+	],
+	"3910": [
+		"Scattered",
+		"Showers"
+	],
+	"3919": [
+		"Scattered",
+		"Showers"
+	],
+	"4000": [
+		"Heavy",
+		"Rain"
+	],
+	"4010": [
+		"Heavy",
+		"Rain/Wind"
+	],
+	"4100": [
+		"Sct Snow",
+		"Showers"
+	],
+	"4109": [
+		"Sct Snow",
+		"Showers"
+	],
+	"4110": [
+		"Snow",
+		"Showers"
+	],
+	"4119": [
+		"Snow",
+		"Showers"
+	],
+	"4200": [
+		"Heavy",
+		"Snow"
+	],
+	"4210": [
+		"Heavy",
+		"Snow/Wind"
+	],
+	"4300": [
+		"Blizzard",
+		""
+	],
+	"4400": [
+		"???",
+		""
+	],
+	"4500": [
+		"Sprinkles",
+		""
+	],
+	"4510": [
+		"Sprinkles",
+		"Wind"
+	],
+	"4600": [
+		"Few",
+		"Showers"
+	],
+	"4610": [
+		"Few",
+		"Showers"
+	],
+	"4700": [
+		"Few Snow",
+		"Showers"
+	],
+	"4710": [
+		"Few Snow",
+		"Showers"
+	],
+	"4800": [
+		"Scattered",
+		"Flurries"
+	],
+	"4809": [
+		"Scattered",
+		"Flurries"
+	],
+	"4810": [
+		"Scattered",
+		"Flurries"
+	],
+	"4819": [
+		"Scattered",
+		"Flurries"
+	],
+	"4900": [
+		"Rain/Snow",
+		"Showers"
+	],
+	"4910": [
+		"Rain/Snow",
+		"Wind"
+	],
+	"5000": [
+		"Snow",
+		"Wind"
+	],
+	"5100": [
+		"Freezing",
+		"Rain/Sleet"
+	],
+	"5101": [
+		"Freezing",
+		"Rain/Sleet"
+	],
+	"5110": [
+		"Frz Rain",
+		"Sleet/Wind"
+	],
+	"5111": [
+		"Frz Rain",
+		"Sleet/Wind"
+	],
+	"5200": [
+		"Snow",
+		"Sleet"
+	],
+	"5210": [
+		"Snow",
+		"Sleet/Wind"
+	],
+	"5300": [
+		"Rain",
+		"Frz Rain"
+	],
+	"5301": [
+		"Light Rain",
+		"Frz Rain"
+	],
+	"5302": [
+		"Heavy Rain",
+		"Frz Rain"
+	],
+	"5310": [
+		"Rain/Ice",
+		"Wind"
+	],
+	"5311": [
+		"Light Rain",
+		"Ice/Wind"
+	],
+	"5312": [
+		"Heavy Rain",
+		"Ice/Wind"
+	],
+	"5351": [
+		"Light Rain",
+		"Frz Rain"
+	],
+	"5400": [
+		"Snow",
+		"Squalls"
+	],
+	"5409": [
+		"Snow",
+		"Squalls"
+	],
+	"5500": [
+		"Rain",
+		"Squalls"
+	],
+	"5509": [
+		"Rain",
+		"Squalls"
+	],
+	"5600": [
+		"Thunder",
+		"Snow"
+	],
+	"5610": [
+		"T'Snow",
+		"Wind"
+	],
+	"5700": [
+		"Sct Strong",
+		"Storms"
+	],
+	"5709": [
+		"Sct Strong",
+		"Storms"
+	],
+	"5710": [
+		"Sct Strong",
+		"Storms"
+	],
+	"5719": [
+		"Sct Strong",
+		"Storms"
+	],
+	"6000": [
+		"AM",
+		"Drizzle"
+	],
+	"6003": [
+		"AM",
+		"Drizzle"
+	],
+	"6010": [
+		"AM",
+		"Drizzle"
+	],
+	"6013": [
+		"AM Drizzle",
+		"Wind"
+	],
+	"6100": [
+		"AM",
+		"Showers"
+	],
+	"6103": [
+		"AM",
+		"Showers"
+	],
+	"6110": [
+		"Showers",
+		"Wind"
+	],
+	"6113": [
+		"AM",
+		"Showers"
+	],
+	"6140": [
+		"AM",
+		"T'Showers"
+	],
+	"6143": [
+		"AM",
+		"T'Showers"
+	],
+	"6170": [
+		"AM",
+		"T'Showers"
+	],
+	"6173": [
+		"AM",
+		"T'Showers"
+	],
+	"6200": [
+		"AM",
+		"T'Storms"
+	],
+	"6203": [
+		"AM",
+		"T'Storms"
+	],
+	"6210": [
+		"AM",
+		"T'Storms"
+	],
+	"6213": [
+		"AM",
+		"T'Storms"
+	],
+	"6300": [
+		"AM",
+		"Rain"
+	],
+	"6301": [
+		"AM",
+		"Lgt Rain"
+	],
+	"6303": [
+		"AM",
+		"Rain"
+	],
+	"6304": [
+		"AM Light",
+		"Rain"
+	],
+	"6310": [
+		"AM Rain",
+		"Wind"
+	],
+	"6311": [
+		"AM Light",
+		"Rain/Wind"
+	],
+	"6313": [
+		"AM Rain",
+		"Wind"
+	],
+	"6314": [
+		"AM Rain",
+		"Wind"
+	],
+	"6400": [
+		"AM",
+		"Rain/Snow"
+	],
+	"6401": [
+		"Rain/Snow",
+		"Showers"
+	],
+	"6403": [
+		"AM",
+		"Rain/Snow"
+	],
+	"6404": [
+		"AM",
+		"Rain/Snow"
+	],
+	"6410": [
+		"AM Rain",
+		"Snow/Wind"
+	],
+	"6411": [
+		"AM Rain",
+		"Snow/Wind"
+	],
+	"6413": [
+		"AM",
+		"Rain/Snow"
+	],
+	"6414": [
+		"AM",
+		"Rain/Snow"
+	],
+	"6500": [
+		"AM Rain",
+		"Ice"
+	],
+	"6501": [
+		"AM Light",
+		"Rain/Ice"
+	],
+	"6503": [
+		"AM Rain",
+		"Ice"
+	],
+	"6504": [
+		"AM Rain",
+		"Ice"
+	],
+	"6510": [
+		"AM Rain",
+		"Ice/Wind"
+	],
+	"6511": [
+		"Light Rain",
+		"Ice/Wind"
+	],
+	"6513": [
+		"AM Rain",
+		"Ice/Wind"
+	],
+	"6514": [
+		"AM Rain",
+		"Ice/Wind"
+	],
+	"6600": [
+		"AM",
+		"Ice"
+	],
+	"6603": [
+		"AM",
+		"Ice"
+	],
+	"6610": [
+		"AM",
+		"Ice/Wind"
+	],
+	"6613": [
+		"AM",
+		"Ice/Wind"
+	],
+	"6700": [
+		"AM Wintry",
+		"Mix"
+	],
+	"6701": [
+		"AM Wintry",
+		"Mix"
+	],
+	"6703": [
+		"AM",
+		"Wintry Mix"
+	],
+	"6704": [
+		"AM Light",
+		"Wintry Mix"
+	],
+	"6710": [
+		"AM Wintry",
+		"Mix/Wind"
+	],
+	"6711": [
+		"AM Wintry",
+		"Mix/Wind"
+	],
+	"6713": [
+		"AM Wintry",
+		"Mix/Wind"
+	],
+	"6714": [
+		"AM Wintry",
+		"Mix/Wind"
+	],
+	"6800": [
+		"Snow",
+		"Showers"
+	],
+	"6803": [
+		"AM Snow",
+		"Showers"
+	],
+	"6810": [
+		"Snow",
+		"Showers"
+	],
+	"6813": [
+		"AM Snow",
+		"Showers"
+	],
+	"6900": [
+		"AM",
+		"Snow"
+	],
+	"6901": [
+		"AM Light",
+		"Snow"
+	],
+	"6903": [
+		"AM",
+		"Snow"
+	],
+	"6904": [
+		"AM Light",
+		"Snow"
+	],
+	"6910": [
+		"AM Snow",
+		"Wind"
+	],
+	"6911": [
+		"AM Light",
+		"Snow/Wind"
+	],
+	"6913": [
+		"AM Snow",
+		"Wind"
+	],
+	"6914": [
+		"AM Snow",
+		"Wind"
+	],
+	"7000": [
+		"PM Drizzle",
+		""
+	],
+	"7003": [
+		"PM",
+		"Drizzle"
+	],
+	"7010": [
+		"PM Drizzle",
+		"Wind"
+	],
+	"7013": [
+		"PM Drizzle",
+		"Wind"
+	],
+	"7100": [
+		"PM Showers",
+		""
+	],
+	"7103": [
+		"PM",
+		"Showers"
+	],
+	"7110": [
+		"PM",
+		"Showers"
+	],
+	"7113": [
+		"PM",
+		"Showers"
+	],
+	"7140": [
+		"PM",
+		"T'Showers"
+	],
+	"7143": [
+		"PM",
+		"T'Showers"
+	],
+	"7170": [
+		"PM Showers",
+		"Wind"
+	],
+	"7173": [
+		"PM",
+		"T'Showers"
+	],
+	"7200": [
+		"PM",
+		"T'Storms"
+	],
+	"7203": [
+		"PM",
+		"T'Storms"
+	],
+	"7210": [
+		"PM",
+		"T'Storms"
+	],
+	"7213": [
+		"PM",
+		"T'Storms"
+	],
+	"7300": [
+		"PM",
+		"Rain"
+	],
+	"7301": [
+		"PM",
+		"Light Rain"
+	],
+	"7303": [
+		"PM",
+		"Rain"
+	],
+	"7304": [
+		"PM",
+		"Light Rain"
+	],
+	"7310": [
+		"PM Rain",
+		"Wind"
+	],
+	"7311": [
+		"PM Rain",
+		"Wind"
+	],
+	"7313": [
+		"PM Rain",
+		"Wind"
+	],
+	"7314": [
+		"PM Rain",
+		"Wind"
+	],
+	"7400": [
+		"PM Rain",
+		"Snow"
+	],
+	"7401": [
+		"PM Rain",
+		"Snow"
+	],
+	"7403": [
+		"PM",
+		"Rain/Snow"
+	],
+	"7404": [
+		"PM",
+		"Rain/Snow"
+	],
+	"7410": [
+		"PM Rain",
+		"Snow/Wind"
+	],
+	"7411": [
+		"PM Rain",
+		"Snow/Wind"
+	],
+	"7413": [
+		"PM",
+		"Rain/Snow"
+	],
+	"7414": [
+		"PM",
+		"Rain/Snow"
+	],
+	"7500": [
+		"PM Rain",
+		"Ice"
+	],
+	"7501": [
+		"Light Rain",
+		"PM Ice"
+	],
+	"7503": [
+		"PM",
+		"Rain/Ice"
+	],
+	"7504": [
+		"PM Light",
+		"Rain/Ice"
+	],
+	"7510": [
+		"PM Rain",
+		"Ice/Wind"
+	],
+	"7511": [
+		"Light Rain",
+		"Ice/Wind"
+	],
+	"7513": [
+		"PM Rain",
+		"Ice/Wind"
+	],
+	"7514": [
+		"PM Rain",
+		"Ice/Wind"
+	],
+	"7600": [
+		"PM",
+		"Ice"
+	],
+	"7603": [
+		"PM",
+		"Ice"
+	],
+	"7610": [
+		"PM",
+		"Ice/Wind"
+	],
+	"7613": [
+		"PM",
+		"Ice/Wind"
+	],
+	"7700": [
+		"PM",
+		"Wintry Mix"
+	],
+	"7701": [
+		"PM Light",
+		"Wintry Mix"
+	],
+	"7703": [
+		"PM",
+		"Wintry Mix"
+	],
+	"7704": [
+		"PM Light",
+		"Wintry Mix"
+	],
+	"7710": [
+		"PM Wintry",
+		"Mix/Wind"
+	],
+	"7711": [
+		"PM Wintry",
+		"Mix/Wind"
+	],
+	"7713": [
+		"PM Wintry",
+		"Mix/Wind"
+	],
+	"7714": [
+		"PM Wintry",
+		"Mix/Wind"
+	],
+	"7800": [
+		"PM",
+		"Snow"
+	],
+	"7803": [
+		"PM Snow",
+		"Showers"
+	],
+	"7810": [
+		"PM Snow",
+		"Wind"
+	],
+	"7813": [
+		"PM Snow",
+		"Wind"
+	],
+	"7900": [
+		"PM",
+		"Snow"
+	],
+	"7901": [
+		"PM Light",
+		"Snow"
+	],
+	"7903": [
+		"PM",
+		"Snow"
+	],
+	"7904": [
+		"PM Light",
+		"Snow"
+	],
+	"7910": [
+		"PM Snow",
+		"Wind"
+	],
+	"7911": [
+		"PM Light",
+		"Snow/Wind"
+	],
+	"7913": [
+		"PM Snow",
+		"Wind"
+	],
+	"7914": [
+		"PM Light",
+		"Snow/Wind"
+	],
+	"8000": [
+		"Rain/Snow",
+		""
+	],
+	"8010": [
+		"Rain",
+		"Snow/Wind"
+	],
+	"8100": [
+		"Rain/Ice",
+		""
+	],
+	"8110": [
+		"Rain",
+		"Ice/Wind"
+	],
+	"8200": [
+		"Snow",
+		"Rain"
+	],
+	"8210": [
+		"Snow",
+		"Rain/Wind"
+	],
+	"8300": [
+		"Snow/Ice",
+		"Rain"
+	],
+	"8310": [
+		"Snow/Ice",
+		"Rain/Wind"
+	],
+	"8400": [
+		"Snow",
+		"Ice"
+	],
+	"8410": [
+		"Snow",
+		"Ice/Wind"
+	],
+	"8500": [
+		"Ice",
+		"Rain"
+	],
+	"8510": [
+		"Ice",
+		"Rain/Wind"
+	],
+	"8600": [
+		"Ice",
+		"Snow"
+	],
+	"8610": [
+		"Ice",
+		"Snow/Wind"
+	],
+	"8700": [
+		"Wintry Mix",
+		"Snow"
+	],
+	"8710": [
+		"Mix",
+		"Snow/Wind"
+	],
+	"8800": [
+		"Snow",
+		"Wintry Mix"
+	],
+	"8810": [
+		"Snow",
+		"Mix/Wind"
+	],
+	"8900": [
+		"Wintry Mix",
+		"Rain"
+	],
+	"8910": [
+		"Mix",
+		"Rain/Wind"
+	],
+	"9000": [
+		"AM",
+		"Clouds"
+	],
+	"9003": [
+		"AM Clouds",
+		"PM Sun"
+	],
+	"9010": [
+		"P Cloudy",
+		"Wind"
+	],
+	"9013": [
+		"AM Clouds",
+		"Wind"
+	],
+	"9100": [
+		"AM",
+		"Fog"
+	],
+	"9103": [
+		"AM Fog",
+		"PM Sun"
+	],
+	"9110": [
+		"AM Fog",
+		"Wind"
+	],
+	"9113": [
+		"AM Fog",
+		"Wind"
+	],
+	"9200": [
+		"AM Fog",
+		"PM Clouds"
+	],
+	"9203": [
+		"AM Fog",
+		"PM Clouds"
+	],
+	"9210": [
+		"AM Fog",
+		"Wind"
+	],
+	"9213": [
+		"AM Fog",
+		"Wind"
+	],
+	"9300": [
+		"PM",
+		"Fog"
+	],
+	"9303": [
+		"PM",
+		"Fog"
+	],
+	"9310": [
+		"PM",
+		"Fog/Wind"
+	],
+	"9313": [
+		"PM",
+		"Fog/Wind"
+	],
+	"9500": [
+		"Rain",
+		"Wintry Mix"
+	],
+	"9510": [
+		"Rain",
+		"Mix/Wind"
+	]
+}

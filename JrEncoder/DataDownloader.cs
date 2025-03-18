@@ -838,9 +838,9 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
 
                 // Get daypart conditions, we use the day part of the daypart, so we skip the odd indexes
                 // Split the text up for word wrapping too
-                List<string> day1Cond = Util.WordWrap(forecastData.Daypart[0].GetFormattedWxPhrase(4), 10);
-                List<string> day2Cond = Util.WordWrap(forecastData.Daypart[0].GetFormattedWxPhrase(6), 10);
-                List<string> day3Cond = Util.WordWrap(forecastData.Daypart[0].GetFormattedWxPhrase(8), 10);
+                List<string> day1Cond = forecastData.Daypart[0].GetFormattedWxPhrase(4);
+                List<string> day2Cond = forecastData.Daypart[0].GetFormattedWxPhrase(6);
+                List<string> day3Cond = forecastData.Daypart[0].GetFormattedWxPhrase(8);
 
                 // Get defaults for each line of the conditions
                 string day1CondLine1 = day1Cond.ElementAtOrDefault(0) ?? "";

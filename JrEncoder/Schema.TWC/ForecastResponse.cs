@@ -157,17 +157,9 @@ public class ForecastDaypart
     [JsonPropertyName("wxPhraseShort")]
     public required List<string?> WxPhraseShort { get; init; }
 
-    public string GetFormattedWxPhrase(int index)
+    public List<string> GetFormattedWxPhrase(int index)
     {
-        if (WxPhraseLong[index] == null) return "";
-
-        string output = WxPhraseLong[index] ?? "";
-
-        // Remove anything after the / which is usually a second condition
-        if (output.Contains('/'))
-            output = output.Substring(0, output.IndexOf("/"));
-
-        return output;
+        return Mappings.GetFcstTwoLineMapping(IconCodeExtend[index] ?? 0);
     }
 
     public string GetFormattedWxPhraseShort(int index)
