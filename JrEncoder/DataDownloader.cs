@@ -749,7 +749,10 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                                 // Try to use description text, there's no headline
                                 string description = nwsFeature.Properties.Description;
 
-                                // Clean it up 
+                                // Remove line breaks
+                                description = description.Replace("\\n\\n", " ").Replace("\\n", " ");
+
+                                // Clean it up with our regex
                                 MatchCollection m = Regex.Matches(description, headlinePattern);
                                 if (m.Count != 0 && m[0].Groups.Count != 0)
                                 {
@@ -761,6 +764,9 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                             // Could not find anything, skip
                             if (nwsHeadline == null)
                                 continue;
+
+                            // I've seen this in headlines so let's remove it
+                            nwsHeadline = nwsHeadline.Replace("THE NATIONAL WEATHER SERVICE HAS ISSUED ", "");
 
                             // Trim any extra space off the ends
                             nwsHeadline = nwsHeadline.Trim();
