@@ -723,7 +723,8 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                             [
                                 "Marine Weather Statement", "High Surf Advisory", "High Surf Warning", "Gale Warning",
                                 "Storm Watch", "Heavy Freezing Spray Warning", "Small Craft Advisory", "Rip Current Statement",
-                                "Beach Hazards Statement", "Hazardous Seas Watch"
+                                "Beach Hazards Statement", "Hazardous Seas Watch", "Severe Thunderstorm Warning",
+                                "Tornado Warning", "Flash Flood Warning"
                             ];
                             if (ignoreEvents.Contains(nwsFeature.Properties.Event))
                                 continue;
