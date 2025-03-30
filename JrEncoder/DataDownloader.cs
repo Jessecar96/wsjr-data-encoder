@@ -726,7 +726,8 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
 
                             string headlinePattern = @"(.+(?:UNTIL|TO|THROUGH)(?: (?:.+?).(?:D|S)T)? (?:MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY)?(?: (?:AFTERNOON|EVENING|NIGHT|MORNING))?)";
 
-                            // Ignore some marine ones
+                            // Ignore some events
+                            // TODO: Put this in a config file
                             string[] ignoreEvents =
                             [
                                 "Marine Weather Statement", "High Surf Advisory", "High Surf Warning", "Gale Warning",
@@ -760,6 +761,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
 
                                 // Remove line breaks
                                 description = description.Replace("\\n\\n", " ").Replace("\\n", " ");
+                                description = description.Replace("\n\n", " ").Replace("\n", " ");
 
                                 // Clean it up with our regex
                                 MatchCollection m = Regex.Matches(description, headlinePattern);
@@ -773,9 +775,15 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                             // Could not find anything, skip
                             if (nwsHeadline == null)
                                 continue;
+                            
+                            // Make sure it's uppercase
+                            nwsHeadline = nwsHeadline.ToUpper();
 
                             // I've seen this in headlines so let's remove it
                             nwsHeadline = nwsHeadline.Replace("THE NATIONAL WEATHER SERVICE HAS ISSUED ", "");
+                            
+                            // I think this sounds better
+                            nwsHeadline = nwsHeadline.Replace("REMAINS VALID UNTIL", "IN EFFECT UNTIL");
 
                             // Trim any extra space off the ends
                             nwsHeadline = nwsHeadline.Trim();
