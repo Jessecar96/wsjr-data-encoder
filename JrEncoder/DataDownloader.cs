@@ -71,6 +71,14 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
         {
             Console.WriteLine($"[DataDownloader] Getting NWS zones for {star.LocationName}");
 
+            if (star.Zones != null && star.Zones.Count > 0)
+            {
+                // Zones are specified in config, use them instead
+                _nwsZones[star.Location] = star.Zones;
+                Console.WriteLine($"[DataDownloader] Manual zones for star {star.LocationName}: " + string.Join(",", _nwsZones[star.Location]));
+                continue;
+            }
+
             // Make HTTP request
             HttpResponseMessage httpResponseMessage =
                 await Util.HttpClient.GetAsync($"https://api.weather.gov/points/{star.Location}");

@@ -33,8 +33,17 @@ public class Config
         [JsonPropertyName("switches")]
         public required string Switches { get; set; }
 
+        /// <summary>
+        /// Primary forecast & conditions location
+        /// </summary>
         [JsonPropertyName("location")]
         public required string Location { get; set; }
+
+        /// <summary>
+        /// Optional: manually specify NWS zones/counties for alerts
+        /// </summary>
+        [JsonPropertyName("zones")]
+        public List<string>? Zones { get; set; }
 
         [JsonPropertyName("location_name")]
         public required string LocationName { get; set; }
