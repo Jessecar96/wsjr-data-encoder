@@ -230,12 +230,12 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 string fullAlertText = "";
 
                 // We need to rebuild the header of the alert since the NWS does not include it in the API
-                List<string> alertHeader = new List<string>();
+                List<string> alertLines = new List<string>();
                 //alertHeader.AddRange(Util.WordWrap(nwsFeature.Properties.Event.ToUpper()));
-                alertHeader.AddRange(Util.WordWrap(nwsFeature.Properties.SenderName.Replace("NWS", "National Weather Service").ToUpper()));
+                alertLines.AddRange(Util.WordWrap(nwsFeature.Properties.SenderName.Replace("NWS", "National Weather Service").ToUpper()));
                 string tzAbrev = Util.GetTimeZoneAbbreviation(star.GetTimeZoneInfo());
-                alertHeader.AddRange(Util.WordWrap(nwsFeature.Properties.Sent.ToString("hmm tt '" + tzAbrev + "' ddd MMM d yyyy").ToUpper()));
-                alertHeader.Add("");
+                alertLines.AddRange(Util.WordWrap(nwsFeature.Properties.Sent.ToString("hmm tt '" + tzAbrev + "' ddd MMM d yyyy").ToUpper()));
+                alertLines.Add("");
 
                 // Start off with the headline
                 if (nwsFeature.Properties.Parameters.NWSheadline != null)
@@ -245,6 +245,10 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
 
                 // Add description
                 fullAlertText += nwsFeature?.Properties?.Description + "\n\n";
+
+                // Remove AWIPSidentifier from description
+                if (nwsFeature?.Properties?.Parameters?.AWIPSidentifier?[0] != null)
+                    fullAlertText = fullAlertText.Replace(nwsFeature.Properties.Parameters.AWIPSidentifier?[0] + "\n\n", "");
 
                 // Add instruction
                 if (nwsFeature?.Properties?.Instruction != null)
@@ -262,10 +266,10 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                     type = WarningType.Advisory;
 
                 // Add the rest of the text to our header
-                alertHeader.AddRange(Util.WordWrapAlert(fullAlertText));
+                alertLines.AddRange(Util.WordWrapAlert(fullAlertText));
 
                 // Send it!
-                Program.ShowWxWarning(alertHeader,
+                Program.ShowWxWarning(alertLines,
                     type, Address.FromSwitches(star.Switches), _omcw);
 
                 // Save this alert ID so we don't send it again
