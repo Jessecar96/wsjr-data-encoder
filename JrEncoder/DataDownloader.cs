@@ -728,7 +728,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                             //if (nwsFeature.Properties.Parameters.NWSheadline == null)
                             //    continue;
 
-                            string headlinePattern = @"(.+(?:UNTIL|TO|THROUGH)(?: (?:.+?).(?:D|S)T)? (?:MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY)?(?: (?:AFTERNOON|EVENING|NIGHT|MORNING))?)";
+                            string headlinePattern = @"(.+?(?:UNTIL|TO|THROUGH)(?: (?:.+?).(?:D|S)T)? (?:MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY)?(?: (?:AFTERNOON|EVENING|NIGHT|MORNING))?)";
 
                             // Ignore some events
                             // TODO: Put this in a config file
