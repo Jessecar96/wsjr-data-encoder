@@ -728,7 +728,7 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                             //if (nwsFeature.Properties.Parameters.NWSheadline == null)
                             //    continue;
 
-                            string headlinePattern = @"(.+?(?:UNTIL|TO|THROUGH)(?: (?:.+?).(?:D|S)T)? (?:MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY|FURTHER NOTICE)?(?: (?:AFTERNOON|EVENING|NIGHT|MORNING))?)";
+                            string headlinePattern = @"(.+?(?:UNTIL|TO|THROUGH)(?: (?:.+?).(?:D|S)T)? (?:MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY|FURTHER NOTICE|TOMORROW)?(?: (?:AFTERNOON|EVENING|NIGHT|MORNING))?)";
 
                             // Ignore some events
                             // TODO: Put this in a config file
@@ -743,51 +743,43 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                                 continue;
 
                             // This will store our headline
-                            string? nwsHeadline = null;
+                            string nwsHeadline = "";
 
                             if (nwsFeature.Properties.Parameters.NWSheadline != null)
                             {
                                 // Use headline given by the NWS API
                                 nwsHeadline = nwsFeature.Properties.Parameters.NWSheadline[0];
-
-                                // Clean it up 
-                                MatchCollection m = Regex.Matches(nwsHeadline, headlinePattern);
-                                if (m.Count != 0 && m[0].Groups.Count != 0)
-                                {
-                                    // If that regex matches use group 1 to extract the clean version
-                                    nwsHeadline = m[0].Groups[1].Value;
-                                }
                             }
                             else
                             {
                                 // Try to use description text, there's no headline
-                                string description = nwsFeature.Properties.Description;
-
-                                // Remove line breaks
-                                description = description.Replace("\\n\\n", " ").Replace("\\n", " ");
-                                description = description.Replace("\n\n", " ").Replace("\n", " ");
-
-                                // Clean it up with our regex
-                                MatchCollection m = Regex.Matches(description, headlinePattern);
-                                if (m.Count != 0 && m[0].Groups.Count != 0)
-                                {
-                                    // If that regex matches use group 1 to extract the clean version
-                                    nwsHeadline = m[0].Groups[1].Value;
-                                }
+                                nwsHeadline = nwsFeature.Properties.Description;
                             }
 
                             // Could not find anything, skip
-                            if (nwsHeadline == null)
+                            if (string.IsNullOrEmpty(nwsHeadline))
                                 continue;
                             
-                            // Make sure it's uppercase
+                            // Force uppercase
                             nwsHeadline = nwsHeadline.ToUpper();
+                            
+                            // Remove line breaks
+                            nwsHeadline = nwsHeadline.Replace("\\n\\n", " ").Replace("\\n", " ");
+                            nwsHeadline = nwsHeadline.Replace("\n\n", " ").Replace("\n", " ");
 
                             // I've seen this in headlines so let's remove it
                             nwsHeadline = nwsHeadline.Replace("THE NATIONAL WEATHER SERVICE HAS ISSUED ", "");
                             
                             // I think this sounds better
                             nwsHeadline = nwsHeadline.Replace("REMAINS VALID UNTIL", "IN EFFECT UNTIL");
+
+                            // Clean it up with our regex
+                            MatchCollection m = Regex.Matches(nwsHeadline, headlinePattern);
+                            if (m.Count != 0 && m[0].Groups.Count != 0)
+                            {
+                                // If that regex matches use group 1 to extract the clean version
+                                nwsHeadline = m[0].Groups[1].Value;
+                            }
 
                             // Trim any extra space off the ends
                             nwsHeadline = nwsHeadline.Trim();
