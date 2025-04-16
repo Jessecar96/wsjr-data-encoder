@@ -20,13 +20,13 @@ public class Alert
     /// <summary>
     /// If this alert will show as a scroll
     /// </summary>
-    [XmlElement(ElementName = "Scroll")]
+    [XmlAttribute(AttributeName = "Scroll")]
     public bool Scroll { get; set; } = false;
 
     /// <summary>
     /// If scroll is enabled, the severity of the scroll (Warning or Advisory)
     /// </summary>
-    [XmlElement(ElementName = "Severity")]
+    [XmlAttribute(AttributeName = "Severity")]
     public WarningType Severity { get; set; } = WarningType.Advisory;
 }
 
