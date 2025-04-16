@@ -1,0 +1,66 @@
+﻿<Alerts>
+    <!-- 
+    
+    List of all NWS alerts to process
+    Any alert types not listed in this file will not show as a headline nor as a scroll
+    
+    "Headline" enables showing on 36-hour forecast page 
+    "Scroll" triggers a vertical scroll when the alert is received
+    "Severity" (either "Warning" or "Advisory") controls the color of the vertical scroll background, and "Warning" triggers the alert tone
+    
+    -->
+
+    <!-- Winter Weather/Cold Weather -->
+    <Alert Name="Avalanche Advisory" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Avalanche Watch" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Avalanche Warning" Headline="1" Scroll="1" Severity="Warning"/>
+    <Alert Name="Blizzard Watch" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Blizzard Warning" Headline="1" Scroll="1" Severity="Warning"/>
+    <Alert Name="Winter Weather Advisory" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Winter Storm Watch" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Winter Storm Warning" Headline="1" Scroll="1" Severity="Warning"/>
+    <Alert Name="Ice Storm Warning" Headline="1" Scroll="1" Severity="Warning"/>
+    <Alert Name="Freeze Watch" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Freeze Warning" Headline="1" Scroll="1" Severity="Warning"/>
+    <Alert Name="Frost Advisory" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Cold Weather Advisory" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Extreme Cold Warning" Headline="1" Scroll="1" Severity="Warning"/>
+    <Alert Name="Snow Squall Warning" Headline="1" Scroll="1" Severity="Warning"/>
+
+    <!-- Fire Weather -->
+    <Alert Name="Fire Weather Watch" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Red Flag Warning" Headline="1" Scroll="1" Severity="Warning"/>
+
+    <!-- Fog / Wind /Severe Weather -->
+    <Alert Name="Dense Fog Advisory" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="High Wind Watch" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="High Wind Warning" Headline="1" Scroll="1" Severity="Warning"/>
+    <Alert Name="Wind Advisory" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Severe Thunderstorm Watch" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Severe Thunderstorm Warning" Headline="0" Scroll="1" Severity="Warning"/>
+    <Alert Name="Tornado Watch" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Tornado Warning" Headline="0" Scroll="1" Severity="Warning"/>
+    <Alert Name="Extreme Wind Warning" Headline="1" Scroll="1" Severity="Warning"/>
+    <Alert Name="Blowing Dust Warning" Headline="1" Scroll="1" Severity="Warning"/>
+    <Alert Name="Ashfall Warning" Headline="1" Scroll="1" Severity="Warning"/>
+    <Alert Name="Dust Storm Warning" Headline="1" Scroll="1" Severity="Warning"/>
+    <Alert Name="Earthquake Warning" Headline="1" Scroll="1" Severity="Warning"/>
+
+    <!-- Flooding -->
+    <Alert Name="Coastal Flood Advisory" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Coastal Flood Watch" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Coastal Flood Warning" Headline="1" Scroll="1" Severity="Warning"/>
+    <Alert Name="Flash Flood Warning" Headline="0" Scroll="1" Severity="Warning"/>
+
+    <!-- Excessive Heat -->
+    <Alert Name="Excessive Heat Watch" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Excessive Heat Warning" Headline="1" Scroll="1" Severity="Warning"/>
+    <Alert Name="Heat Advisory" Headline="1" Scroll="1" Severity="Advisory"/>
+
+    <!-- Tropical -->
+    <Alert Name="Tropical Storm Watch" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Tropical Storm Warning" Headline="1" Scroll="1" Severity="Warning"/>
+    <Alert Name="Hurricane Watch" Headline="1" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Hurricane Warning" Headline="1" Scroll="1" Severity="Warning"/>
+
+</Alerts>

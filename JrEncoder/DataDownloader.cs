@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Xml.Serialization;
 using CoordinateSharp;
 using JrEncoder.Schema.NWS;
 using JrEncoder.Schema.TWC;
@@ -10,11 +11,14 @@ using JrEncoderLib.StarAttributes;
 
 namespace JrEncoder;
 
-public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW omcw)
+public class DataDownloader
 {
-    private Config _config = config;
-    private DataTransmitter _dataTransmitter = dataTransmitter;
-    private OMCW _omcw = omcw;
+    private Config _config;
+    private DataTransmitter _dataTransmitter;
+    private OMCW _omcw;
+    
+    // Alerts config
+    private readonly Alerts _alertsConfig;
 
     // Data cache
     private readonly Dictionary<string, List<NWSFeature>> _alertsCache = new();
@@ -24,6 +28,30 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
 
     // Stores NWS zones/counties for locations
     private readonly Dictionary<string, List<string>> _nwsZones = new();
+
+    public DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW omcw)
+    {
+        _config = config;
+        _dataTransmitter = dataTransmitter;
+        _omcw = omcw;
+        
+        // Load alerts config
+        string alertsConfigPath = Path.Combine(Util.GetExeLocation(), "Alerts.xml");
+        if (File.Exists(alertsConfigPath))
+        {
+            XmlSerializer serializer = new(typeof(Alerts));
+            using StreamReader reader = new(alertsConfigPath);
+            _alertsConfig = (Alerts?)serializer.Deserialize(reader);
+        }
+
+        if (_alertsConfig == null)
+        {
+            // No alert config :((
+            Console.WriteLine("ERROR: Failed to load Alerts.xml");
+            Program.ShowErrorMessage("Failed to load Alerts.xml", true);
+            return;
+        }
+    }
 
     public async Task UpdateAll()
     {
@@ -220,7 +248,27 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                 // Alert already sent, do not send again
                 if (_sentAlertIds[star.Location].Contains(nwsFeature.Id))
                 {
-                    Console.WriteLine($"[DataDownloader] Alert already sent: {nwsFeature.Properties.Event} for {star.LocationName}");
+                    Console.WriteLine($"[DataDownloader] Alert already processed: {nwsFeature.Properties.Event} for {star.LocationName}");
+                    continue;
+                }
+                
+                // Look for event in alert config
+                Alert? alertConfig = _alertsConfig.Alert.FirstOrDefault(alert => alert.Name == nwsFeature.Properties.Event);
+                if (alertConfig == null)
+                {
+                    // Not found in config, ignore it
+                    Console.WriteLine($"[DataDownloader] Alert not defined, ignoring: {nwsFeature.Properties.Event} for {star.LocationName}");
+                    // Save the ID so we don't keep checking it
+                    _sentAlertIds[star.Location].Add(nwsFeature.Id);
+                    continue;
+                }
+                
+                if (!alertConfig.Scroll)
+                {
+                    Console.WriteLine($"[DataDownloader] Alert not set to scroll, ignoring: {nwsFeature.Properties.Event} for {star.LocationName}");
+                    // Alert is not set to scroll, ignore it
+                    // Save the ID so we don't keep checking it
+                    _sentAlertIds[star.Location].Add(nwsFeature.Id);
                     continue;
                 }
 
@@ -257,20 +305,12 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
                     fullAlertText += nwsFeature.Properties.Instruction;
                 }
 
-                // Set warning type
-                WarningType type;
-                string[] warningSeverity = new string[] { "Severe", "Extreme" };
-                if (warningSeverity.Contains(nwsFeature?.Properties?.Severity))
-                    type = WarningType.Warning;
-                else
-                    type = WarningType.Advisory;
-
                 // Add the rest of the text to our header
                 alertLines.AddRange(Util.WordWrapAlert(fullAlertText));
 
                 // Send it!
                 Program.ShowWxWarning(alertLines,
-                    type, Address.FromSwitches(star.Switches), _omcw);
+                    alertConfig.Severity, Address.FromSwitches(star.Switches), _omcw);
 
                 // Save this alert ID so we don't send it again
                 _sentAlertIds[star.Location].Add(nwsFeature.Id);
@@ -730,16 +770,15 @@ public class DataDownloader(Config config, DataTransmitter dataTransmitter, OMCW
 
                             string headlinePattern = @"(.+?(?:UNTIL|TO|THROUGH)(?: (?:.+?).(?:D|S)T)? (?:MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY|FURTHER NOTICE|TOMORROW)?(?: (?:AFTERNOON|EVENING|NIGHT|MORNING))?)";
 
-                            // Ignore some events
-                            // TODO: Put this in a config file
-                            string[] ignoreEvents =
-                            [
-                                "Marine Weather Statement", "High Surf Advisory", "High Surf Warning", "Gale Warning",
-                                "Storm Watch", "Heavy Freezing Spray Warning", "Small Craft Advisory", "Rip Current Statement",
-                                "Beach Hazards Statement", "Hazardous Seas Watch", "Severe Thunderstorm Warning",
-                                "Tornado Warning", "Flash Flood Warning"
-                            ];
-                            if (ignoreEvents.Contains(nwsFeature.Properties.Event))
+                            // Look for event in alert config
+                            Alert? alertConfig = _alertsConfig.Alert.FirstOrDefault(alert => alert.Name == nwsFeature.Properties.Event);
+                            
+                            // Not found in config, ignore it
+                            if (alertConfig == null)
+                                continue;
+                
+                            // If the config says to not show as a headline, ignore it
+                            if (!alertConfig.Headline)
                                 continue;
 
                             // This will store our headline
