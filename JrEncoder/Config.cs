@@ -136,7 +136,7 @@ public class Config
     /// Load config from config.json
     /// </summary>
     /// <returns></returns>
-    public static Config LoadConfig(string fileName = "config.json")
+    public static async Task<Config> LoadConfig(string fileName = "config.json")
     {
         string configPath = GetPath(fileName);
         if (!File.Exists(configPath))
@@ -149,7 +149,7 @@ public class Config
             ReadCommentHandling = JsonCommentHandling.Skip
         };
 
-        string fileContent = File.ReadAllText(configPath);
+        string fileContent = await File.ReadAllTextAsync(configPath);
         return JsonSerializer.Deserialize<Config>(fileContent, options) ?? throw new InvalidOperationException("Invalid config.json file");
     }
 

@@ -56,7 +56,7 @@ class Program
         _ = Task.Run(() => transmitter.Run());
 
         // Load config.json
-        LoadConfig("config.json");
+        await LoadConfig("config.json");
 
         // Init time updater
         timeUpdater = new(config, transmitter, omcw);
@@ -151,11 +151,11 @@ class Program
     /// <summary>
     /// Load a config file
     /// </summary>
-    public static void LoadConfig(string fileName)
+    public static async Task LoadConfig(string fileName)
     {
         try
         {
-            config = Config.LoadConfig(fileName);
+            config = await Config.LoadConfig(fileName);
             if (downloader != null)
                 downloader.SetConfig(config);
             if (timeUpdater != null)
