@@ -53,6 +53,11 @@ public class DataDownloader
         }
     }
 
+    public void SetConfig(Config config)
+    {
+        _config = config;
+    }
+
     public async Task UpdateAll()
     {
         Console.WriteLine("[DataDownloader] Updating all records...");

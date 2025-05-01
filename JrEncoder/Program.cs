@@ -10,10 +10,11 @@ namespace JrEncoder;
 class Program
 {
     private static OMCW omcw;
-    private static GPIODataTransmitter transmitter;
     private static Flavors? flavors;
     private static bool flavorRunning;
     private static Config config;
+    private static TimeUpdater timeUpdater;
+    private static GPIODataTransmitter transmitter;
     public static DataDownloader downloader;
 
     static async Task Main(string[] args)
@@ -58,7 +59,7 @@ class Program
         LoadConfig("config.json");
 
         // Init time updater
-        TimeUpdater timeUpdater = new(config, transmitter, omcw);
+        timeUpdater = new(config, transmitter, omcw);
         timeUpdater.Run();
 
         // Init data downloader
@@ -155,6 +156,8 @@ class Program
         try
         {
             config = Config.LoadConfig(fileName);
+            downloader.SetConfig(config);
+            timeUpdater.SetConfig(config);
             Console.WriteLine("Loaded config file " + fileName);
         }
         catch (Exception e)

@@ -22,6 +22,11 @@ public class TimeUpdater(Config config, DataTransmitter dataTransmitter, OMCW om
                 UpdateTime();
         });
     }
+    
+    public void SetConfig(Config config)
+    {
+        _config = config;
+    }
 
     private void UpdateTime()
     {
