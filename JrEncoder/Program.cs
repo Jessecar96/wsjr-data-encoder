@@ -156,8 +156,10 @@ class Program
         try
         {
             config = Config.LoadConfig(fileName);
-            downloader.SetConfig(config);
-            timeUpdater.SetConfig(config);
+            if (downloader != null)
+                downloader.SetConfig(config);
+            if (timeUpdater != null)
+                timeUpdater.SetConfig(config);
             Console.WriteLine("Loaded config file " + fileName);
         }
         catch (Exception e)
