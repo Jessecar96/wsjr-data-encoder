@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Globalization;
+using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace JrEncoder.Schema.NWS;
 
@@ -129,6 +131,54 @@ public class Properties
 
     [JsonPropertyName("parameters")]
     public Parameters Parameters { get; set; }
+
+    /// <summary>
+    /// Get weather star formatted headline
+    /// </summary>
+    /// <returns></returns>
+    public string GetHeadline(TimeZoneInfo zoneInfo)
+    {
+        // Custom handling for Tornado Watch
+        if (Event == "Tornado Watch")
+        {
+            // Extract watch number from description text
+            string watchNumber = "";
+            MatchCollection m = Regex.Matches(Description, @"TORNADO WATCH (\d+)");
+            if (m.Count != 0 && m[0].Groups.Count != 0)
+            {
+                // If that regex matches use group 1 to extract the clean version
+                watchNumber = m[0].Groups[1].Value;
+            }
+
+            return ($"TORNADO WATCH {watchNumber} IN EFFECT UNTIL " + GetEndTimeString(zoneInfo)).ToUpper();
+        }
+
+        // Everything else
+        return ($"{Event} IN EFFECT UNTIL " + GetEndTimeString(zoneInfo)).ToUpper();
+    }
+
+    /// <summary>
+    /// Get ending time string for headline string
+    /// </summary>
+    /// <returns></returns>
+    private string GetEndTimeString(TimeZoneInfo zoneInfo)
+    {
+        // Use "Ends" if we have it, or else use "Expires"
+        DateTimeOffset end = Ends ?? Expires;
+
+        if (end.Date == DateTime.Today)
+        {
+            // Expires today, only give ending time
+            string tzAbrev = Util.GetTimeZoneAbbreviation(zoneInfo);
+            return end.ToString("h tt", CultureInfo.InvariantCulture) + " " + tzAbrev;
+        }
+        else
+        {
+            // Expires after today, include day in the text
+            string tzAbrev = Util.GetTimeZoneAbbreviation(zoneInfo);
+            return end.ToString("dddd h tt", CultureInfo.InvariantCulture) + " " + tzAbrev;
+        }
+    }
 }
 
 public class Reference

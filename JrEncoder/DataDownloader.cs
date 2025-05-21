@@ -16,7 +16,7 @@ public class DataDownloader
     private Config _config;
     private DataTransmitter _dataTransmitter;
     private OMCW _omcw;
-    
+
     // Alerts config
     private readonly Alerts _alertsConfig;
 
@@ -34,7 +34,7 @@ public class DataDownloader
         _config = config;
         _dataTransmitter = dataTransmitter;
         _omcw = omcw;
-        
+
         // Load alerts config
         string alertsConfigPath = Path.Combine(Util.GetExeLocation(), "Alerts.xml");
         if (File.Exists(alertsConfigPath))
@@ -256,7 +256,7 @@ public class DataDownloader
                     Console.WriteLine($"[DataDownloader] Alert already processed: {nwsFeature.Properties.Event} for {star.LocationName}");
                     continue;
                 }
-                
+
                 // Look for event in alert config
                 Alert? alertConfig = _alertsConfig.Alert.FirstOrDefault(alert => alert.Name == nwsFeature.Properties.Event);
                 if (alertConfig == null)
@@ -267,7 +267,7 @@ public class DataDownloader
                     _sentAlertIds[star.Location].Add(nwsFeature.Id);
                     continue;
                 }
-                
+
                 if (!alertConfig.Scroll)
                 {
                     Console.WriteLine($"[DataDownloader] Alert not set to scroll, ignoring: {nwsFeature.Properties.Event} for {star.LocationName}");
@@ -769,64 +769,24 @@ public class DataDownloader
                         List<NWSFeature> nwsFeatures = _alertsCache[star.Location];
                         foreach (NWSFeature nwsFeature in nwsFeatures)
                         {
-                            // Make sure headline exists
-                            //if (nwsFeature.Properties.Parameters.NWSheadline == null)
-                            //    continue;
-
-                            string headlinePattern = @"(.+?(?:UNTIL|TO|THROUGH)(?: (?:.+?).(?:D|S)T)? (?:MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY|FURTHER NOTICE|TOMORROW)?(?: (?:AFTERNOON|EVENING|NIGHT|MORNING))?)";
-
                             // Look for event in alert config
                             Alert? alertConfig = _alertsConfig.Alert.FirstOrDefault(alert => alert.Name == nwsFeature.Properties.Event);
-                            
+
                             // Not found in config, ignore it
                             if (alertConfig == null)
                                 continue;
-                
+
                             // If the config says to not show as a headline, ignore it
                             if (!alertConfig.Headline)
                                 continue;
 
-                            // This will store our headline
-                            string nwsHeadline = "";
-
-                            if (nwsFeature.Properties.Parameters.NWSheadline != null)
-                            {
-                                // Use headline given by the NWS API
-                                nwsHeadline = nwsFeature.Properties.Parameters.NWSheadline[0];
-                            }
-                            else
-                            {
-                                // Try to use description text, there's no headline
-                                nwsHeadline = nwsFeature.Properties.Description;
-                            }
+                            // Get the headline
+                            string nwsHeadline = nwsFeature.Properties.GetHeadline(star.GetTimeZoneInfo());
+                            Console.WriteLine("HEADLINE: " + nwsHeadline);
 
                             // Could not find anything, skip
                             if (string.IsNullOrEmpty(nwsHeadline))
                                 continue;
-                            
-                            // Force uppercase
-                            nwsHeadline = nwsHeadline.ToUpper();
-                            
-                            // Remove line breaks
-                            nwsHeadline = nwsHeadline.Replace("\\n\\n", " ").Replace("\\n", " ");
-                            nwsHeadline = nwsHeadline.Replace("\n\n", " ").Replace("\n", " ");
-
-                            // I've seen this in headlines so let's remove it
-                            nwsHeadline = nwsHeadline.Replace("THE NATIONAL WEATHER SERVICE HAS ISSUED ", "");
-                            
-                            // I think this sounds better
-                            nwsHeadline = nwsHeadline.Replace("REMAINS VALID UNTIL", "IN EFFECT UNTIL");
-
-                            // Clean it up with our regex
-                            MatchCollection m = Regex.Matches(nwsHeadline, headlinePattern);
-                            if (m.Count != 0 && m[0].Groups.Count != 0)
-                            {
-                                // If that regex matches use group 1 to extract the clean version
-                                nwsHeadline = m[0].Groups[1].Value;
-                            }
-
-                            // Trim any extra space off the ends
-                            nwsHeadline = nwsHeadline.Trim();
 
                             // We already added this one with the same text, skip it
                             if (headlines.Contains(nwsHeadline))
