@@ -184,12 +184,12 @@ public class DataDownloader
                 // Use zones if we know them
                 string zones = string.Join(",", _nwsZones[star.Location]);
                 Console.WriteLine($"[DataDownloader] Using NWS zones " + zones);
-                url = $"https://api.weather.gov/alerts/active?zone={zones}&limit=500";
+                url = $"https://api.weather.gov/alerts/active?zone={zones}";
             }
             else
             {
                 // Use point location
-                url = $"https://api.weather.gov/alerts/active?point={star.Location}&limit=500";
+                url = $"https://api.weather.gov/alerts/active?point={star.Location}";
             }
 
             // Make HTTP request
