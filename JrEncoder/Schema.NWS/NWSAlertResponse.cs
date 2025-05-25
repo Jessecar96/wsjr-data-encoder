@@ -143,14 +143,19 @@ public class Properties
         {
             // Extract watch number from description text
             string watchNumber = "";
-            MatchCollection m = Regex.Matches(Description, @"TORNADO WATCH (\d+)");
+            MatchCollection m = Regex.Matches(Description.Replace("\n", " "), @"TORNADO WATCH (\d+)");
             if (m.Count != 0 && m[0].Groups.Count != 0)
             {
                 // If that regex matches use group 1 to extract the clean version
                 watchNumber = m[0].Groups[1].Value;
             }
 
-            return ($"TORNADO WATCH {watchNumber} IN EFFECT UNTIL " + GetEndTimeString(zoneInfo)).ToUpper();
+            // Add space before if we were able to find a watch number
+            if (!string.IsNullOrEmpty(watchNumber))
+                watchNumber = " " + watchNumber;
+            
+            // No space before watchNumber just in case we don't find it
+            return ($"TORNADO WATCH{watchNumber} IN EFFECT UNTIL " + GetEndTimeString(zoneInfo)).ToUpper();
         }
 
         // Everything else
