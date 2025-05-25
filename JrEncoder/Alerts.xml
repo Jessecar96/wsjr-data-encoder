@@ -47,7 +47,9 @@
     <Alert Name="Earthquake Warning" Headline="1" Scroll="1" Severity="Warning"/>
 
     <!-- Flooding -->
-    <Alert Name="Flood Watch" Headline="1" Scroll="1" Severity="Advisory"/>
+    <!-- No (river) flood warnings as headlines pls -->
+    <Alert Name="Flood Watch" Headline="0" Scroll="1" Severity="Advisory"/>
+    <Alert Name="Flood Warning" Headline="0" Scroll="1" Severity="Warning"/>
     <Alert Name="Coastal Flood Advisory" Headline="1" Scroll="1" Severity="Advisory"/>
     <Alert Name="Coastal Flood Watch" Headline="1" Scroll="1" Severity="Advisory"/>
     <Alert Name="Coastal Flood Warning" Headline="1" Scroll="1" Severity="Warning"/>
