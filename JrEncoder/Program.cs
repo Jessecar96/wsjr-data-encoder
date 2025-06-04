@@ -225,12 +225,16 @@ class Program
                 omcw.LDL(ldlStyle);
             }
 
-            // Switch to that page
+            // Switch to the page, set all other OMCW attributes
             omcw
-                .TopSolid(true)
-                .BottomSolid(true)
-                .RegionSeparator(true)
-                .TopPage((int)newPage);
+                .TopPage((int)newPage)
+                .TopSolid(page.TopSolid)
+                .BottomSolid(page.BottomSolid)
+                .RegionSeparator(page.RegionSeparator)
+                .Radar(page.Radar)
+                .AuxAudio(page.AuxAudio)
+                .LocalPreroll(page.LocalPreroll)
+                .LocalProgram(page.LocalProgram);
 
             omcw.Commit();
 

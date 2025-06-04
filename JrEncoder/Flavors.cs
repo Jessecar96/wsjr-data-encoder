@@ -22,6 +22,49 @@ public class FlavorPage
     /// </summary>
     [XmlAttribute(AttributeName = "LDL")]
     public string? LDL { get; set; }
+
+    /// <summary>
+    /// If the top section of the screen should have a solid background
+    /// </summary>
+    [XmlAttribute(AttributeName = "TopSolid")]
+    public bool TopSolid { get; set; } = true;
+    
+    /// <summary>
+    /// If the bottom section of the screen should have a solid background
+    /// </summary>
+    [XmlAttribute(AttributeName = "BottomSolid")]
+    public bool BottomSolid { get; set; } = true;
+    
+    /// <summary>
+    /// If the line between the two sections of the screen should be shown
+    /// </summary>
+    [XmlAttribute(AttributeName = "RegionSeparator")]
+    public bool RegionSeparator { get; set; } = true;
+    
+    /// <summary>
+    /// If the radar relay should be enabled
+    /// </summary>
+    [XmlAttribute(AttributeName = "Radar")]
+    public bool Radar { get; set; } = false;
+    
+    /// <summary>
+    /// If the aux audio relay should be enabled
+    /// </summary>
+    [XmlAttribute(AttributeName = "AuxAudio")]
+    public bool AuxAudio { get; set; } = false;
+
+    /// <summary>
+    /// If the local pre-roll relay should be enabled
+    /// </summary>
+    [XmlAttribute(AttributeName = "LocalPreroll")]
+    public bool LocalPreroll { get; set; } = false;
+        
+    /// <summary>
+    /// If the local program relay should be enabled
+    /// </summary>
+    [XmlAttribute(AttributeName = "LocalProgram")]
+    public bool LocalProgram { get; set; } = false;
+    
 }
 
 [XmlRoot(ElementName = "Flavor")]
