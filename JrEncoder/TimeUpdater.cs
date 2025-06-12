@@ -12,7 +12,7 @@ public class TimeUpdater(Config config, DataTransmitter dataTransmitter, OMCW om
     
     public void Run()
     {
-        Console.WriteLine("[TimeUpdater] Running...");
+        Logger.Info("[TimeUpdater] Running...");
         UpdateTime();
         _ = Task.Run(async () =>
         {
@@ -30,14 +30,14 @@ public class TimeUpdater(Config config, DataTransmitter dataTransmitter, OMCW om
 
     private void UpdateTime()
     {
-        Console.WriteLine("[TimeUpdater] Sending time update");
+        Logger.Info("[TimeUpdater] Sending time update");
         
         // Look if any stars have all 0 switches, or config is set to force clock set
         if (_config.ForceClockSet || _config.Stars.Any(star => star.Switches == "00000000"))
         {
             // Set all time zones to the zone of the first star defined
             Config.WeatherStar star = _config.Stars[0];
-            Console.WriteLine($"[TimeUpdater] Using global time zone {star.GetTimeZoneIdentifier()}");
+            Logger.Info($"[TimeUpdater] Using global time zone {star.GetTimeZoneIdentifier()}");
 
             // There are 8 possible time zones 0-7
             for (int i = 0; i <= 7; i++)
@@ -53,12 +53,12 @@ public class TimeUpdater(Config config, DataTransmitter dataTransmitter, OMCW om
             foreach (Config.WeatherStar star in _config.Stars)
             {
                 int timezone = Address.GetTimeZone(star.Switches);
-                Console.WriteLine($"[TimeUpdater] Star {star.LocationName} is using time zone {star.GetTimeZoneIdentifier()} with address {timezone}");
+                Logger.Info($"[TimeUpdater] Star {star.LocationName} is using time zone {star.GetTimeZoneIdentifier()} with address {timezone}");
 
                 // Check if this time zone address was already used, if so don't send it again
                 if (usedTimeZones.Contains(timezone))
                 {
-                    Console.WriteLine($"[TimeUpdater] ERROR: Star {star.LocationName} has the same time zone address as another. Time will not be set.");
+                    Logger.Error($"[TimeUpdater] Star {star.LocationName} has the same time zone address as another. Time will not be set.");
                     continue;
                 }
 

@@ -12,7 +12,7 @@ public class MQTTServer
                 .Build());
         mqttServer.StartedAsync += args =>
         {
-            Console.WriteLine("[MQTT] Server started");
+            Logger.Info("[MQTT] Server started");
             return Task.CompletedTask;
         };
         await mqttServer.StartAsync();

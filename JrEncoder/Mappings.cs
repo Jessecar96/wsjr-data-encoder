@@ -20,7 +20,7 @@ public class Mappings
             }
             catch (Exception ex)
             {
-                Console.WriteLine("[Mappings] Failed to load ObsMapping.json: " + ex.Message);
+                Logger.Error("[Mappings] Failed to load ObsMapping.json: " + ex.Message);
                 return "N/A";
             }
         }
@@ -44,7 +44,7 @@ public class Mappings
             }
             catch (Exception ex)
             {
-                Console.WriteLine("[Mappings] Failed to load FcstMapping.json: " + ex.Message);
+                Logger.Error("[Mappings] Failed to load FcstMapping.json: " + ex.Message);
                 return "N/A";
             }
         }
@@ -68,7 +68,7 @@ public class Mappings
             }
             catch (Exception ex)
             {
-                Console.WriteLine("[Mappings] Failed to load FcstTwoLineMapping.json: " + ex.Message);
+                Logger.Error("[Mappings] Failed to load FcstTwoLineMapping.json: " + ex.Message);
                 return ["N/A", ""];
             }
         }

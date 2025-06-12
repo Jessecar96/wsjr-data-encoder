@@ -19,20 +19,20 @@ class Program
 
     static async Task Main(string[] args)
     {
-        Console.WriteLine("Starting WeatherSTAR Data Transmitter");
-        Console.WriteLine("Written by Jesse Cardone, 2024");
+        Logger.Info("Starting WeatherSTAR Data Transmitter");
+        Logger.Info("Written by Jesse Cardone, 2024");
 
         // Config creation parameter
         if (args.Contains("--create-config"))
         {
             if (File.Exists(Config.GetPath()))
             {
-                Console.WriteLine("config.json already exists. Please delete it to create a new one.");
+                Logger.Error("config.json already exists. Please delete it to create a new one.");
                 return;
             }
 
             Config.CreateConfig();
-            Console.WriteLine("Created config.json, program will now exit.");
+            Logger.Info("Created config.json, program will now exit.");
             return;
         }
 
@@ -120,7 +120,7 @@ class Program
         if (flavors == null)
         {
             // No flavors :((
-            Console.WriteLine("ERROR: Failed to load Flavors.xml");
+            Logger.Error("Failed to load Flavors.xml");
             ShowErrorMessage("Failed to load Flavors.xml", true);
             return;
         }
@@ -141,7 +141,7 @@ class Program
             .LDL(LDLStyle.DateTime)
             .Commit();
 
-        Console.WriteLine("Ready for commands! Looping is not enabled.");
+        Logger.Info("Ready for commands! Looping is not enabled.");
 
         // Forever...
         while (true)
@@ -160,27 +160,32 @@ class Program
                 downloader.SetConfig(config);
             if (timeUpdater != null)
                 timeUpdater.SetConfig(config);
-            Console.WriteLine("Loaded config file " + fileName);
+            Logger.Info("Loaded config file " + fileName);
         }
         catch (Exception e)
         {
-            Console.WriteLine($"Failed to load {fileName}: " + e.Message);
+            Logger.Error($"Failed to load {fileName}: " + e.Message);
             ShowErrorMessage($"Failed to load {fileName}: " + e.Message, true);
         }
     }
 
-    public static void RunFlavor(string flavorName)
+    /// <summary>
+    /// Run an LF flavor, optionally at a specific time
+    /// </summary>
+    /// <param name="flavorName">Name of flavor, defined in Flavors.xml</param>
+    /// <param name="runTime">Specific time to run the flavor at</param>
+    public static async Task RunFlavor(string flavorName, DateTimeOffset? runTime = null)
     {
         if (flavorRunning)
         {
-            Console.WriteLine("ERROR: Flavor is already running. Not running another!");
+            Logger.Error("Flavor is already running. Not running another!");
             return;
         }
 
         // Make sure flavors are defined
         if (flavors == null)
         {
-            Console.WriteLine("ERROR: Flavors were not loaded");
+            Logger.Error("Flavors were not loaded");
             ShowErrorMessage("Flavors were not loaded");
             return;
         }
@@ -191,12 +196,33 @@ class Program
         // Could not find that flavor
         if (flavor == null)
         {
-            Console.WriteLine($"ERROR: Flavor \"{flavorName}\" does not exist in Flavors.xml");
+            Logger.Error($"Flavor \"{flavorName}\" does not exist in Flavors.xml");
             ShowErrorMessage($"Flavor \"{flavorName}\" does not exist in Flavors.xml");
             return;
         }
 
-        Console.WriteLine($"Running flavor \"{flavor.Name}\"");
+        if (runTime != null)
+        {
+            long currentTimeUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            long runTimeUnix = runTime.Value.ToUnixTimeSeconds();
+            
+            // Make sure schedule time was not in the past
+            if (runTime.Value <= DateTime.Now)
+            {
+                Logger.Error($"Flavor \"{flavorName}\" was scheduled to run before current time. Current time: {currentTimeUnix} scheduled: {runTimeUnix}");
+                return;
+            }
+
+            // Find the difference between now and run time
+            long secondsDifference = runTimeUnix - currentTimeUnix;
+            Logger.Info($"Flavor \"{flavorName}\" will run in {secondsDifference} seconds");
+            flavorRunning = true;
+
+            // Wait until the time we want
+            await Task.Delay(TimeSpan.FromSeconds(secondsDifference));
+        }
+
+        Logger.Info($"Running flavor \"{flavor.Name}\"");
         flavorRunning = true;
 
         // TODO: Save OMCW state to restore to after
@@ -206,7 +232,7 @@ class Program
             // Make sure that page exists
             if (!Enum.TryParse(page.Name, out Page newPage))
             {
-                Console.WriteLine($"ERROR: Invalid page \"{page.Name}\"");
+                Logger.Error($"Invalid page \"{page.Name}\"");
                 ShowErrorMessage($"Invalid page \"{page.Name}\"");
                 return;
             }
@@ -238,7 +264,7 @@ class Program
 
             omcw.Commit();
 
-            Console.WriteLine("Switched to page " + newPage);
+            Logger.Info("Switched to page " + newPage);
 
             // Wait for its duration
             Thread.Sleep(page.Duration * 1000);
@@ -246,7 +272,7 @@ class Program
 
         // we done!
         flavorRunning = false;
-        Console.WriteLine($"Flavor \"{flavor.Name}\" complete");
+        Logger.Info($"Flavor \"{flavor.Name}\" complete");
 
         // Default no loop state
         omcw.TopSolid(false)
@@ -303,10 +329,10 @@ class Program
 
             // Send it
             transmitter.AddFrame(page.Build());
-            Console.WriteLine("Sent page " + page.PageNumber);
+            Logger.Info("Sent page " + page.PageNumber);
         }
 
-        Console.WriteLine("Weather warning activated");
+        Logger.Info("Weather warning activated");
     }
 
     /// <summary>

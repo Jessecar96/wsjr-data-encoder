@@ -92,7 +92,7 @@ public class Config
             catch (Exception ex)
             {
                 // Failed to find time zone, use the local system time zone
-                Console.WriteLine("Failed to find time zone: " + ex.Message);
+                Logger.Error("Failed to find time zone: " + ex.Message);
                 return TimeZoneInfo.Local;
             }
         }

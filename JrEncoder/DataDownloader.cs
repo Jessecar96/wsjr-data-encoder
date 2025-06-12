@@ -47,7 +47,7 @@ public class DataDownloader
         if (_alertsConfig == null)
         {
             // No alert config :((
-            Console.WriteLine("ERROR: Failed to load Alerts.xml");
+            Logger.Error("Failed to load Alerts.xml");
             Program.ShowErrorMessage("Failed to load Alerts.xml", true);
             return;
         }
@@ -60,7 +60,7 @@ public class DataDownloader
 
     public async Task UpdateAll()
     {
-        Console.WriteLine("[DataDownloader] Updating all records...");
+        Logger.Info("[DataDownloader] Updating all records...");
         await GetNWSZones();
         await UpdateAlerts();
         await UpdateCurrentConditions();
@@ -71,7 +71,7 @@ public class DataDownloader
 
     public void Run()
     {
-        Console.WriteLine("[DataDownloader] Running...");
+        Logger.Info("[DataDownloader] Running...");
         _ = Task.Run(async () =>
         {
             // Update alerts every minute
@@ -102,13 +102,13 @@ public class DataDownloader
     {
         foreach (Config.WeatherStar star in _config.Stars)
         {
-            Console.WriteLine($"[DataDownloader] Getting NWS zones for {star.LocationName}");
+            Logger.Info($"[DataDownloader] Getting NWS zones for {star.LocationName}");
 
             if (star.Zones != null && star.Zones.Count > 0)
             {
                 // Zones are specified in config, use them instead
                 _nwsZones[star.Location] = star.Zones;
-                Console.WriteLine($"[DataDownloader] Manual zones for star {star.LocationName}: " + string.Join(",", _nwsZones[star.Location]));
+                Logger.Info($"[DataDownloader] Manual zones for star {star.LocationName}: " + string.Join(",", _nwsZones[star.Location]));
                 continue;
             }
 
@@ -119,7 +119,7 @@ public class DataDownloader
             // Make sure the request was successful
             if (!httpResponseMessage.IsSuccessStatusCode)
             {
-                Console.WriteLine($"[DataDownloader] Failed to download NWS zones for {star.LocationName}: HTTP {httpResponseMessage.StatusCode}");
+                Logger.Error($"[DataDownloader] Failed to download NWS zones for {star.LocationName}: HTTP {httpResponseMessage.StatusCode}");
                 continue;
             }
 
@@ -127,7 +127,7 @@ public class DataDownloader
             string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
             if (string.IsNullOrEmpty(responseBody))
             {
-                Console.WriteLine($"[DataDownloader] Empty NWS zones response for {star.LocationName}");
+                Logger.Error($"[DataDownloader] Empty NWS zones response for {star.LocationName}");
                 continue;
             }
 
@@ -140,13 +140,13 @@ public class DataDownloader
             catch (Exception ex)
             {
                 // Failed to parse json, halt program and show error
-                Console.WriteLine($"[DataDownloader] Failed to get NWS s for {star.LocationName}: " + ex.Message);
+                Logger.Error($"[DataDownloader] Failed to get NWS s for {star.LocationName}: " + ex.Message);
             }
 
             // Make sure it's not null
             if (nwsResponse == null)
             {
-                Console.WriteLine($"[DataDownloader] Failed to get NWS zones for {star.LocationName}");
+                Logger.Error($"[DataDownloader] Failed to get NWS zones for {star.LocationName}");
                 continue;
             }
 
@@ -167,7 +167,7 @@ public class DataDownloader
             _nwsZones[star.Location].Add(county);
 
             string zones = string.Join(",", _nwsZones[star.Location]);
-            Console.WriteLine($"[DataDownloader] Got zones for {star.LocationName}: " + zones);
+            Logger.Info($"[DataDownloader] Got zones for {star.LocationName}: " + zones);
         }
     }
 
@@ -175,7 +175,7 @@ public class DataDownloader
     {
         foreach (Config.WeatherStar star in _config.Stars)
         {
-            Console.WriteLine($"[DataDownloader] Updating alerts for {star.LocationName}");
+            Logger.Info($"[DataDownloader] Updating alerts for {star.LocationName}");
 
             // Build URL for getting NWS alerts
             string url;
@@ -183,7 +183,7 @@ public class DataDownloader
             {
                 // Use zones if we know them
                 string zones = string.Join(",", _nwsZones[star.Location]);
-                Console.WriteLine($"[DataDownloader] Using NWS zones " + zones);
+                Logger.Info($"[DataDownloader] Using NWS zones " + zones);
                 url = $"https://api.weather.gov/alerts/active?zone={zones}";
             }
             else
@@ -200,7 +200,7 @@ public class DataDownloader
             if (!httpResponseMessage.IsSuccessStatusCode
                 && httpResponseMessage.StatusCode != System.Net.HttpStatusCode.NotModified)
             {
-                Console.WriteLine($"[DataDownloader] Failed to download alerts for {star.LocationName}: HTTP {httpResponseMessage.StatusCode}");
+                Logger.Error($"[DataDownloader] Failed to download alerts for {star.LocationName}: HTTP {httpResponseMessage.StatusCode}");
                 continue;
             }
 
@@ -208,7 +208,7 @@ public class DataDownloader
             string responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
             if (string.IsNullOrEmpty(responseBody))
             {
-                Console.WriteLine($"[DataDownloader] Empty alert response for {star.LocationName}");
+                Logger.Error($"[DataDownloader] Empty alert response for {star.LocationName}");
                 continue;
             }
 
@@ -227,11 +227,11 @@ public class DataDownloader
             // Make sure it's not null
             if (nwsResponse == null)
             {
-                Console.WriteLine($"[DataDownloader] No alerts for {star.LocationName}");
+                Logger.Error($"[DataDownloader] No alerts for {star.LocationName}");
                 continue;
             }
 
-            Console.WriteLine($"[DataDownloader] There are {nwsResponse.Features.Count} alerts for {star.LocationName}");
+            Logger.Info($"[DataDownloader] There are {nwsResponse.Features.Count} alerts for {star.LocationName}");
 
             // Init _sentAlertIds for this star location
             if (!_sentAlertIds.ContainsKey(star.Location))
@@ -242,7 +242,7 @@ public class DataDownloader
             {
                 foreach (NWSFeature nwsFeature in nwsResponse.Features)
                 {
-                    Console.WriteLine($"[DataDownloader] Marking alert sent: {nwsFeature.Properties.Event} for {star.LocationName}");
+                    Logger.Info($"[DataDownloader] Marking alert sent: {nwsFeature.Properties.Event} for {star.LocationName}");
                     _sentAlertIds[star.Location].Add(nwsFeature.Id);
                 }
             }
@@ -253,7 +253,7 @@ public class DataDownloader
                 // Alert already sent, do not send again
                 if (_sentAlertIds[star.Location].Contains(nwsFeature.Id))
                 {
-                    Console.WriteLine($"[DataDownloader] Alert already processed: {nwsFeature.Properties.Event} for {star.LocationName}");
+                    Logger.Info($"[DataDownloader] Alert already processed: {nwsFeature.Properties.Event} for {star.LocationName}");
                     continue;
                 }
 
@@ -262,7 +262,7 @@ public class DataDownloader
                 if (alertConfig == null)
                 {
                     // Not found in config, ignore it
-                    Console.WriteLine($"[DataDownloader] Alert not defined, ignoring: {nwsFeature.Properties.Event} for {star.LocationName}");
+                    Logger.Info($"[DataDownloader] Alert not defined, ignoring: {nwsFeature.Properties.Event} for {star.LocationName}");
                     // Save the ID so we don't keep checking it
                     _sentAlertIds[star.Location].Add(nwsFeature.Id);
                     continue;
@@ -270,14 +270,14 @@ public class DataDownloader
 
                 if (!alertConfig.Scroll)
                 {
-                    Console.WriteLine($"[DataDownloader] Alert not set to scroll, ignoring: {nwsFeature.Properties.Event} for {star.LocationName}");
+                    Logger.Info($"[DataDownloader] Alert not set to scroll, ignoring: {nwsFeature.Properties.Event} for {star.LocationName}");
                     // Alert is not set to scroll, ignore it
                     // Save the ID so we don't keep checking it
                     _sentAlertIds[star.Location].Add(nwsFeature.Id);
                     continue;
                 }
 
-                Console.WriteLine($"[DataDownloader] New alert: {nwsFeature.Properties.Event} for {star.LocationName}");
+                Logger.Info($"[DataDownloader] New alert: {nwsFeature.Properties.Event} for {star.LocationName}");
 
                 // Build the text we're going to roll
                 string fullAlertText = "";
@@ -341,7 +341,7 @@ public class DataDownloader
 
         foreach (Config.WeatherStar star in _config.Stars)
         {
-            Console.WriteLine($"[DataDownloader] Updating current conditions for {star.LocationName}");
+            Logger.Info($"[DataDownloader] Updating current conditions for {star.LocationName}");
 
             // Build list of locations to get current conditions for
             List<string> locations = [];
@@ -361,7 +361,7 @@ public class DataDownloader
             // Make sure the request was successful
             if (!httpResponseMessage.IsSuccessStatusCode)
             {
-                Console.WriteLine("[DataDownloader] Failed to download current conditions");
+                Logger.Error("[DataDownloader] Failed to download current conditions");
                 SendCcNoReportPage(star);
                 SendObsNoReportPage(star);
                 continue;
@@ -374,7 +374,7 @@ public class DataDownloader
             // Make sure conditions didn't parse as null
             if (conditionsDatas == null)
             {
-                Console.WriteLine("[DataDownloader] Failed to download current conditions");
+                Logger.Error("[DataDownloader] Failed to download current conditions");
                 SendCcNoReportPage(star);
                 SendObsNoReportPage(star);
                 continue;
@@ -389,7 +389,7 @@ public class DataDownloader
 
             if (conditionsData == null)
             {
-                Console.WriteLine($"[DataDownloader] Failed to download current conditions for {star.LocationName}");
+                Logger.Error($"[DataDownloader] Failed to download current conditions for {star.LocationName}");
                 SendCcNoReportPage(star);
             }
             else
@@ -419,7 +419,7 @@ public class DataDownloader
                         .AddLine($"Visib:{visibStr} mi. Ceiling{ceilingStr} ft.")
                         .Build();
                     _dataTransmitter.AddFrame(ccPage);
-                    Console.WriteLine($"[DataDownloader] Page {(int)pageNum} sent");
+                    Logger.Info($"[DataDownloader] Page {(int)pageNum} sent");
                 }
             } // end conditionsData null check
 
@@ -455,7 +455,7 @@ public class DataDownloader
             }
 
             _dataTransmitter.AddFrame(nearbyObs.Build());
-            Console.WriteLine($"[DataDownloader] Page {(int)Page.LatestObservations} sent");
+            Logger.Info($"[DataDownloader] Page {(int)Page.LatestObservations} sent");
 
             // // 
             // Regional Observations
@@ -486,7 +486,7 @@ public class DataDownloader
             }
 
             _dataTransmitter.AddFrame(regionalObs.Build());
-            Console.WriteLine($"[DataDownloader] Page {(int)Page.RegionalObservations} sent");
+            Logger.Info($"[DataDownloader] Page {(int)Page.RegionalObservations} sent");
         }
     }
 
@@ -497,7 +497,7 @@ public class DataDownloader
             .AddLine("No Current Report")
             .Build();
         _dataTransmitter.AddFrame(ccPage);
-        Console.WriteLine($"[DataDownloader] Page {(int)Page.CurrentConditions} sent");
+        Logger.Info($"[DataDownloader] Page {(int)Page.CurrentConditions} sent");
     }
 
     private void SendObsNoReportPage(Config.WeatherStar star)
@@ -519,7 +519,7 @@ public class DataDownloader
         }
 
         _dataTransmitter.AddFrame(nearbyObs.Build());
-        Console.WriteLine($"[DataDownloader] Page {(int)Page.LatestObservations} sent");
+        Logger.Info($"[DataDownloader] Page {(int)Page.LatestObservations} sent");
     }
 
     /// <summary>
@@ -547,7 +547,7 @@ public class DataDownloader
                 .AddLine("No Report");
 
             _dataTransmitter.AddFrame(pageBuilder.Build());
-            Console.WriteLine($"[DataDownloader] Page {actualPageNum} sent");
+            Logger.Info($"[DataDownloader] Page {actualPageNum} sent");
         }
 
         // Extended forecast
@@ -557,7 +557,7 @@ public class DataDownloader
             .AddLine("No Report");
 
         _dataTransmitter.AddFrame(extForecastPage.Build());
-        Console.WriteLine($"[DataDownloader] Page {(int)Page.ExtendedForecast} sent");
+        Logger.Info($"[DataDownloader] Page {(int)Page.ExtendedForecast} sent");
 
         // Regional forecast
         PageBuilder regionalFcst = new PageBuilder((int)Page.RegionalForecast, Address.FromSwitches(star.Switches), _omcw)
@@ -572,14 +572,14 @@ public class DataDownloader
         }
 
         _dataTransmitter.AddFrame(regionalFcst.Build());
-        Console.WriteLine($"[DataDownloader] Page {(int)Page.RegionalForecast} sent");
+        Logger.Info($"[DataDownloader] Page {(int)Page.RegionalForecast} sent");
     }
 
     private async Task UpdateAlmanac()
     {
         foreach (Config.WeatherStar star in _config.Stars)
         {
-            Console.WriteLine($"[DataDownloader] Updating almanac for {star.LocationName}");
+            Logger.Info($"[DataDownloader] Updating almanac for {star.LocationName}");
 
             // Get local time for this star's location
             DateTime localStarTime = TimeZoneInfo.ConvertTime(DateTime.Now, star.GetTimeZoneInfo());
@@ -593,7 +593,7 @@ public class DataDownloader
             // Make sure the request was successful
             if (!httpResponseMessage.IsSuccessStatusCode)
             {
-                Console.WriteLine($"[DataDownloader] Failed to download daily almanac for {star.LocationName}");
+                Logger.Error($"[DataDownloader] Failed to download daily almanac for {star.LocationName}");
                 continue;
             }
 
@@ -602,7 +602,7 @@ public class DataDownloader
 
             if (dailyAlmanacData == null)
             {
-                Console.WriteLine($"[DataDownloader] Failed to download daily almanac for {star.LocationName}");
+                Logger.Error($"[DataDownloader] Failed to download daily almanac for {star.LocationName}");
                 continue;
             }
 
@@ -615,7 +615,7 @@ public class DataDownloader
             // Make sure the request was successful
             if (!httpResponseMessage2.IsSuccessStatusCode)
             {
-                Console.WriteLine($"[DataDownloader] Failed to download monthly almanac for {star.LocationName}");
+                Logger.Error($"[DataDownloader] Failed to download monthly almanac for {star.LocationName}");
                 continue;
             }
 
@@ -624,7 +624,7 @@ public class DataDownloader
 
             if (monthlyAlmanacData == null)
             {
-                Console.WriteLine($"[DataDownloader] Failed to download monthly almanac for {star.LocationName}");
+                Logger.Error($"[DataDownloader] Failed to download monthly almanac for {star.LocationName}");
                 continue;
             }
 
@@ -674,7 +674,7 @@ public class DataDownloader
                 .Build();
 
             _dataTransmitter.AddFrame(almanacPage);
-            Console.WriteLine($"[DataDownloader] Page {(int)Page.Almanac} sent");
+            Logger.Info($"[DataDownloader] Page {(int)Page.Almanac} sent");
         }
     }
 
@@ -690,7 +690,7 @@ public class DataDownloader
 
         foreach (Config.WeatherStar star in _config.Stars)
         {
-            Console.WriteLine($"[DataDownloader] Updating forecast for {star.LocationName}");
+            Logger.Info($"[DataDownloader] Updating forecast for {star.LocationName}");
 
             // Build list of locations to get current forecast for
             List<string> locations = [];
@@ -712,7 +712,7 @@ public class DataDownloader
             // Make sure the request was successful
             if (!httpResponseMessage.IsSuccessStatusCode)
             {
-                Console.WriteLine($"[DataDownloader] Failed to download forecast for {star.LocationName}: HTTP " + (int)httpResponseMessage.StatusCode);
+                Logger.Error($"[DataDownloader] Failed to download forecast for {star.LocationName}: HTTP " + (int)httpResponseMessage.StatusCode);
                 SendForecastNoReportPages(star);
                 continue;
             }
@@ -723,7 +723,7 @@ public class DataDownloader
 
             if (forecastDatas == null)
             {
-                Console.WriteLine($"[DataDownloader] Failed to download forecast data for {star.LocationName}");
+                Logger.Error($"[DataDownloader] Failed to download forecast data for {star.LocationName}");
                 SendForecastNoReportPages(star);
                 continue;
             }
@@ -737,7 +737,7 @@ public class DataDownloader
 
             if (forecastData == null)
             {
-                Console.WriteLine($"[DataDownloader] Failed to download forecast for {star.LocationName}");
+                Logger.Error($"[DataDownloader] Failed to download forecast for {star.LocationName}");
                 SendForecastNoReportPages(star);
             }
             else
@@ -782,7 +782,7 @@ public class DataDownloader
 
                             // Get the headline
                             string nwsHeadline = nwsFeature.Properties.GetHeadline(star.GetTimeZoneInfo());
-                            Console.WriteLine("HEADLINE: " + nwsHeadline);
+                            Logger.Info("HEADLINE: " + nwsHeadline);
 
                             // Could not find anything, skip
                             if (string.IsNullOrEmpty(nwsHeadline))
@@ -845,7 +845,7 @@ public class DataDownloader
                         pageBuilder.AddLine(line);
 
                     _dataTransmitter.AddFrame(pageBuilder.Build());
-                    Console.WriteLine($"[DataDownloader] Page {actualPageNum} sent");
+                    Logger.Info($"[DataDownloader] Page {actualPageNum} sent");
 
                     curForecastPage++;
                 }
@@ -891,7 +891,7 @@ public class DataDownloader
                     .AddLine($" Hi: {day1Hi,-3}    Hi: {day2Hi,-3}    Hi: {day3Hi,-3}");
 
                 _dataTransmitter.AddFrame(extForecastPage.Build());
-                Console.WriteLine($"[DataDownloader] Page {(int)Page.ExtendedForecast} sent");
+                Logger.Info($"[DataDownloader] Page {(int)Page.ExtendedForecast} sent");
             } // end primary forecastData null check
 
             // // 
@@ -926,13 +926,13 @@ public class DataDownloader
             }
 
             _dataTransmitter.AddFrame(regionalFcst.Build());
-            Console.WriteLine($"[DataDownloader] Page {(int)Page.RegionalForecast} sent");
+            Logger.Info($"[DataDownloader] Page {(int)Page.RegionalForecast} sent");
         }
     }
 
     private async Task UpdateTravelCitiesForecast()
     {
-        Console.WriteLine($"[DataDownloader] Updating Travel Cities Forecast");
+        Logger.Info($"[DataDownloader] Updating Travel Cities Forecast");
 
         // List of cities
         List<(string City, string Geocode)> cities =
@@ -968,7 +968,7 @@ public class DataDownloader
         // Make sure the request was successful
         if (!httpResponseMessage.IsSuccessStatusCode)
         {
-            Console.WriteLine($"[DataDownloader] Failed to download travel cities forecast: HTTP " + (int)httpResponseMessage.StatusCode);
+            Logger.Error($"[DataDownloader] Failed to download travel cities forecast: HTTP " + (int)httpResponseMessage.StatusCode);
             return;
         }
 
@@ -979,7 +979,7 @@ public class DataDownloader
         // Make sure we have any response
         if (forecastDatas == null)
         {
-            Console.WriteLine($"[DataDownloader] Failed to download travel cities forecast");
+            Logger.Error($"[DataDownloader] Failed to download travel cities forecast");
             return;
         }
 
@@ -1043,7 +1043,7 @@ public class DataDownloader
 
         // Send it
         _dataTransmitter.AddFrame(tcfPage1.Build());
-        Console.WriteLine($"[DataDownloader] Page {tcfPage1.PageNumber} sent");
+        Logger.Info($"[DataDownloader] Page {tcfPage1.PageNumber} sent");
 
         // Use a loop to add the rest of the lines to multiple pages
         do
@@ -1067,9 +1067,9 @@ public class DataDownloader
 
             // Send it
             _dataTransmitter.AddFrame(tcfPage.Build());
-            Console.WriteLine($"[DataDownloader] Page {tcfPage.PageNumber} sent");
+            Logger.Info($"[DataDownloader] Page {tcfPage.PageNumber} sent");
         } while (morePages);
 
-        Console.WriteLine($"[DataDownloader] Sent Travel Cities Forecast");
+        Logger.Info($"[DataDownloader] Sent Travel Cities Forecast");
     }
 }
