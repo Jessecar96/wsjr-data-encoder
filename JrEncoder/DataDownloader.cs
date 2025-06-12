@@ -396,7 +396,9 @@ public class DataDownloader
             {
                 // Build padding into strings
                 string tempStr = (conditionsData.Temperature.ToString() ?? "").PadLeft(4);
-                string wcStr = (conditionsData.TemperatureWindChill.ToString() ?? "").PadLeft(3);
+                string feelsLike = (conditionsData.TemperatureFeelsLike.ToString() ?? "").PadLeft(3);
+                // According to TWC docs, 65 and up is heat index. below is wind chill
+                string feelsLikeTxt = conditionsData.Temperature != conditionsData.TemperatureFeelsLike ? (conditionsData.Temperature >= 65 ? $"Heat Index:{feelsLike}°F" : $"Wind Chill:{feelsLike}°F") : "";
                 string humStr = (conditionsData.RelativeHumidity.ToString() ?? "").PadLeft(4);
                 string dewptStr = (conditionsData.TemperatureDewPoint.ToString() ?? "").PadLeft(3);
                 string presStr = (conditionsData.PressureAltimeter.ToString() ?? "").PadLeft(6);
@@ -412,7 +414,7 @@ public class DataDownloader
                     DataFrame[] ccPage = new PageBuilder((int)pageNum, Address.FromSwitches(star.Switches), _omcw)
                         .AddLine($"Conditions at {star.LocationName}")
                         .AddLine(conditionsData.WxPhraseLong ?? "")
-                        .AddLine($"Temp:{tempStr}°F    Wind Chill:{wcStr}°F")
+                        .AddLine($"Temp:{tempStr}°F    {feelsLikeTxt}")
                         .AddLine($"Humidity:{humStr}%   Dewpoint:{dewptStr}°F")
                         .AddLine($"Barometric Pressure:{presStr} in.")
                         .AddLine($"Wind:{windDir}{windSpeedStr} MPH")
