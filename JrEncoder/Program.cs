@@ -1,5 +1,4 @@
 ﻿using System.Xml.Serialization;
-using System.Linq;
 using JrEncoderLib;
 using JrEncoderLib.DataTransmitter;
 using JrEncoderLib.Frames;
@@ -82,15 +81,33 @@ class Program
             .AddLine("  Information is being updated  ")
             .Build();
         transmitter.AddFrame(updatePage);
-
-        // Show updating page
-        omcw
-            .BottomSolid()
-            .TopSolid()
-            .TopPage(41)
-            .RegionSeparator()
-            .LDL(LDLStyle.DateTime)
-            .Commit();
+        
+        // Test for internet access
+        do
+        {
+            // Show updating page
+            omcw
+                .BottomSolid()
+                .TopSolid()
+                .TopPage(41)
+                .RegionSeparator()
+                .LDL(LDLStyle.DateTime)
+                .Commit();
+            
+            // Run HTTP request to test connectivity to weather.gov
+            try
+            {
+                await Util.HttpClient.GetAsync("https://api.weather.gov/alerts/active?zone=GAZ045");
+                break; // Request worked! Break out of the do/while loop
+            }
+            catch (Exception ex)
+            {
+                // Failed to connect. Show error screen and try again in 10 seconds
+                ShowErrorMessage("Failed to connect to weather.gov. Retrying...");
+                Logger.Error("Failed to connect to weather.gov: " + ex.Message);
+                await Task.Delay(10000);
+            }
+        } while (true);
 
         // Update all records
         await downloader.UpdateAll();
@@ -205,7 +222,7 @@ class Program
         {
             long currentTimeUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             long runTimeUnix = runTime.Value.ToUnixTimeSeconds();
-            
+
             // Make sure schedule time was not in the past
             if (runTime.Value <= DateTime.Now)
             {
