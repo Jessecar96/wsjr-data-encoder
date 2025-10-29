@@ -10,37 +10,44 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DebugSymbols>true</DebugSymbols>
+        <DebugSymbols>true</DebugSymbols>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="CoordinateSharp" Version="3.1.1.1" />
-      <PackageReference Include="GeoTimeZone" Version="6.0.0" />
-      <PackageReference Include="MQTTnet" Version="5.0.1.1416" />
-      <PackageReference Include="MQTTnet.Server" Version="5.0.1.1416" />
-      <PackageReference Include="System.Device.Gpio" Version="3.2.0" />
+        <PackageReference Include="CoordinateSharp" Version="3.1.1.1"/>
+        <PackageReference Include="GeoTimeZone" Version="6.0.0"/>
+        <PackageReference Include="MQTTnet" Version="5.0.1.1416"/>
+        <PackageReference Include="MQTTnet.Server" Version="5.0.1.1416"/>
+        <PackageReference Include="System.Device.Gpio" Version="3.2.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\JrEncoderLib\JrEncoderLib.csproj" />
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Flavors.xml">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="ObsMapping.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="FcstMapping.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="FcstTwoLineMapping.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="Alerts.xml">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+        <ProjectReference Include="..\JrEncoderLib\JrEncoderLib.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Flavors.xml">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="ObsMapping.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="FcstMapping.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="FcstTwoLineMapping.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Alerts.xml">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <Content Include="wwwroot/**/*.*">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
 </Project>

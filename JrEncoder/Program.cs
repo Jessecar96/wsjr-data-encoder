@@ -14,6 +14,7 @@ class Program
     private static Config config;
     private static TimeUpdater timeUpdater;
     private static GPIODataTransmitter transmitter;
+    private static WebServer webServer;
     public static DataDownloader downloader;
 
     static async Task Main(string[] args)
@@ -57,12 +58,33 @@ class Program
         // Load config.json
         await LoadConfig("config.json");
 
+        // Load flavor config
+        string flavorsFilePath = Path.Combine(Util.GetExeLocation(), "Flavors.xml");
+        if (File.Exists(flavorsFilePath))
+        {
+            XmlSerializer serializer = new(typeof(Flavors));
+            using StreamReader reader = new(flavorsFilePath);
+            flavors = (Flavors?)serializer.Deserialize(reader);
+        }
+
+        if (flavors == null)
+        {
+            // No flavors :((
+            Logger.Error("Failed to load Flavors.xml");
+            ShowErrorMessage("Failed to load Flavors.xml", true);
+            return;
+        }
+
         // Init time updater
         timeUpdater = new(config, transmitter, omcw);
         timeUpdater.Run();
 
         // Init data downloader
         downloader = new(config, transmitter, omcw);
+
+        // Start web server
+        webServer = new(config, flavors);
+        _ = Task.Run(() => webServer.Run());
 
         // Start MQTT server
         MQTTServer server = new();
@@ -81,7 +103,7 @@ class Program
             .AddLine("  Information is being updated  ")
             .Build();
         transmitter.AddFrame(updatePage);
-        
+
         // Test for internet access
         do
         {
@@ -93,7 +115,7 @@ class Program
                 .RegionSeparator()
                 .LDL(LDLStyle.DateTime)
                 .Commit();
-            
+
             // Run HTTP request to test connectivity to weather.gov
             try
             {
@@ -124,23 +146,6 @@ class Program
         }
 
         await Task.Delay(500);
-
-        // Load flavor config
-        string flavorsFilePath = Path.Combine(Util.GetExeLocation(), "Flavors.xml");
-        if (File.Exists(flavorsFilePath))
-        {
-            XmlSerializer serializer = new(typeof(Flavors));
-            using StreamReader reader = new(flavorsFilePath);
-            flavors = (Flavors?)serializer.Deserialize(reader);
-        }
-
-        if (flavors == null)
-        {
-            // No flavors :((
-            Logger.Error("Failed to load Flavors.xml");
-            ShowErrorMessage("Failed to load Flavors.xml", true);
-            return;
-        }
 
         // Check if looping is configured
         if (config.LoopFlavor != null)
@@ -177,6 +182,8 @@ class Program
                 downloader.SetConfig(config);
             if (timeUpdater != null)
                 timeUpdater.SetConfig(config);
+            if (webServer != null)
+                webServer.SetConfig(config);
             Logger.Info("Loaded config file " + fileName);
         }
         catch (Exception e)

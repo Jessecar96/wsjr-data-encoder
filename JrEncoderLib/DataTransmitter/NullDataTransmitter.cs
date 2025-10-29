@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using JrEncoderLib.StarAttributes;
 
 namespace JrEncoderLib.DataTransmitter;
@@ -14,6 +15,7 @@ public class NullDataTransmitter(OMCW omcw) : DataTransmitter(omcw)
 
     public override Task Run()
     {
-        while (true) Task.Delay(100);
+        while (true) Thread.Sleep(100);
+        // ReSharper disable once FunctionNeverReturns
     }
 }
