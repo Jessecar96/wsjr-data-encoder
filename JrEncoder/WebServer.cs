@@ -21,7 +21,7 @@ public class WebServer(Config config, Flavors flavors)
 
         // Server requests
         app.MapGet("/test", () => "This is the test page");
-        app.MapGet("/get-config", () =>
+        app.MapGet("/getConfig", () =>
         {
             dynamic response =
                 new

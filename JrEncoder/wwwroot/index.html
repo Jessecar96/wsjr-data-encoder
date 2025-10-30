@@ -1,13 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Weather Star Jr Encoder</title>
     <link rel="stylesheet" href="css/bootstrap.min.css"/>
     <link rel="stylesheet" href="css/styles.css"/>
-    <script type="text/javascript" src="js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript" src="js/scripts.js"></script>
 </head>
 <body onload="loadConfig()">
 
@@ -32,7 +30,7 @@
 
     <div class="mb-3">
         <label for="apikey" class="form-label">TWC API Key</label>
-        <input type="text" class="form-control" id="apikey">
+        <input type="text" class="form-control" id="apikey" onchange="updateStar()">
     </div>
 
     <div class="form-check mb-3">
@@ -45,45 +43,41 @@
         <label for="loop_flavor" class="form-label">Looping Flavor</label>
         <select id="loop_flavor" class="form-select">
             <option selected>Disabled</option>
-            <option>L</option>
-            <option>F</option>
         </select>
     </div>
 
-    <h3>Stars</h3>
+    <div class="d-flex">
+        <h3 class="flex-grow-1">Stars</h3>
+        <button type="button" class="btn btn-primary me-2" onclick="addStar()">Add</button>
+        <button type="button" class="btn btn-danger" onclick="removeStar()">Remove</button>
+    </div>
 
-    <ul class="nav nav-pills mb-3" id="star-selector">
-        <li class="nav-item"><a class="nav-link active" href="#">New York</a></li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">Boston</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">Atlanta</a>
-        </li>
-    </ul>
+    <!-- Container for holding the tabs -->
+    <ul class="nav nav-tabs mb-3" id="star-selector"></ul>
 
-    <div id="star-config" class="mb-4">
+    <!-- Container for holding the tab content -->
+    <div id="star-config-tab-content" class="mb-4">
 
         <div class="mb-3 row">
             <div class="col">
                 <label for="location_name" class="form-label">Primary Location Name</label>
-                <input type="text" class="form-control" id="location_name">
+                <input type="text" class="form-control" id="location_name" maxlength="18" onchange="updateStar()">
             </div>
             <div class="col">
                 <label for="location" class="form-label">Primary Location</label>
-                <input type="text" class="form-control" id="location" placeholder="23.12,-34.34">
+                <input type="text" class="form-control" id="location" placeholder="23.12,-34.34" onchange="updateStar()">
             </div>
         </div>
 
         <div class="mb-3">
             <label for="switches" class="form-label">Switches</label>
-            <input type="text" class="form-control" id="switches" maxlength="8">
+            <input type="text" class="form-control" id="switches" maxlength="8" onchange="updateStar()">
             <div class="form-text">Physical switches for this star. Jr: Use Alt + F10 on keyboard</div>
         </div>
 
         <div class="mb-3">
             <label for="zones" class="form-label">NWS Zones</label>
-            <input type="text" class="form-control" id="zones">
+            <input type="text" class="form-control" id="zones" onchange="updateStar()">
             <div class="form-text">Optional: Comma separated list of NWS zones to check alerts for</div>
         </div>
 
@@ -91,59 +85,59 @@
         <div class="row mb-2">
             <div class="col">
                 <label for="nearby_city_0_name" class="form-label">Nearby City Names</label>
-                <input type="text" class="form-control" id="nearby_city_0_name">
+                <input type="text" class="form-control" id="nearby_city_0_name" maxlength="14" onchange="updateStar()">
             </div>
             <div class="col">
                 <label for="nearby_city_0" class="form-label">Nearby City Locations</label>
-                <input type="text" class="form-control" id="nearby_city_0" placeholder="23.12,-34.34">
+                <input type="text" class="form-control" id="nearby_city_0" placeholder="23.12,-34.34" maxlength="14" onchange="updateStar()">
             </div>
         </div>
         <div class="row mb-2">
             <div class="col">
-                <input type="text" class="form-control" id="nearby_city_1_name">
+                <input type="text" class="form-control" id="nearby_city_1_name" maxlength="14" onchange="updateStar()">
             </div>
             <div class="col">
-                <input type="text" class="form-control" id="nearby_city_1" placeholder="23.12,-34.34">
-            </div>
-        </div>
-        <div class="row mb-2">
-            <div class="col">
-                <input type="text" class="form-control" id="nearby_city_2_name">
-            </div>
-            <div class="col">
-                <input type="text" class="form-control" id="nearby_city_2" placeholder="23.12,-34.34">
+                <input type="text" class="form-control" id="nearby_city_1" placeholder="23.12,-34.34" onchange="updateStar()">
             </div>
         </div>
         <div class="row mb-2">
             <div class="col">
-                <input type="text" class="form-control" id="nearby_city_3_name">
+                <input type="text" class="form-control" id="nearby_city_2_name" maxlength="14" onchange="updateStar()">
             </div>
             <div class="col">
-                <input type="text" class="form-control" id="nearby_city_3" placeholder="23.12,-34.34">
-            </div>
-        </div>
-        <div class="row mb-2">
-            <div class="col">
-                <input type="text" class="form-control" id="nearby_city_4_name">
-            </div>
-            <div class="col">
-                <input type="text" class="form-control" id="nearby_city_4" placeholder="23.12,-34.34">
+                <input type="text" class="form-control" id="nearby_city_2" placeholder="23.12,-34.34" onchange="updateStar()">
             </div>
         </div>
         <div class="row mb-2">
             <div class="col">
-                <input type="text" class="form-control" id="nearby_city_5_name">
+                <input type="text" class="form-control" id="nearby_city_3_name" maxlength="14" onchange="updateStar()">
             </div>
             <div class="col">
-                <input type="text" class="form-control" id="nearby_city_5" placeholder="23.12,-34.34">
+                <input type="text" class="form-control" id="nearby_city_3" placeholder="23.12,-34.34" onchange="updateStar()">
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col">
+                <input type="text" class="form-control" id="nearby_city_4_name" maxlength="14" onchange="updateStar()">
+            </div>
+            <div class="col">
+                <input type="text" class="form-control" id="nearby_city_4" placeholder="23.12,-34.34" onchange="updateStar()">
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col">
+                <input type="text" class="form-control" id="nearby_city_5_name" maxlength="14" onchange="updateStar()">
+            </div>
+            <div class="col">
+                <input type="text" class="form-control" id="nearby_city_5" placeholder="23.12,-34.34" onchange="updateStar()">
             </div>
         </div>
         <div class="row mb-3">
             <div class="col">
-                <input type="text" class="form-control" id="nearby_city_6_name">
+                <input type="text" class="form-control" id="nearby_city_6_name" maxlength="14" onchange="updateStar()">
             </div>
             <div class="col">
-                <input type="text" class="form-control" id="nearby_city_6" placeholder="23.12,-34.34">
+                <input type="text" class="form-control" id="nearby_city_6" placeholder="23.12,-34.34" onchange="updateStar()">
             </div>
         </div>
 
@@ -151,66 +145,68 @@
         <div class="row mb-2">
             <div class="col">
                 <label for="regional_city_0_name" class="form-label">Regional City Names</label>
-                <input type="text" class="form-control" id="regional_city_0_name">
+                <input type="text" class="form-control" id="regional_city_0_name" maxlength="14" onchange="updateStar()">
             </div>
             <div class="col">
                 <label for="regional_city_0" class="form-label">Regional City Locations</label>
-                <input type="text" class="form-control" id="regional_city_0" placeholder="23.12,-34.34">
+                <input type="text" class="form-control" id="regional_city_0" placeholder="23.12,-34.34" onchange="updateStar()">
             </div>
         </div>
         <div class="row mb-2">
             <div class="col">
-                <input type="text" class="form-control" id="regional_city_1_name">
+                <input type="text" class="form-control" id="regional_city_1_name" maxlength="14" onchange="updateStar()">
             </div>
             <div class="col">
-                <input type="text" class="form-control" id="regional_city_1" placeholder="23.12,-34.34">
+                <input type="text" class="form-control" id="regional_city_1" placeholder="23.12,-34.34" onchange="updateStar()">
             </div>
         </div>
         <div class="row mb-2">
             <div class="col">
-                <input type="text" class="form-control" id="regional_city_2_name">
+                <input type="text" class="form-control" id="regional_city_2_name" maxlength="14" onchange="updateStar()">
             </div>
             <div class="col">
-                <input type="text" class="form-control" id="regional_city_2" placeholder="23.12,-34.34">
+                <input type="text" class="form-control" id="regional_city_2" placeholder="23.12,-34.34" onchange="updateStar()">
             </div>
         </div>
         <div class="row mb-2">
             <div class="col">
-                <input type="text" class="form-control" id="regional_city_3_name">
+                <input type="text" class="form-control" id="regional_city_3_name" maxlength="14" onchange="updateStar()">
             </div>
             <div class="col">
-                <input type="text" class="form-control" id="regional_city_3" placeholder="23.12,-34.34">
+                <input type="text" class="form-control" id="regional_city_3" placeholder="23.12,-34.34" onchange="updateStar()">
             </div>
         </div>
         <div class="row mb-2">
             <div class="col">
-                <input type="text" class="form-control" id="regional_city_4_name">
+                <input type="text" class="form-control" id="regional_city_4_name" maxlength="14" onchange="updateStar()">
             </div>
             <div class="col">
-                <input type="text" class="form-control" id="regional_city_4" placeholder="23.12,-34.34">
+                <input type="text" class="form-control" id="regional_city_4" placeholder="23.12,-34.34" onchange="updateStar()">
             </div>
         </div>
         <div class="row mb-2">
             <div class="col">
-                <input type="text" class="form-control" id="regional_city_5_name">
+                <input type="text" class="form-control" id="regional_city_5_name" maxlength="14" onchange="updateStar()">
             </div>
             <div class="col">
-                <input type="text" class="form-control" id="regional_city_5" placeholder="23.12,-34.34">
+                <input type="text" class="form-control" id="regional_city_5" placeholder="23.12,-34.34" onchange="updateStar()">
             </div>
         </div>
         <div class="row mb-2">
             <div class="col">
-                <input type="text" class="form-control" id="regional_city_6_name">
+                <input type="text" class="form-control" id="regional_city_6_name" maxlength="14" onchange="updateStar()">
             </div>
             <div class="col">
-                <input type="text" class="form-control" id="regional_city_6" placeholder="23.12,-34.34">
+                <input type="text" class="form-control" id="regional_city_6" placeholder="23.12,-34.34" onchange="updateStar()">
             </div>
         </div>
-
+        
     </div>
 
     <button type="button" class="btn btn-primary">Save</button>
 
 </div>
+<script type="text/javascript" src="js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="js/scripts.js"></script>
 </body>
 </html>
