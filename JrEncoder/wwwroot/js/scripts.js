@@ -69,7 +69,7 @@ function buildHtml() {
         // Add this flavor to the select. If loop_flavor is set to this flavor, set it as selected
         elFlavors.innerHTML += "<option value=\"" + flavor.Name + "\" " + (config.config.loop_flavor === flavor.Name ? "selected" : "") + ">" + flavor.Name + "</option>";
     }
-    
+
     // Change the flavor selector
     elFlavors.value = config.config.loop_flavor;
 
@@ -257,4 +257,26 @@ function removeStar() {
 
     // Rebuild html
     buildHtml();
+}
+
+async function saveConfig() {
+
+    // Make http request to get config
+    const response = await fetch('/setConfig', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(config)
+    });
+
+    // Make sure it loaded okay
+    if (!response.ok) {
+        alert("Unable to set config");
+        return;
+    }
+
+    // Read json response
+    respJson = await response.json();
+    alert(respJson.message);
 }

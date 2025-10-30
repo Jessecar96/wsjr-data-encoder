@@ -59,13 +59,7 @@ class Program
         await LoadConfig("config.json");
 
         // Load flavor config
-        string flavorsFilePath = Path.Combine(Util.GetExeLocation(), "Flavors.xml");
-        if (File.Exists(flavorsFilePath))
-        {
-            XmlSerializer serializer = new(typeof(Flavors));
-            using StreamReader reader = new(flavorsFilePath);
-            flavors = (Flavors?)serializer.Deserialize(reader);
-        }
+        flavors = Flavors.LoadFlavors();
 
         if (flavors == null)
         {

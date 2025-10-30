@@ -23,12 +23,31 @@ public class WebServer(Config config, Flavors flavors)
         app.MapGet("/test", () => "This is the test page");
         app.MapGet("/getConfig", () =>
         {
-            dynamic response =
-                new
-                {
-                    config = _config,
-                    flavors = _flavors
-                };
+            ConfigWebResponse response = new()
+            {
+                config = _config,
+                flavors = _flavors
+            };
+            return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
+        });
+        app.MapPost("/setConfig", (ConfigWebResponse newConfig) =>
+        {
+            // Set the new config
+            _config = newConfig.config;
+            _config.Save();
+            Console.WriteLine("Saved config file");
+            
+            // Set flavors
+            _flavors = newConfig.flavors;
+            _flavors.Save();
+            Console.WriteLine("Saved flavors file");
+
+            // Return json response
+            dynamic response = new
+            {
+                success = true,
+                message = "Saved Config",
+            };
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         });
         app.MapGet("/loadLocalPresentation", (string flavor) => { return "OK"; });
