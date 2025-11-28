@@ -13,7 +13,7 @@ class Program
     private static bool flavorRunning;
     private static Config config;
     private static TimeUpdater timeUpdater;
-    private static GPIODataTransmitter transmitter;
+    private static DataTransmitter transmitter;
     private static WebServer webServer;
     public static DataDownloader downloader;
 
@@ -48,9 +48,17 @@ class Program
             .LDL(LDLStyle.DateTime)
             .Commit();
 
-        // Init data transmitter, sets up DDS module
-        transmitter = new(omcw);
-        transmitter.Init();
+        if (args.Contains("--null-transmitter"))
+        {
+            // Use null transmitter, for debugging on a non-raspberry pi
+            transmitter = new NullDataTransmitter(omcw);
+        }
+        else
+        {
+            // Init GPIO data transmitter, sets up DDS module
+            transmitter = new GPIODataTransmitter(omcw);
+            transmitter.Init();
+        }
 
         // Background thread for data transmission
         _ = Task.Run(() => transmitter.Run());
