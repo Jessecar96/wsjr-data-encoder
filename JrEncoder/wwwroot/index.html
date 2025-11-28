@@ -26,7 +26,7 @@
 
 <div class="container-fixed">
 
-    <h3 class="mt-4">Global Settings</h3>
+    <h3 class="mt-5">Global Settings</h3>
 
     <div class="mb-3">
         <label for="apikey" class="form-label">TWC API Key</label>
@@ -39,7 +39,7 @@
         <div class="form-text">Set all stars to the same timezone. (If you can't find your switches)</div>
     </div>
 
-    <div class="mb-4">
+    <div class="mb-5">
         <label for="loop_flavor" class="form-label">Looping Flavor</label>
         <select id="loop_flavor" class="form-select">
             <option selected>Disabled</option>
@@ -78,7 +78,10 @@
         <div class="mb-3">
             <label for="zones" class="form-label">NWS Zones</label>
             <input type="text" class="form-control" id="zones" onchange="updateStar()">
-            <div class="form-text">Optional: Comma separated list of NWS zones to check alerts for</div>
+            <div class="form-text">
+                Optional: Comma separated list of NWS zones to check alerts for<br/>
+                If left blank, the program will only check the primary location's zone
+            </div>
         </div>
 
         <!-- Nearby Cities -->

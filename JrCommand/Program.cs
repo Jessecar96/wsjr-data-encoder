@@ -1,5 +1,4 @@
-﻿using System;
-using CommandLine;
+﻿using CommandLine;
 using JrEncoderLib.StarAttributes;
 using MQTTnet;
 
@@ -8,7 +7,7 @@ namespace JrCommand
     internal class Program
     {
         private static IMqttClient? mqttClient;
-        private static string[] args;
+        private static string[]? args;
 
         static async Task Main(string[] args)
         {

@@ -36,7 +36,7 @@ public class WebServer(Config config, Flavors flavors)
             _config = newConfig.config;
             _config.Save();
             Console.WriteLine("Saved config file");
-            
+
             // Set flavors
             _flavors = newConfig.flavors;
             _flavors.Save();
