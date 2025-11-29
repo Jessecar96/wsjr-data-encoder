@@ -10,7 +10,7 @@ namespace JrEncoder;
 /// </summary>
 public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTransmitter, OMCW omcw)
 {
-    private CancellationTokenSource _cancellationTokenSource;
+    private CancellationTokenSource? _cancellationTokenSource = null;
     private bool _flavorRunning;
     private bool _runLoop = false;
 
@@ -57,9 +57,10 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
     public async Task RunFlavor(string flavorName, DateTimeOffset? runTime = null)
     {
         // Make a new CTS if we need it
-        _cancellationTokenSource = new CancellationTokenSource();
+        if (_cancellationTokenSource == null)
+            _cancellationTokenSource = new CancellationTokenSource();
         CancellationToken cancelationToken = _cancellationTokenSource.Token;
-        
+
         if (_flavorRunning)
         {
             Logger.Error("Flavor is already running. Not running another!");
@@ -175,20 +176,20 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
     public void CancelLF()
     {
         Logger.Info("Canceling LF");
-        
+
         // Stop any looping from looping again
         _runLoop = false;
-        
+
         // This will cancel any Task.Delay's in RunFlavor
         _cancellationTokenSource.Cancel();
-        
+
         // No longer running an LF
         _flavorRunning = false;
-        
+
         // Switch to default state
         SetDefaultOMCW();
     }
-    
+
     public async Task RunLoop(string flavorName)
     {
         // Make sure we don't run on top of anything else
@@ -200,7 +201,7 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
 
         // We want to start looping. This is changed in CancelLF() to stop it 
         _runLoop = true;
-        
+
         // Loop that flavor forever
         while (_runLoop)
             await RunFlavor(flavorName);
