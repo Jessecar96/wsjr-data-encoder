@@ -26,10 +26,33 @@
 
 <div class="container-fixed">
 
-    <h3 class="mt-5">Control</h3>
-    <div>
-        <button type="button" class="btn btn-primary" onclick="runLF()">Run Flavor L</button>
-        <button type="button" class="btn btn-danger" onclick="cancelLF()">Cancel LF</button>
+    <h3 class="mt-5">Star Control</h3>
+    <div class="mb-3 d-flex">
+        <div class="flex-fill me-2">
+            <select id="run_flavor" class="form-select"></select>
+        </div>
+        <div class="me-2">
+            <button type="button" class="btn btn-primary" onclick="runLF()">Run Flavor</button>
+        </div>
+        <div>
+            <button type="button" class="btn btn-danger" onclick="cancelLF()">Cancel LF</button>
+        </div>
+    </div>
+    <div class="mb-3">
+        <div class="mb-1">
+            <textarea class="form-control" placeholder="Alert Text" rows="6" id="alert_text"></textarea>
+        </div>
+        <div class="d-flex">
+            <div class="me-1">
+                <button type="button" class="btn btn-danger" onclick="sendAlert()">Send Alert</button>
+            </div>
+            <div>
+                <select id="alert_type" class="form-select">
+                    <option>Warning</option>
+                    <option>Advisory</option>
+                </select>
+            </div>
+        </div>
     </div>
 
 </div>

@@ -85,7 +85,7 @@ class Program
         downloader = new(config, dataTransmitter, omcw);
 
         // Start web server
-        _webServer = new(config, flavors);
+        _webServer = new(config, flavors, omcw);
         _ = Task.Run(() => _webServer.Run());
 
         // Start MQTT server

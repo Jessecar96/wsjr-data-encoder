@@ -57,9 +57,8 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
     public async Task RunFlavor(string flavorName, DateTimeOffset? runTime = null)
     {
         // Make a new CTS if we need it
-        if (_cancellationTokenSource == null)
-            _cancellationTokenSource = new CancellationTokenSource();
-        CancellationToken cancelationToken = _cancellationTokenSource.Token;
+        _cancellationTokenSource ??= new CancellationTokenSource();
+        CancellationToken cancellationToken = _cancellationTokenSource.Token;
 
         if (_flavorRunning)
         {
@@ -98,7 +97,7 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
             try
             {
                 // Wait until the time we want
-                await Task.Delay(TimeSpan.FromSeconds(secondsDifference), cancelationToken);
+                await Task.Delay(TimeSpan.FromSeconds(secondsDifference), cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -155,7 +154,7 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
             // Wait for its duration
             try
             {
-                await Task.Delay(page.Duration * 1000, cancelationToken);
+                await Task.Delay(page.Duration * 1000, cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -181,7 +180,7 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
         _runLoop = false;
 
         // This will cancel any Task.Delay's in RunFlavor
-        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource?.Cancel();
 
         // No longer running an LF
         _flavorRunning = false;

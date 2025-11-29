@@ -51,6 +51,21 @@ public class Util
     }
 
     /// <summary>
+    /// Word wrapping for generic (non NWS) text
+    /// </summary>
+    /// <param name="text"></param>
+    /// <returns></returns>
+    public static List<string> WordWrapGeneric(string text)
+    {
+        List<string> output = [];
+        foreach (string line in text.Split('\n'))
+        {
+            output.AddRange(WordWrap(line));
+        }
+        return output;
+    }
+
+    /// <summary>
     /// Word wrap text
     /// </summary>
     /// <remarks>https://gist.github.com/anderssonjohan/660952</remarks>

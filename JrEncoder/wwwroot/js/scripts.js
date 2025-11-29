@@ -3,7 +3,8 @@
 // elements
 const elApiKey = document.getElementById("apikey");
 const elForceClockSet = document.getElementById("force_clock_set");
-const elFlavors = document.getElementById("loop_flavor");
+const elLoopFlavor = document.getElementById("loop_flavor");
+const elRunFlavor = document.getElementById("run_flavor");
 const elLocationName = document.getElementById("location_name");
 const elLocation = document.getElementById("location");
 const elSwitches = document.getElementById("switches");
@@ -44,6 +45,14 @@ async function loadConfigPage() {
 
 async function loadControlPage() {
     await loadConfig();
+
+    // Populate flavors select
+    elRunFlavor.innerHTML += "";
+    for (const flavorsKey in config.flavors.Flavor) {
+        const flavor = config.flavors.Flavor[flavorsKey];
+        elRunFlavor.innerHTML += "<option value=\"" + flavor.Name + "\">" + flavor.Name + "</option>";
+    }
+
 }
 
 async function loadConfig() {
@@ -67,18 +76,18 @@ function buildHtml() {
     elForceClockSet.checked = config.config.force_clock_set;
 
     // Clear out anything in there first
-    elFlavors.innerHTML = "";
+    elLoopFlavor.innerHTML = "";
 
     // Populate flavors select
-    elFlavors.innerHTML += "<option value=''>Disabled</option>";
+    elLoopFlavor.innerHTML += "<option value=''>Disabled</option>";
     for (const flavorsKey in config.flavors.Flavor) {
         const flavor = config.flavors.Flavor[flavorsKey];
         // Add this flavor to the select. If loop_flavor is set to this flavor, set it as selected
-        elFlavors.innerHTML += "<option value=\"" + flavor.Name + "\" " + (config.config.loop_flavor === flavor.Name ? "selected" : "") + ">" + flavor.Name + "</option>";
+        elLoopFlavor.innerHTML += "<option value=\"" + flavor.Name + "\" " + (config.config.loop_flavor === flavor.Name ? "selected" : "") + ">" + flavor.Name + "</option>";
     }
 
     // Change the flavor selector
-    elFlavors.value = config.config.loop_flavor;
+    elLoopFlavor.value = config.config.loop_flavor;
 
     // Empty the tabs
     const elStarSelector = document.getElementById("star-selector");
@@ -168,7 +177,7 @@ function updateStar() {
     // Update global vars
     config.config.apikey = elApiKey.value;
     config.config.force_clock_set = elForceClockSet.checked;
-    config.config.loop_flavor = elFlavors.value;
+    config.config.loop_flavor = elLoopFlavor.value;
 
     // Find the selected tab, and index of it
     const selectedStar = document.querySelector("#star-selector .active");
@@ -189,7 +198,7 @@ function updateStar() {
 
     // Change tab name to location name
     selectedStar.innerText = elLocationName.value;
-    
+
     // Parse zone list
     let zoneList = [];
     if (elZones.value !== "") {
@@ -295,10 +304,16 @@ async function saveConfig() {
 }
 
 async function runLF() {
-    // Make http request to get config
+
+    if (elRunFlavor.value.trim() === "") {
+        alert("Flavor is required");
+        return;
+    }
+
+    // Make http request
     const response = await fetch('/runLocalPresentation', {
         method: 'POST',
-        body: "L"
+        body: elRunFlavor.value
     });
 
     // Make sure it loaded okay
@@ -313,9 +328,37 @@ async function runLF() {
 }
 
 async function cancelLF() {
-    // Make http request to get config
+    // Make http request
     const response = await fetch('/cancelLocalPresentation', {
         method: 'POST'
+    });
+
+    // Make sure it loaded okay
+    if (!response.ok) {
+        alert("Unable to cancel LF");
+        return;
+    }
+
+    // Read json response
+    respJson = await response.json();
+    alert(respJson.message);
+}
+
+async function sendAlert() {
+    
+    const elAlertText = document.getElementById('alert_text');
+    const alertText = elAlertText.value;
+    
+    const elAlertType = document.getElementById('alert_type');
+    const alertType = elAlertType.value;
+    
+    // Make http request
+    const formData = new FormData();
+    formData.append('alertText', alertText);
+    formData.append('alertType', alertType);
+    const response = await fetch('/sendAlert', {
+        method: 'POST',
+        body: formData
     });
 
     // Make sure it loaded okay

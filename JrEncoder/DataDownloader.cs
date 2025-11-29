@@ -193,7 +193,6 @@ public class DataDownloader
             }
 
             // Make HTTP request
-            Console.WriteLine(url);
             HttpResponseMessage httpResponseMessage = await Util.HttpClient.GetAsync(url);
 
             // Make sure the request was successful

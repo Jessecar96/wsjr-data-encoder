@@ -1,11 +1,13 @@
 ﻿using System.Text;
 using System.Text.Json;
+using JrEncoderLib.StarAttributes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace JrEncoder;
 
-public class WebServer(Config config, Flavors flavors)
+public class WebServer(Config config, Flavors flavors, OMCW omcw)
 {
     private Config _config = config;
     private Flavors _flavors = flavors;
@@ -32,7 +34,7 @@ public class WebServer(Config config, Flavors flavors)
             };
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         });
-        
+
         app.MapPost("/setConfig", (ConfigWebResponse newConfig) =>
         {
             // Set the new config
@@ -53,12 +55,12 @@ public class WebServer(Config config, Flavors flavors)
             };
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         });
-        
+
         app.MapPost("/loadLocalPresentation", (string flavor) =>
         {
-            // There is not loading on the jr!
+            // There is no loading on the jr!
             // so we do nothing :)
-            
+
             // Return json response
             dynamic response = new
             {
@@ -67,15 +69,15 @@ public class WebServer(Config config, Flavors flavors)
             };
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         });
-        
+
         app.MapPost("/runLocalPresentation", async (HttpContext context) =>
         {
             using StreamReader reader = new StreamReader(context.Request.Body, Encoding.UTF8);
             string flavor = await reader.ReadToEndAsync();
-            
+
             // Run that flavor in the background on a new task
             _ = Task.Run(() => Program.FlavorMan.RunFlavor(flavor));
-            
+
             // Return json response
             dynamic response = new
             {
@@ -84,19 +86,48 @@ public class WebServer(Config config, Flavors flavors)
             };
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         });
-        
+
         app.MapPost("/cancelLocalPresentation", () =>
         {
             Program.FlavorMan.CancelLF();
-            
+
             // Return json response
             dynamic response = new
             {
                 success = true,
-                message = "LF cancelled",
+                message = "LF Cancelled",
             };
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         });
+
+        app.MapPost("/sendAlert", ([FromForm] string alertText, [FromForm] string alertType) =>
+        {
+            // Show warning
+            WarningType type;
+            try
+            {
+                type = Enum.Parse<WarningType>(alertType);
+            }
+            catch (Exception)
+            {
+                // Return json response
+                return JsonSerializer.Serialize(new
+                {
+                    success = true,
+                    message = "Invalid alert type",
+                }, new JsonSerializerOptions { WriteIndented = true });
+            }
+
+            Program.ShowWxWarning(Util.WordWrapGeneric(alertText), type, Address.All, omcw);
+
+            // Return json response
+            dynamic response = new
+            {
+                success = true,
+                message = "Alert Sent",
+            };
+            return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
+        }).DisableAntiforgery();
 
         await app.RunAsync();
     }
