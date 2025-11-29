@@ -21,7 +21,7 @@ public class DataDownloader
     private readonly Alerts _alertsConfig;
 
     // Data cache
-    private readonly Dictionary<string, List<NWSFeature>> _alertsCache = new();
+    private readonly Dictionary<string, List<GeoJsonFeature>> _alertsCache = new();
 
     // Holds the ids of alerts that we already have sent
     private readonly Dictionary<string, List<string>> _sentAlertIds = new();
@@ -132,10 +132,10 @@ public class DataDownloader
             }
 
             // Deserialize from json
-            NWSPointResponse? nwsResponse = null;
+            PointGeoJson? nwsResponse = null;
             try
             {
-                nwsResponse = JsonSerializer.Deserialize<NWSPointResponse>(responseBody);
+                nwsResponse = JsonSerializer.Deserialize<PointGeoJson>(responseBody);
             }
             catch (Exception ex)
             {
@@ -213,10 +213,10 @@ public class DataDownloader
             }
 
             // Deserialize from json
-            NWSAlertResponse? nwsResponse = null;
+            AlertCollectionGeoJson? nwsResponse = null;
             try
             {
-                nwsResponse = JsonSerializer.Deserialize<NWSAlertResponse>(responseBody);
+                nwsResponse = JsonSerializer.Deserialize<AlertCollectionGeoJson>(responseBody);
             }
             catch (Exception ex)
             {
@@ -240,29 +240,29 @@ public class DataDownloader
             // First time downloading these alerts, save all ids so we don't roll them when the program first starts
             if (!_alertsCache.ContainsKey(star.Location))
             {
-                foreach (NWSFeature nwsFeature in nwsResponse.Features)
+                foreach (GeoJsonFeature nwsFeature in nwsResponse.Features)
                 {
-                    Logger.Info($"[DataDownloader] Marking alert sent: {nwsFeature.Properties.Event} for {star.LocationName}");
+                    Logger.Info($"[DataDownloader] Marking alert sent: {nwsFeature.Alert.Event} for {star.LocationName}");
                     _sentAlertIds[star.Location].Add(nwsFeature.Id);
                 }
             }
 
             // Alerts have changed, process any that need to roll
-            foreach (NWSFeature nwsFeature in nwsResponse.Features)
+            foreach (GeoJsonFeature nwsFeature in nwsResponse.Features)
             {
                 // Alert already sent, do not send again
                 if (_sentAlertIds[star.Location].Contains(nwsFeature.Id))
                 {
-                    Logger.Info($"[DataDownloader] Alert already processed: {nwsFeature.Properties.Event} for {star.LocationName}");
+                    Logger.Info($"[DataDownloader] Alert already processed: {nwsFeature.Alert.Event} for {star.LocationName}");
                     continue;
                 }
 
                 // Look for event in alert config
-                Alert? alertConfig = _alertsConfig.Alert.FirstOrDefault(alert => alert.Name == nwsFeature.Properties.Event);
+                Alert? alertConfig = _alertsConfig.Alert.FirstOrDefault(alert => alert.Name == nwsFeature.Alert.Event);
                 if (alertConfig == null)
                 {
                     // Not found in config, ignore it
-                    Logger.Info($"[DataDownloader] Alert not defined, ignoring: {nwsFeature.Properties.Event} for {star.LocationName}");
+                    Logger.Info($"[DataDownloader] Alert not defined, ignoring: {nwsFeature.Alert.Event} for {star.LocationName}");
                     // Save the ID so we don't keep checking it
                     _sentAlertIds[star.Location].Add(nwsFeature.Id);
                     continue;
@@ -270,14 +270,14 @@ public class DataDownloader
 
                 if (!alertConfig.Scroll)
                 {
-                    Logger.Info($"[DataDownloader] Alert not set to scroll, ignoring: {nwsFeature.Properties.Event} for {star.LocationName}");
+                    Logger.Info($"[DataDownloader] Alert not set to scroll, ignoring: {nwsFeature.Alert.Event} for {star.LocationName}");
                     // Alert is not set to scroll, ignore it
                     // Save the ID so we don't keep checking it
                     _sentAlertIds[star.Location].Add(nwsFeature.Id);
                     continue;
                 }
 
-                Logger.Info($"[DataDownloader] New alert: {nwsFeature.Properties.Event} for {star.LocationName}");
+                Logger.Info($"[DataDownloader] New alert: {nwsFeature.Alert.Event} for {star.LocationName}");
 
                 // Build the text we're going to roll
                 string fullAlertText = "";
@@ -285,29 +285,29 @@ public class DataDownloader
                 // We need to rebuild the header of the alert since the NWS does not include it in the API
                 List<string> alertLines = new List<string>();
                 //alertHeader.AddRange(Util.WordWrap(nwsFeature.Properties.Event.ToUpper()));
-                alertLines.AddRange(Util.WordWrap(nwsFeature.Properties.SenderName.Replace("NWS", "National Weather Service").ToUpper()));
+                alertLines.AddRange(Util.WordWrap(nwsFeature.Alert.SenderName.Replace("NWS", "National Weather Service").ToUpper()));
                 string tzAbrev = Util.GetTimeZoneAbbreviation(star.GetTimeZoneInfo());
-                alertLines.AddRange(Util.WordWrap(nwsFeature.Properties.Sent.ToString("hmm tt '" + tzAbrev + "' ddd MMM d yyyy").ToUpper()));
+                alertLines.AddRange(Util.WordWrap(nwsFeature.Alert.Sent.ToString("hmm tt '" + tzAbrev + "' ddd MMM d yyyy").ToUpper()));
                 alertLines.Add("");
 
                 // Start off with the headline
-                if (nwsFeature.Properties.Parameters.NWSheadline != null)
+                if (nwsFeature.Alert.Parameters.NWSheadline != null)
                 {
-                    fullAlertText += nwsFeature.Properties.Parameters.NWSheadline[0] + "\n\n";
+                    fullAlertText += nwsFeature.Alert.Parameters.NWSheadline[0] + "\n\n";
                 }
 
                 // Add description
-                fullAlertText += nwsFeature?.Properties?.Description + "\n\n";
+                fullAlertText += nwsFeature?.Alert?.Description + "\n\n";
 
                 // Remove AWIPSidentifier from description
-                if (nwsFeature?.Properties?.Parameters?.AWIPSidentifier?[0] != null)
-                    fullAlertText = fullAlertText.Replace(nwsFeature.Properties.Parameters.AWIPSidentifier?[0] + "\n\n", "");
+                if (nwsFeature?.Alert?.Parameters?.AWIPSidentifier?[0] != null)
+                    fullAlertText = fullAlertText.Replace(nwsFeature.Alert.Parameters.AWIPSidentifier?[0] + "\n\n", "");
 
                 // Add instruction
-                if (nwsFeature?.Properties?.Instruction != null)
+                if (nwsFeature?.Alert?.Instruction != null)
                 {
                     fullAlertText += "PRECAUTIONARY/PREPAREDNESS ACTIONS...\n\n";
-                    fullAlertText += nwsFeature.Properties.Instruction;
+                    fullAlertText += nwsFeature.Alert.Instruction;
                 }
 
                 // Add the rest of the text to our header
@@ -768,11 +768,11 @@ public class DataDownloader
                     if (curForecastPage == 0 && _alertsCache.ContainsKey(star.Location))
                     {
                         // Find the saved alerts for this location
-                        List<NWSFeature> nwsFeatures = _alertsCache[star.Location];
-                        foreach (NWSFeature nwsFeature in nwsFeatures)
+                        List<GeoJsonFeature> nwsFeatures = _alertsCache[star.Location];
+                        foreach (GeoJsonFeature nwsFeature in nwsFeatures)
                         {
                             // Look for event in alert config
-                            Alert? alertConfig = _alertsConfig.Alert.FirstOrDefault(alert => alert.Name == nwsFeature.Properties.Event);
+                            Alert? alertConfig = _alertsConfig.Alert.FirstOrDefault(alert => alert.Name == nwsFeature.Alert.Event);
 
                             // Not found in config, ignore it
                             if (alertConfig == null)
@@ -783,7 +783,7 @@ public class DataDownloader
                                 continue;
 
                             // Get the headline
-                            string nwsHeadline = nwsFeature.Properties.GetHeadline(star.GetTimeZoneInfo());
+                            string nwsHeadline = nwsFeature.Alert.GetHeadline(star.GetTimeZoneInfo());
                             Logger.Info("HEADLINE: " + nwsHeadline);
 
                             // Could not find anything, skip
