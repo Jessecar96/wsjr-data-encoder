@@ -56,8 +56,10 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
     /// <param name="runTime">Specific time to run the flavor at</param>
     public async Task RunFlavor(string flavorName, DateTimeOffset? runTime = null)
     {
-        // Make a new CTS if we need it
-        _cancellationTokenSource ??= new CancellationTokenSource();
+        // Make a new CTS if we don't have one, or the one we have was already canceled previously
+        if (_cancellationTokenSource is null or { IsCancellationRequested: true })
+            _cancellationTokenSource = new CancellationTokenSource();
+        
         CancellationToken cancellationToken = _cancellationTokenSource.Token;
 
         if (_flavorRunning)
