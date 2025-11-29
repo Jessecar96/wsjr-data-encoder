@@ -1,23 +1,21 @@
-﻿using System.Xml.Serialization;
-using JrEncoderLib;
+﻿using JrEncoderLib;
 using JrEncoderLib.DataTransmitter;
-using JrEncoderLib.Frames;
 using JrEncoderLib.StarAttributes;
 
 namespace JrEncoder;
 
 class Program
 {
-    private static OMCW omcw;
-    private static Flavors? flavors;
-    private static Config config;
-    private static TimeUpdater timeUpdater;
-    private static DataTransmitter dataTransmitter;
-    private static WebServer _webServer;
-    public static DataDownloader downloader;
-    public static FlavorMan FlavorMan;
+    private static OMCW? _omcw;
+    private static Flavors? _flavors;
+    private static Config? _config;
+    private static TimeUpdater? _timeUpdater;
+    private static DataTransmitter? _dataTransmitter;
+    private static WebServer? _webServer;
+    public static DataDownloader? Downloader;
+    public static FlavorMan? FlavorMan;
 
-    static async Task Main(string[] args)
+    private static async Task Main(string[] args)
     {
         Logger.Info("Starting WeatherSTAR Data Transmitter");
         Logger.Info("Written by Jesse Cardone, 2024");
@@ -40,7 +38,7 @@ class Program
         Util.HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd("JrEncoder/1.0");
 
         // Build our OMCW of defaults
-        omcw = OMCW.Create()
+        _omcw = OMCW.Create()
             .BottomSolid(false)
             .TopSolid(false)
             .TopPage(0)
@@ -51,25 +49,25 @@ class Program
         if (args.Contains("--null-transmitter"))
         {
             // Use null transmitter, for debugging on a non-raspberry pi
-            dataTransmitter = new NullDataTransmitter(omcw);
+            _dataTransmitter = new NullDataTransmitter(_omcw);
         }
         else
         {
             // Init GPIO data transmitter, sets up DDS module
-            dataTransmitter = new GPIODataTransmitter(omcw);
-            dataTransmitter.Init();
+            _dataTransmitter = new GPIODataTransmitter(_omcw);
+            _dataTransmitter.Init();
         }
 
         // Background thread for data transmission
-        _ = Task.Run(() => dataTransmitter.Run());
+        _ = Task.Run(() => _dataTransmitter.Run());
 
         // Load config.json
         await LoadConfig("config.json");
 
         // Load flavor config
-        flavors = Flavors.LoadFlavors();
+        _flavors = Flavors.LoadFlavors();
 
-        if (flavors == null)
+        if (_flavors == null)
         {
             // No flavors :((
             Logger.Error("Failed to load Flavors.xml");
@@ -78,26 +76,26 @@ class Program
         }
 
         // Init time updater
-        timeUpdater = new(config, dataTransmitter, omcw);
-        timeUpdater.Run();
+        _timeUpdater = new TimeUpdater(_config, _dataTransmitter, _omcw);
+        _timeUpdater.Run();
 
         // Init data downloader
-        downloader = new(config, dataTransmitter, omcw);
+        Downloader = new DataDownloader(_config, _dataTransmitter, _omcw);
 
         // Start web server
-        _webServer = new(config, flavors, omcw);
+        _webServer = new WebServer(_config, _flavors, _omcw);
         _ = Task.Run(() => _webServer.Run());
 
         // Start MQTT server
-        MQTTServer server = new();
+        MQTTServer server = new MQTTServer();
         _ = Task.Run(() => server.Run());
 
         // MQTT Client
-        MQTTClient client = new(omcw);
+        MQTTClient client = new MQTTClient(_omcw);
         _ = Task.Run(() => client.Run());
         
         // Init flavor man
-        FlavorMan = new FlavorMan(config, flavors, dataTransmitter, omcw);
+        FlavorMan = new FlavorMan(_config, _flavors, _dataTransmitter, _omcw);
 
         // Show "Information is being updated" page
         FlavorMan.ShowUpdatePage();
@@ -121,12 +119,12 @@ class Program
         } while (true);
 
         // Update all records
-        await downloader.UpdateAll();
+        await Downloader.UpdateAll();
 
         // Background thread for data downloading
         try
         {
-            downloader.Run();
+            Downloader.Run();
         }
         catch (Exception e)
         {
@@ -140,11 +138,11 @@ class Program
         FlavorMan.SetDefaultOMCW();
 
         // Check if looping is configured
-        if (!string.IsNullOrEmpty(config.LoopFlavor))
+        if (!string.IsNullOrEmpty(_config.LoopFlavor))
         {
             // await here if we're configured to run a loop by default
             // If aborted we will break out and go to the Forever... loop
-            await FlavorMan.RunLoop(config.LoopFlavor);
+            await FlavorMan.RunLoop(_config.LoopFlavor);
         }
         else
         {
@@ -163,13 +161,13 @@ class Program
     {
         try
         {
-            config = await Config.LoadConfig(fileName);
-            if (downloader != null)
-                downloader.SetConfig(config);
-            if (timeUpdater != null)
-                timeUpdater.SetConfig(config);
+            _config = await Config.LoadConfig(fileName);
+            if (Downloader != null)
+                Downloader.SetConfig(_config);
+            if (_timeUpdater != null)
+                _timeUpdater.SetConfig(_config);
             if (_webServer != null)
-                _webServer.SetConfig(config);
+                _webServer.SetConfig(_config);
             Logger.Info("Loaded config file " + fileName);
         }
         catch (Exception e)
@@ -224,7 +222,7 @@ class Program
             pageOffset++;
 
             // Send it
-            dataTransmitter.AddFrame(page.Build());
+            _dataTransmitter.AddFrame(page.Build());
             Logger.Info("Sent page " + page.PageNumber);
         }
 
@@ -238,7 +236,7 @@ class Program
     /// <param name="fatal">If this message should show forever, locking up the program</param>
     public static void ShowErrorMessage(string message, bool fatal = false)
     {
-        PageBuilder page = new PageBuilder((int)Page.Error, Address.All, omcw)
+        PageBuilder page = new PageBuilder((int)Page.Error, Address.All, _omcw)
             .AddLine(Util.CenterString("ATTENTION CABLE OPERATOR"), new TextLineAttributes { Color = Color.Diarrhea })
             .AddLine(Util.CenterString("An Error Has Occurred"), new TextLineAttributes { Color = Color.Diarrhea })
             .AddLine(Util.CenterString("Restart Software Once Corrected"), new TextLineAttributes { Color = Color.Diarrhea })
@@ -249,13 +247,13 @@ class Program
         foreach (string s in messages)
             page.AddLine(Util.CenterString(s), new TextLineAttributes { Color = Color.Diarrhea });
 
-        dataTransmitter.AddFrame(page.Build());
+        _dataTransmitter.AddFrame(page.Build());
 
         // Wait for the page to load into memory...
         Thread.Sleep(500);
 
         // Show blank page
-        omcw.TopSolid(true)
+        _omcw.TopSolid(true)
             .BottomSolid(true)
             .RegionSeparator(true)
             .TopPage(0)
@@ -265,7 +263,7 @@ class Program
         Thread.Sleep(500);
 
         // Show error page
-        omcw.TopSolid(true)
+        _omcw.TopSolid(true)
             .BottomSolid(true)
             .RegionSeparator(true)
             .TopPage((int)Page.Error)

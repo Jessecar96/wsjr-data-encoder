@@ -99,12 +99,12 @@ public class MQTTClient(OMCW omcw)
             case "jrencoder/load-config":
                 await Program.LoadConfig(payloadStr);
                 Logger.Info("[MQTTClient] Config file changed");
-                await Program.downloader.UpdateAll();
+                await Program.Downloader.UpdateAll();
                 Logger.Info("[MQTTClient] All data reloaded");
                 break;
 
             case "jrencoder/reload-data":
-                await Program.downloader.UpdateAll();
+                await Program.Downloader.UpdateAll();
                 Logger.Info("[MQTTClient] All data reloaded");
                 break;
         }
