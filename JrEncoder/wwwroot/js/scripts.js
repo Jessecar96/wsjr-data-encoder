@@ -37,6 +37,15 @@ const elRegionalCity4 = document.getElementById("regional_city_4");
 const elRegionalCity5 = document.getElementById("regional_city_5");
 const elRegionalCity6 = document.getElementById("regional_city_6");
 
+async function loadConfigPage() {
+    await loadConfig();
+    buildHtml();
+}
+
+async function loadControlPage() {
+    await loadConfig();
+}
+
 async function loadConfig() {
 
     // Make http request to get config
@@ -50,8 +59,6 @@ async function loadConfig() {
 
     // Read json response
     config = await response.json();
-
-    buildHtml();
 }
 
 function buildHtml() {
@@ -182,11 +189,17 @@ function updateStar() {
 
     // Change tab name to location name
     selectedStar.innerText = elLocationName.value;
+    
+    // Parse zone list
+    let zoneList = [];
+    if (elZones.value !== "") {
+        zoneList = elZones.value.split(",");
+    }
 
     config.config.stars[selectedStarIndex].location_name = elLocationName.value;
     config.config.stars[selectedStarIndex].location = elLocation.value;
     config.config.stars[selectedStarIndex].switches = elSwitches.value;
-    config.config.stars[selectedStarIndex].zones = elZones.value;
+    config.config.stars[selectedStarIndex].zones = zoneList;
     // Nearby cities
     config.config.stars[selectedStarIndex].nearby_cities.location_name[0] = elNearbyCity0Name.value;
     config.config.stars[selectedStarIndex].nearby_cities.location_name[1] = elNearbyCity1Name.value;
@@ -273,6 +286,41 @@ async function saveConfig() {
     // Make sure it loaded okay
     if (!response.ok) {
         alert("Unable to set config");
+        return;
+    }
+
+    // Read json response
+    respJson = await response.json();
+    alert(respJson.message);
+}
+
+async function runLF() {
+    // Make http request to get config
+    const response = await fetch('/runLocalPresentation', {
+        method: 'POST',
+        body: "L"
+    });
+
+    // Make sure it loaded okay
+    if (!response.ok) {
+        alert("Unable to cancel LF");
+        return;
+    }
+
+    // Read json response
+    respJson = await response.json();
+    alert(respJson.message);
+}
+
+async function cancelLF() {
+    // Make http request to get config
+    const response = await fetch('/cancelLocalPresentation', {
+        method: 'POST'
+    });
+
+    // Make sure it loaded okay
+    if (!response.ok) {
+        alert("Unable to cancel LF");
         return;
     }
 

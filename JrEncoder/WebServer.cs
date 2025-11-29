@@ -1,5 +1,7 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 
 namespace JrEncoder;
 
@@ -30,6 +32,7 @@ public class WebServer(Config config, Flavors flavors)
             };
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         });
+        
         app.MapPost("/setConfig", (ConfigWebResponse newConfig) =>
         {
             // Set the new config
@@ -50,11 +53,49 @@ public class WebServer(Config config, Flavors flavors)
             };
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         });
-        app.MapGet("/loadLocalPresentation", (string flavor) => { return "OK"; });
-        app.MapGet("/runLocalPresentation", (string flavor) =>
+        
+        app.MapPost("/loadLocalPresentation", (string flavor) =>
         {
-            _ = Task.Run(() => Program.RunFlavor(flavor));
-            return "OK";
+            // There is not loading on the jr!
+            // so we do nothing :)
+            
+            // Return json response
+            dynamic response = new
+            {
+                success = true,
+                message = "Saved Config",
+            };
+            return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
+        });
+        
+        app.MapPost("/runLocalPresentation", async (HttpContext context) =>
+        {
+            using StreamReader reader = new StreamReader(context.Request.Body, Encoding.UTF8);
+            string flavor = await reader.ReadToEndAsync();
+            
+            // Run that flavor in the background on a new task
+            _ = Task.Run(() => Program.FlavorMan.RunFlavor(flavor));
+            
+            // Return json response
+            dynamic response = new
+            {
+                success = true,
+                message = "Here we go grandma!",
+            };
+            return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
+        });
+        
+        app.MapPost("/cancelLocalPresentation", () =>
+        {
+            Program.FlavorMan.CancelLF();
+            
+            // Return json response
+            dynamic response = new
+            {
+                success = true,
+                message = "LF cancelled",
+            };
+            return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         });
 
         await app.RunAsync();

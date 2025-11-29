@@ -45,7 +45,7 @@ public class MQTTClient(OMCW omcw)
         switch (topic)
         {
             case "jrencoder/lf":
-                _ = Task.Run(() => Program.RunFlavor(payloadStr));
+                _ = Task.Run(() => Program.FlavorMan.RunFlavor(payloadStr));
                 break;
             
             case "jrencoder/timed-lf":
@@ -56,7 +56,7 @@ public class MQTTClient(OMCW omcw)
                     double time = jsonDoc.RootElement.GetProperty("time").GetDouble();
                     DateTimeOffset runTime = DateTimeOffset.FromUnixTimeSeconds((long)time);
                     Logger.Info($"[MQTTClient] flavor: {flavor} Run time: {runTime}");
-                    _ = Task.Run(() => Program.RunFlavor(flavor, runTime));
+                    _ = Task.Run(() => Program.FlavorMan.RunFlavor(flavor, runTime));
                 }
                 catch (JsonException e)
                 {
