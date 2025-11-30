@@ -47,6 +47,15 @@ public class Config
 
         [JsonPropertyName("location_name")]
         public required string LocationName { get; set; }
+        
+        [JsonPropertyName("headend_id")]
+        public string? HeadendId { get; set; } = null;
+        
+        [JsonPropertyName("affiliate_text1")]
+        public string? AffiliateText1 { get; set; } = null;
+        
+        [JsonPropertyName("affiliate_text2")]
+        public string? AffiliateText2 { get; set; } = null;
 
         [JsonPropertyName("nearby_cities")]
         public NearbyLocations? NearbyCities { get; set; } = new NearbyLocations

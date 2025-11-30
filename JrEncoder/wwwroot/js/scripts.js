@@ -8,6 +8,9 @@ const elRunFlavor = document.getElementById("run_flavor");
 const elLocationName = document.getElementById("location_name");
 const elLocation = document.getElementById("location");
 const elSwitches = document.getElementById("switches");
+const elHeadendId = document.getElementById("headend_id");
+const elAffiliateText1 = document.getElementById("affiliate_text1");
+const elAffiliateText2 = document.getElementById("affiliate_text2");
 const elZones = document.getElementById("zones");
 const elNearbyCity0Name = document.getElementById("nearby_city_0_name");
 const elNearbyCity1Name = document.getElementById("nearby_city_1_name");
@@ -137,6 +140,9 @@ function setHtmlValues() {
     elLocationName.value = starConfig.location_name ?? "";
     elLocation.value = starConfig.location ?? "";
     elSwitches.value = starConfig.switches ?? "";
+    elHeadendId.value = starConfig.headend_id ?? "";
+    elAffiliateText1.value = starConfig.affiliate_text1 ?? "";
+    elAffiliateText2.value = starConfig.affiliate_text2 ?? "";
     elZones.value = starConfig.zones ?? "";
     // Nearby cities
     elNearbyCity0Name.value = starConfig.nearby_cities.location_name[0] ?? "";
@@ -208,6 +214,9 @@ function updateStar() {
     config.config.stars[selectedStarIndex].location_name = elLocationName.value;
     config.config.stars[selectedStarIndex].location = elLocation.value;
     config.config.stars[selectedStarIndex].switches = elSwitches.value;
+    config.config.stars[selectedStarIndex].headend_id = elHeadendId.value;
+    config.config.stars[selectedStarIndex].affiliate_text1 = elAffiliateText1.value;
+    config.config.stars[selectedStarIndex].affiliate_text2 = elAffiliateText2.value;
     config.config.stars[selectedStarIndex].zones = zoneList;
     // Nearby cities
     config.config.stars[selectedStarIndex].nearby_cities.location_name[0] = elNearbyCity0Name.value;

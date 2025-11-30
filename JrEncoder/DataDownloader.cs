@@ -67,6 +67,9 @@ public class DataDownloader
         await UpdateAlmanac();
         await UpdateForecast();
         await UpdateTravelCitiesForecast();
+
+        foreach (Config.WeatherStar star in _config.Stars)
+            await UpdateStaticPages(star);
     }
 
     public void Run()
@@ -1073,5 +1076,51 @@ public class DataDownloader
         } while (morePages);
 
         Logger.Info($"[DataDownloader] Sent Travel Cities Forecast");
+    }
+
+    private async Task UpdateStaticPages(Config.WeatherStar star)
+    {
+        PageBuilder affiliateText1 = new PageBuilder((int)Page.AffiliateText1, Address.FromSwitches(star.Switches), _omcw);
+        string headendId = star.HeadendId ?? "000000";
+        affiliateText1.AddLine(headendId.PadLeft(32), new TextLineAttributes
+        {
+            Color = Color.Blue,
+            Border = true,
+            Width = 0,
+            Height = 0
+        });
+        affiliateText1.AddLine("");
+        affiliateText1.AddLine("");
+        affiliateText1.AddLine("");
+        affiliateText1.AddLine(Util.CenterString(star.AffiliateText1 ?? ""), new TextLineAttributes
+        {
+            Color = Color.Blue,
+            Border = true,
+            Width = 0,
+            Height = 2
+        });
+        _dataTransmitter.AddFrame(affiliateText1.Build());
+        Logger.Info($"[DataDownloader] Page {(int)Page.AffiliateText1} sent");
+
+        PageBuilder affiliateText2 = new PageBuilder((int)Page.AffiliateText2, Address.FromSwitches(star.Switches), _omcw);
+        affiliateText2.AddLine("53120", new TextLineAttributes
+        {
+            Color = Color.Blue,
+            Border = true,
+            Width = 0,
+            Height = 2
+        });
+        affiliateText2.AddLine("");
+        affiliateText2.AddLine("");
+        affiliateText2.AddLine("");
+        affiliateText2.AddLine(Util.CenterString(star.AffiliateText2 ?? ""), new TextLineAttributes
+        {
+            Color = Color.Blue,
+            Border = true,
+            Width = 0,
+            Height = 2
+        });
+        _dataTransmitter.AddFrame(affiliateText2.Build());
+        Logger.Info($"[DataDownloader] Page {(int)Page.AffiliateText2} sent");
     }
 }

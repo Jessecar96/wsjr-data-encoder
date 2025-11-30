@@ -69,10 +69,30 @@
             </div>
         </div>
 
-        <div class="mb-3">
-            <label for="switches" class="form-label">Switches</label>
-            <input type="text" class="form-control" id="switches" maxlength="8" onchange="updateStar()">
-            <div class="form-text">Physical switches for this star. Jr: Use Alt + F10 on keyboard</div>
+        <div class="mb-3 row">
+            <div class="col">
+                <label for="switches" class="form-label">Switches</label>
+                <input type="text" class="form-control" id="switches" maxlength="8" onchange="updateStar()">
+                <div class="form-text">Physical switches for this star. Jr: Use Alt + F10 on keyboard</div>
+            </div>
+            <div class="col">
+                <label for="headend_id" class="form-label">Headend ID</label>
+                <input type="text" class="form-control" id="headend_id" maxlength="8" onchange="updateStar()">
+                <div class="form-text">Only used for tag53100</div>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <div class="col">
+                <label for="affiliate_text1" class="form-label">Affiliate Text 1</label>
+                <input type="text" class="form-control" id="affiliate_text1" maxlength="8" onchange="updateStar()">
+                <div class="form-text">Cable company name</div>
+            </div>
+            <div class="col">
+                <label for="affiliate_text2" class="form-label">Affiliate Text 2</label>
+                <input type="text" class="form-control" id="affiliate_text2" maxlength="8" onchange="updateStar()">
+                <div class="form-text">Radio station/newspaper name</div>
+            </div>
         </div>
 
         <div class="mb-3">
