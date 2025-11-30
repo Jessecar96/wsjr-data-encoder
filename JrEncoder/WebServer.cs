@@ -47,6 +47,9 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             _flavors.Save();
             Console.WriteLine("Saved flavors file");
 
+            // Tell program to reload config
+            _ = Program.LoadConfig("config.json");
+
             // Return json response
             dynamic response = new
             {
@@ -76,7 +79,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             string flavor = await reader.ReadToEndAsync();
 
             // Run that flavor in the background on a new task
-            _ = Task.Run(() => Program.FlavorMan.RunFlavor(flavor));
+            _ = Task.Run(() => Program.FlavorMan?.RunFlavor(flavor));
 
             // Return json response
             dynamic response = new
@@ -89,7 +92,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
 
         app.MapPost("/cancelLocalPresentation", () =>
         {
-            Program.FlavorMan.CancelLF();
+            Program.FlavorMan?.CancelLF();
 
             // Return json response
             dynamic response = new
@@ -128,6 +131,19 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             };
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         }).DisableAntiforgery();
+
+        app.MapPost("/updateData", () =>
+        {
+            _ = Task.Run(() => Program.Downloader?.UpdateAll());
+
+            // Return json response
+            dynamic response = new
+            {
+                success = true,
+                message = "Updating data now",
+            };
+            return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
+        });
 
         await app.RunAsync();
     }

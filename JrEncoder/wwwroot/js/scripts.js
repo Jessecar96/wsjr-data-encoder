@@ -380,3 +380,20 @@ async function sendAlert() {
     respJson = await response.json();
     alert(respJson.message);
 }
+
+async function updateData() {
+    // Make http request
+    const response = await fetch('/updateData', {
+        method: 'POST'
+    });
+
+    // Make sure it loaded okay
+    if (!response.ok) {
+        alert("Unable to update data");
+        return;
+    }
+
+    // Read json response
+    respJson = await response.json();
+    alert(respJson.message);
+}
