@@ -1082,6 +1082,8 @@ public class DataDownloader
     {
         PageBuilder affiliateText1 = new PageBuilder((int)Page.AffiliateText1, Address.FromSwitches(star.Switches), _omcw);
         string headendId = star.HeadendId ?? "000000";
+        string channelNum = star.ChannelNumber != null ? "CHANNEL " + star.ChannelNumber : "";
+        // Headend ID
         affiliateText1.AddLine(headendId.PadLeft(32), new TextLineAttributes
         {
             Color = Color.Blue,
@@ -1089,10 +1091,32 @@ public class DataDownloader
             Width = 0,
             Height = 0
         });
+        // Blank lines
         affiliateText1.AddLine("");
         affiliateText1.AddLine("");
-        affiliateText1.AddLine("");
-        affiliateText1.AddLine(Util.CenterString(star.AffiliateText1 ?? ""), new TextLineAttributes
+        // Affiliate name
+        string[] affiliateTextLines = (star.AffiliateName ?? "").Replace("\r\n", "\n").Split("\n");
+        int lines = 0;
+        foreach (string textLine in affiliateTextLines)
+        {
+            if (lines >= 2) break; // limit to 2 lines
+            affiliateText1.AddLine(Util.CenterString(textLine), new TextLineAttributes
+            {
+                Color = Color.Blue,
+                Border = true,
+                Width = 0,
+                Height = 2
+            });
+            lines++;
+        }
+        // Blank line
+        affiliateText1.AddLine("", new TextLineAttributes
+        {
+            Width = 0,
+            Height = 2
+        });
+        // Channel number
+        affiliateText1.AddLine(channelNum, new TextLineAttributes
         {
             Color = Color.Blue,
             Border = true,
@@ -1103,23 +1127,46 @@ public class DataDownloader
         Logger.Info($"[DataDownloader] Page {(int)Page.AffiliateText1} sent");
 
         PageBuilder affiliateText2 = new PageBuilder((int)Page.AffiliateText2, Address.FromSwitches(star.Switches), _omcw);
-        affiliateText2.AddLine("53120", new TextLineAttributes
+        if (string.IsNullOrEmpty(star.RadioStation))
         {
-            Color = Color.Blue,
-            Border = true,
-            Width = 0,
-            Height = 2
-        });
-        affiliateText2.AddLine("");
-        affiliateText2.AddLine("");
-        affiliateText2.AddLine("");
-        affiliateText2.AddLine(Util.CenterString(star.AffiliateText2 ?? ""), new TextLineAttributes
+            // No radio station name defined, use "NewspaperL"
+            // Source: https://www.youtube.com/watch?v=Oly_qZUSyjk
+            affiliateText2.AddLine("53120", new TextLineAttributes
+            {
+                Color = Color.Blue,
+                Border = true,
+                Width = 0,
+                Height = 2
+            });
+            affiliateText2.AddLine("NewspaperL", new TextLineAttributes
+            {
+                Color = Color.Blue,
+                Border = true,
+                Width = 0,
+                Height = 2
+            });
+        }
+        else
         {
-            Color = Color.Blue,
-            Border = true,
-            Width = 0,
-            Height = 2
-        });
+            affiliateText2.AddLine("");
+            affiliateText2.AddLine("");
+            affiliateText2.AddLine("");
+            string[] radioTextLines = (star.RadioStation ?? "").Replace("\r\n", "\n").Split("\n");
+            lines = 0;
+            foreach (string textLine in radioTextLines)
+            {
+                if (lines >= 2) break; // limit to 2 lines
+                affiliateText2.AddLine(Util.CenterString(textLine), new TextLineAttributes
+                {
+                    Color = Color.Blue,
+                    Border = true,
+                    Width = 0,
+                    Height = 2
+                });
+                lines++;
+            }
+        }
+
         _dataTransmitter.AddFrame(affiliateText2.Build());
         Logger.Info($"[DataDownloader] Page {(int)Page.AffiliateText2} sent");
     }

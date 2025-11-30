@@ -9,8 +9,9 @@ const elLocationName = document.getElementById("location_name");
 const elLocation = document.getElementById("location");
 const elSwitches = document.getElementById("switches");
 const elHeadendId = document.getElementById("headend_id");
-const elAffiliateText1 = document.getElementById("affiliate_text1");
-const elAffiliateText2 = document.getElementById("affiliate_text2");
+const elChannelNumber = document.getElementById("channel_number");
+const elAffiliateName = document.getElementById("affiliate_name");
+const elRadioStation = document.getElementById("radio_station");
 const elZones = document.getElementById("zones");
 const elNearbyCity0Name = document.getElementById("nearby_city_0_name");
 const elNearbyCity1Name = document.getElementById("nearby_city_1_name");
@@ -141,8 +142,9 @@ function setHtmlValues() {
     elLocation.value = starConfig.location ?? "";
     elSwitches.value = starConfig.switches ?? "";
     elHeadendId.value = starConfig.headend_id ?? "";
-    elAffiliateText1.value = starConfig.affiliate_text1 ?? "";
-    elAffiliateText2.value = starConfig.affiliate_text2 ?? "";
+    elChannelNumber.value = starConfig.channel_number ?? "";
+    elAffiliateName.value = starConfig.affiliate_name ?? "";
+    elRadioStation.value = starConfig.radio_station ?? "";
     elZones.value = starConfig.zones ?? "";
     // Nearby cities
     elNearbyCity0Name.value = starConfig.nearby_cities.location_name[0] ?? "";
@@ -215,8 +217,9 @@ function updateStar() {
     config.config.stars[selectedStarIndex].location = elLocation.value;
     config.config.stars[selectedStarIndex].switches = elSwitches.value;
     config.config.stars[selectedStarIndex].headend_id = elHeadendId.value;
-    config.config.stars[selectedStarIndex].affiliate_text1 = elAffiliateText1.value;
-    config.config.stars[selectedStarIndex].affiliate_text2 = elAffiliateText2.value;
+    config.config.stars[selectedStarIndex].channel_number = elChannelNumber.value;
+    config.config.stars[selectedStarIndex].affiliate_name = elAffiliateName.value;
+    config.config.stars[selectedStarIndex].radio_station = elRadioStation.value;
     config.config.stars[selectedStarIndex].zones = zoneList;
     // Nearby cities
     config.config.stars[selectedStarIndex].nearby_cities.location_name[0] = elNearbyCity0Name.value;
