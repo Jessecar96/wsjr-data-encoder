@@ -330,7 +330,31 @@ async function runLF() {
 
     // Make sure it loaded okay
     if (!response.ok) {
-        alert("Unable to cancel LF");
+        alert("Unable to run LF");
+        return;
+    }
+
+    // Read json response
+    respJson = await response.json();
+    alert(respJson.message);
+}
+
+async function runLoop() {
+
+    if (elRunFlavor.value.trim() === "") {
+        alert("Flavor is required");
+        return;
+    }
+
+    // Make http request
+    const response = await fetch('/runLoop', {
+        method: 'POST',
+        body: elRunFlavor.value
+    });
+
+    // Make sure it loaded okay
+    if (!response.ok) {
+        alert("Unable to run loop");
         return;
     }
 

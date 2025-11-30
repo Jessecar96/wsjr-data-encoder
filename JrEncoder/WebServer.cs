@@ -89,6 +89,23 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             };
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         });
+        
+        app.MapPost("/runLoop", async (HttpContext context) =>
+        {
+            using StreamReader reader = new StreamReader(context.Request.Body, Encoding.UTF8);
+            string flavor = await reader.ReadToEndAsync();
+
+            // Run that flavor in the background on a new task
+            _ = Task.Run(() => Program.FlavorMan?.RunLoop(flavor));
+
+            // Return json response
+            dynamic response = new
+            {
+                success = true,
+                message = "Here we go grandma!",
+            };
+            return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
+        });
 
         app.MapPost("/cancelLocalPresentation", () =>
         {
