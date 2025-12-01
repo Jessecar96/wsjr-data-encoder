@@ -27,7 +27,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
         app.MapGet("/test", () => "This is the test page");
         app.MapGet("/config/get", () =>
         {
-            ConfigWebResponse response = new()
+            ConfigWebResponse response = new ConfigWebResponse
             {
                 config = _config,
                 flavors = _flavors
@@ -59,51 +59,62 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         });
 
-        app.MapPost("/presentation/run", async (HttpContext context) =>
+        app.MapPost("/presentation/run", ([FromForm] string flavor, [FromForm] string? time = null) =>
         {
-            using StreamReader reader = new StreamReader(context.Request.Body, Encoding.UTF8);
-            string flavor = await reader.ReadToEndAsync();
+            DateTimeOffset? runTime = null;
+
+            // Check if time was passed in
+            if (time != null)
+            {
+                // Try to parse it as an int
+                if (!int.TryParse(time, out int parsedTime))
+                {
+                    // Failed to, let's bail out
+                    return Task.FromResult(JsonSerializer.Serialize(new
+                    {
+                        success = false,
+                        message = "Invalid time provided",
+                    }, new JsonSerializerOptions { WriteIndented = true }));
+                }
+
+                // Now parse that to a DateTimeOffset
+                runTime = DateTimeOffset.FromUnixTimeSeconds(parsedTime);
+            }
 
             // Run that flavor in the background on a new task
-            _ = Task.Run(() => Program.FlavorMan?.RunFlavor(flavor));
+            _ = Task.Run(() => Program.FlavorMan?.RunFlavor(flavor, runTime));
 
             // Return json response
-            dynamic response = new
+            return Task.FromResult(JsonSerializer.Serialize(new
             {
                 success = true,
                 message = "Here we go grandma!",
-            };
-            return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
-        });
-        
-        app.MapPost("/presentation/loop", async (HttpContext context) =>
-        {
-            using StreamReader reader = new StreamReader(context.Request.Body, Encoding.UTF8);
-            string flavor = await reader.ReadToEndAsync();
+            }, new JsonSerializerOptions { WriteIndented = true }));
+        }).DisableAntiforgery();
 
+        app.MapPost("/presentation/loop", ([FromForm] string flavor) =>
+        {
             // Run that flavor in the background on a new task
             _ = Task.Run(() => Program.FlavorMan?.RunLoop(flavor));
 
             // Return json response
-            dynamic response = new
+            return Task.FromResult(JsonSerializer.Serialize(new
             {
                 success = true,
                 message = "Here we go grandma!",
-            };
-            return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
-        });
+            }, new JsonSerializerOptions { WriteIndented = true }));
+        }).DisableAntiforgery();
 
         app.MapPost("/presentation/cancel", () =>
         {
             Program.FlavorMan?.CancelLF();
 
             // Return json response
-            dynamic response = new
+            return JsonSerializer.Serialize(new
             {
                 success = true,
                 message = "Presentation Cancelled",
-            };
-            return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
+            }, new JsonSerializerOptions { WriteIndented = true });
         });
 
         app.MapPost("/alert/send", ([FromForm] string text, [FromForm] string type) =>
@@ -127,12 +138,11 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             Program.ShowWxWarning(Util.WordWrapGeneric(text), realType, Address.All, omcw);
 
             // Return json response
-            dynamic response = new
+            return JsonSerializer.Serialize(new
             {
                 success = true,
                 message = "Alert Sent",
-            };
-            return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
+            }, new JsonSerializerOptions { WriteIndented = true });
         }).DisableAntiforgery();
 
         app.MapPost("/data/refresh", () =>
@@ -140,12 +150,11 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             _ = Task.Run(() => Program.Downloader?.UpdateAll());
 
             // Return json response
-            dynamic response = new
+            return JsonSerializer.Serialize(new
             {
                 success = true,
                 message = "Refreshing all data now",
-            };
-            return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
+            }, new JsonSerializerOptions { WriteIndented = true });
         });
 
         await app.RunAsync();
