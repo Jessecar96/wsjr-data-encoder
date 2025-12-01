@@ -25,7 +25,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
 
         // Server requests
         app.MapGet("/test", () => "This is the test page");
-        app.MapGet("/getConfig", () =>
+        app.MapGet("/config/get", () =>
         {
             ConfigWebResponse response = new()
             {
@@ -35,7 +35,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         });
 
-        app.MapPost("/setConfig", (ConfigWebResponse newConfig) =>
+        app.MapPost("/config/set", (ConfigWebResponse newConfig) =>
         {
             // Set the new config
             _config = newConfig.config;
@@ -59,21 +59,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         });
 
-        app.MapPost("/loadLocalPresentation", (string flavor) =>
-        {
-            // There is no loading on the jr!
-            // so we do nothing :)
-
-            // Return json response
-            dynamic response = new
-            {
-                success = true,
-                message = "Saved Config",
-            };
-            return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
-        });
-
-        app.MapPost("/runLocalPresentation", async (HttpContext context) =>
+        app.MapPost("/presentation/run", async (HttpContext context) =>
         {
             using StreamReader reader = new StreamReader(context.Request.Body, Encoding.UTF8);
             string flavor = await reader.ReadToEndAsync();
@@ -90,7 +76,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         });
         
-        app.MapPost("/runLoop", async (HttpContext context) =>
+        app.MapPost("/presentation/loop", async (HttpContext context) =>
         {
             using StreamReader reader = new StreamReader(context.Request.Body, Encoding.UTF8);
             string flavor = await reader.ReadToEndAsync();
@@ -107,7 +93,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         });
 
-        app.MapPost("/cancelLocalPresentation", () =>
+        app.MapPost("/presentation/cancel", () =>
         {
             Program.FlavorMan?.CancelLF();
 
@@ -115,18 +101,18 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             dynamic response = new
             {
                 success = true,
-                message = "LF Cancelled",
+                message = "Presentation Cancelled",
             };
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         });
 
-        app.MapPost("/sendAlert", ([FromForm] string alertText, [FromForm] string alertType) =>
+        app.MapPost("/alert/send", ([FromForm] string text, [FromForm] string type) =>
         {
             // Show warning
-            WarningType type;
+            WarningType realType;
             try
             {
-                type = Enum.Parse<WarningType>(alertType);
+                realType = Enum.Parse<WarningType>(type);
             }
             catch (Exception)
             {
@@ -138,7 +124,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
                 }, new JsonSerializerOptions { WriteIndented = true });
             }
 
-            Program.ShowWxWarning(Util.WordWrapGeneric(alertText), type, Address.All, omcw);
+            Program.ShowWxWarning(Util.WordWrapGeneric(text), realType, Address.All, omcw);
 
             // Return json response
             dynamic response = new
@@ -149,7 +135,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         }).DisableAntiforgery();
 
-        app.MapPost("/updateData", () =>
+        app.MapPost("/data/refresh", () =>
         {
             _ = Task.Run(() => Program.Downloader?.UpdateAll());
 
@@ -157,7 +143,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             dynamic response = new
             {
                 success = true,
-                message = "Updating data now",
+                message = "Refreshing all data now",
             };
             return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
         });

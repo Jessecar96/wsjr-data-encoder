@@ -62,7 +62,7 @@ async function loadControlPage() {
 async function loadConfig() {
 
     // Make http request to get config
-    const response = await fetch('/getConfig');
+    const response = await fetch('/config/get');
 
     // Make sure it loaded okay
     if (!response.ok) {
@@ -296,7 +296,7 @@ function removeStar() {
 async function saveConfig() {
 
     // Make http request to get config
-    const response = await fetch('/setConfig', {
+    const response = await fetch('/config/set', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -323,9 +323,11 @@ async function runLF() {
     }
 
     // Make http request
-    const response = await fetch('/runLocalPresentation', {
+    const formData = new FormData();
+    formData.append('flavor', elRunFlavor.value);
+    const response = await fetch('/presentation/run', {
         method: 'POST',
-        body: elRunFlavor.value
+        body: formData
     });
 
     // Make sure it loaded okay
@@ -347,9 +349,11 @@ async function runLoop() {
     }
 
     // Make http request
-    const response = await fetch('/runLoop', {
+    const formData = new FormData();
+    formData.append('flavor', elRunFlavor.value);
+    const response = await fetch('/presentation/loop', {
         method: 'POST',
-        body: elRunFlavor.value
+        body: formData
     });
 
     // Make sure it loaded okay
@@ -365,7 +369,7 @@ async function runLoop() {
 
 async function cancelLF() {
     // Make http request
-    const response = await fetch('/cancelLocalPresentation', {
+    const response = await fetch('/presentation/cancel', {
         method: 'POST'
     });
 
@@ -390,9 +394,9 @@ async function sendAlert() {
     
     // Make http request
     const formData = new FormData();
-    formData.append('alertText', alertText);
-    formData.append('alertType', alertType);
-    const response = await fetch('/sendAlert', {
+    formData.append('text', alertText);
+    formData.append('type', alertType);
+    const response = await fetch('/alert/send', {
         method: 'POST',
         body: formData
     });
@@ -410,7 +414,7 @@ async function sendAlert() {
 
 async function updateData() {
     // Make http request
-    const response = await fetch('/updateData', {
+    const response = await fetch('/data/refresh', {
         method: 'POST'
     });
 
