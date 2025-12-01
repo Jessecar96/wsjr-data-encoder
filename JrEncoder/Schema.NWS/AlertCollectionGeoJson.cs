@@ -43,7 +43,7 @@ public class Parameters
     public required List<string> BLOCKCHANNEL { get; init; }
 
     [JsonPropertyName("EAS-ORG")]
-    public required List<string> EASORG { get; init; }
+    public List<string>? EASORG { get; init; }
 
     [JsonPropertyName("VTEC")]
     public required List<string> VTEC { get; init; }
