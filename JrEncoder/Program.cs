@@ -85,14 +85,6 @@ class Program
         // Start web server
         _webServer = new WebServer(_config, _flavors, _omcw);
         _ = Task.Run(() => _webServer.Run());
-
-        // Start MQTT server
-        MQTTServer server = new MQTTServer();
-        _ = Task.Run(() => server.Run());
-
-        // MQTT Client
-        MQTTClient client = new MQTTClient(_omcw);
-        _ = Task.Run(() => client.Run());
         
         // Init flavor man
         FlavorMan = new FlavorMan(_config, _flavors, _dataTransmitter, _omcw);

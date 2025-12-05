@@ -13,7 +13,6 @@
 
     <ItemGroup>
       <PackageReference Include="CommandLineParser" Version="2.9.1" />
-      <PackageReference Include="MQTTnet" Version="5.0.1.1416" />
     </ItemGroup>
 
     <ItemGroup>
