@@ -46,10 +46,10 @@ public class Parameters
     public List<string>? EASORG { get; init; }
 
     [JsonPropertyName("VTEC")]
-    public required List<string> VTEC { get; init; }
+    public List<string>? VTEC { get; init; }
 
     [JsonPropertyName("eventEndingTime")]
-    public required List<DateTime> EventEndingTime { get; init; }
+    public List<DateTime>? EventEndingTime { get; init; }
 }
 
 public class Alert

@@ -78,21 +78,21 @@ public class DataDownloader
         _ = Task.Run(async () =>
         {
             // Update alerts every minute
-            using PeriodicTimer timer = new(TimeSpan.FromMinutes(1));
+            using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMinutes(1));
             while (await timer.WaitForNextTickAsync())
                 await UpdateAlerts();
         });
         _ = Task.Run(async () =>
         {
             // Update current conditions every 5 minutes
-            using PeriodicTimer timer = new(TimeSpan.FromMinutes(5));
+            using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMinutes(5));
             while (await timer.WaitForNextTickAsync())
                 await UpdateCurrentConditions();
         });
         _ = Task.Run(async () =>
         {
             // Update forecast every 30 minutes
-            using PeriodicTimer timer = new(TimeSpan.FromMinutes(30));
+            using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMinutes(30));
             while (await timer.WaitForNextTickAsync())
             {
                 await UpdateForecast();
@@ -223,8 +223,8 @@ public class DataDownloader
             }
             catch (Exception ex)
             {
-                // Failed to parse json, halt program and show error
-                Program.ShowErrorMessage(ex.Message);
+                // Failed to parse json
+                Logger.Error($"[DataDownloader] Failed to parse alerts for {star.LocationName}: {ex.Message}");
             }
 
             // Make sure it's not null
