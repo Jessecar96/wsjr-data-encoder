@@ -921,8 +921,8 @@ public class DataDownloader
                     string cond = (forecastData.Daypart[0].GetFormattedWxPhraseShort(2) ?? "").PadRight(10);
                     if (cond.Length > 10) cond = cond.Substring(0, 10); // limit to 10 chars
                     // Use index 1 here to get tomorrow's hi and low temp (0 = today, 1 = tomorrow)
-                    string lowTemp = (forecastData.TemperatureMin[1].ToString() ?? "").PadRight(3);
-                    string hiTemp = (forecastData.TemperatureMax[1].ToString() ?? "").PadRight(3);
+                    string lowTemp = (forecastData.TemperatureMin[1].ToString() ?? "").PadLeft(3);
+                    string hiTemp = (forecastData.TemperatureMax[1].ToString() ?? "").PadLeft(3);
                     regionalFcst.AddLine($"{locationName,-14} {cond} {lowTemp} {hiTemp}");
                 }
             }
