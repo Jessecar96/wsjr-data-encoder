@@ -921,8 +921,8 @@ public class DataDownloader
                 else
                 {
                     // We use the 2 index on everything here so we get tomorrow's forecast (0 is today, 1 is tonight, 2 is tomorrow)
-                    string cond = (forecastData.Daypart[0].GetFormattedWxPhraseShort(2) ?? "").PadRight(10);
-                    if (cond.Length > 10) cond = cond.Substring(0, 10); // limit to 10 chars
+                    string cond = (forecastData.Daypart[0].GetFormattedWxPhraseShort(2) ?? "").PadRight(9);
+                    if (cond.Length > 9) cond = cond.Substring(0, 9); // limit to 9 chars
                     // Use index 1 here to get tomorrow's hi and low temp (0 = today, 1 = tomorrow)
                     string lowTemp = (forecastData.TemperatureMin[1].ToString() ?? "").PadLeft(3);
                     string hiTemp = (forecastData.TemperatureMax[1].ToString() ?? "").PadLeft(3);
