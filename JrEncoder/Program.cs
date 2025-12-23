@@ -126,9 +126,6 @@ class Program
 
         await Task.Delay(500);
 
-        // Default no loop state
-        FlavorMan.SetDefaultOMCW();
-
         // Check if looping is configured
         if (!string.IsNullOrEmpty(_config.LoopFlavor))
         {
@@ -138,6 +135,8 @@ class Program
         }
         else
         {
+            // Default no loop state
+            FlavorMan.SetDefaultOMCW();
             Logger.Info("Ready for commands! Looping is not enabled.");
         }
 

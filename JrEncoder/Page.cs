@@ -2,6 +2,7 @@
 
 public enum Page
 {
+    Blank = 0,
     CurrentConditions = 1, // Current conditions for the primary location
     Almanac = 2,
     Forecast1 = 3, // 36 hour forecast, page 1

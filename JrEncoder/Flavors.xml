@@ -1,4 +1,8 @@
 ﻿<Flavors>
+    <!-- Default OMCW state, only one page works in this flavor -->
+    <Flavor Name="Default">
+        <Page Name="Blank" Duration="1" TopSolid="0" BottomSolid="0" LDL="DateTime" RegionSeparator="0"/>
+    </Flavor>
     <Flavor Name="L">
         <Page Name="CurrentConditions" Duration="10"/>
         <Page Name="LatestObservations" Duration="12"/>

@@ -41,12 +41,55 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
     /// </summary>
     public void SetDefaultOMCW()
     {
-        omcw.TopSolid(false)
-            .TopPage(0)
-            .BottomSolid(false)
-            .RegionSeparator(false)
-            .LDL(LDLStyle.DateTime)
-            .Commit();
+        // Get default flavor
+        Flavor? flavor = flavors.Flavor.FirstOrDefault(el => el.Name == "Default");
+        if (flavor == null)
+        {
+            Logger.Error("Default flavor does not exist. Using default OMCW.");
+            omcw.TopSolid(false)
+                .TopPage(0)
+                .BottomSolid(false)
+                .RegionSeparator(false)
+                .LDL(LDLStyle.DateTime)
+                .Commit();
+        }
+        else
+        {
+            // Default flavor only supports one page
+            FlavorPage page = flavor.Page[0];
+
+            // Parse the page number
+            if (!Enum.TryParse(page.Name, out Page newPage))
+            {
+                Logger.Error($"Invalid page \"{page.Name}\"");
+                Program.ShowErrorMessage($"Invalid page \"{page.Name}\"");
+                return;
+            }
+
+            // Parse LDL style
+            // Make sure that LDL style exists
+            if (!Enum.TryParse(page.LDL, out LDLStyle ldlStyle))
+            {
+                Logger.Error($"Invalid LDL Style \"{page.LDL}\"");
+                Program.ShowErrorMessage($"Invalid LDL Style \"{page.LDL}\"");
+                return;
+            }
+
+            // Set omcw properties
+            omcw
+                .TopPage((int)newPage)
+                .LDL(ldlStyle)
+                .TopSolid(page.TopSolid)
+                .BottomSolid(page.BottomSolid)
+                .RegionSeparator(page.RegionSeparator)
+                .Radar(page.Radar)
+                .AuxAudio(page.AuxAudio)
+                .LocalPreroll(page.LocalPreroll)
+                .LocalProgram(page.LocalProgram);
+            omcw.Commit();
+
+            Logger.Info("Switched to default page");
+        }
     }
 
     /// <summary>
@@ -59,7 +102,7 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
         // Make a new CTS if we don't have one, or the one we have was already canceled previously
         if (_cancellationTokenSource is null or { IsCancellationRequested: true })
             _cancellationTokenSource = new CancellationTokenSource();
-        
+
         CancellationToken cancellationToken = _cancellationTokenSource.Token;
 
         if (_flavorRunning)
@@ -130,6 +173,7 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
                 // Make sure that LDL style exists
                 if (!Enum.TryParse(page.LDL, out LDLStyle ldlStyle))
                 {
+                    Logger.Error($"Invalid LDL Style \"{page.LDL}\"");
                     Program.ShowErrorMessage($"Invalid LDL Style \"{page.LDL}\"");
                     return;
                 }
@@ -170,8 +214,9 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
         _flavorRunning = false;
         Logger.Info($"Flavor \"{flavor.Name}\" complete");
 
-        // Switch to default state
-        SetDefaultOMCW();
+        // Switch to default state if it's not looping
+        if (!_runLoop)
+            SetDefaultOMCW();
     }
 
     public void CancelLF()
