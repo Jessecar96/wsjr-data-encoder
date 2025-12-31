@@ -84,7 +84,7 @@ class Program
 
         // Start web server
         _webServer = new WebServer(_config, _flavors, _omcw);
-        _ = Task.Run(() => _webServer.Run());
+        _ = _webServer.Run().ContinueWith(_ => Environment.Exit(0));
         
         // Init flavor man
         FlavorMan = new FlavorMan(_config, _flavors, _dataTransmitter, _omcw);

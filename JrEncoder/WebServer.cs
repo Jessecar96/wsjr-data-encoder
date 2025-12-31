@@ -1,8 +1,6 @@
-﻿using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 using JrEncoderLib.StarAttributes;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JrEncoder;
@@ -12,7 +10,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
     private Config _config = config;
     private Flavors _flavors = flavors;
 
-    public async Task Run()
+    public Task Run()
     {
         WebApplication app = WebApplication.Create();
 
@@ -23,6 +21,8 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
         app.UseDefaultFiles();
         app.UseStaticFiles();
 
+        JsonSerializerOptions jsonOptions = new JsonSerializerOptions { WriteIndented = true };
+
         // Server requests
         app.MapGet("/test", () => "This is the test page");
         app.MapGet("/config/get", () =>
@@ -32,7 +32,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
                 config = _config,
                 flavors = _flavors
             };
-            return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
+            return JsonSerializer.Serialize(response, jsonOptions);
         });
 
         app.MapPost("/config/set", (ConfigWebResponse newConfig) =>
@@ -56,7 +56,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
                 success = true,
                 message = "Saved Config",
             };
-            return JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true });
+            return JsonSerializer.Serialize(response, jsonOptions);
         });
 
         app.MapPost("/presentation/run", ([FromForm] string flavor, [FromForm] string? time = null) =>
@@ -74,7 +74,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
                     {
                         success = false,
                         message = "Invalid time provided",
-                    }, new JsonSerializerOptions { WriteIndented = true }));
+                    }, jsonOptions));
                 }
 
                 // Now parse that to a DateTimeOffset
@@ -89,7 +89,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             {
                 success = true,
                 message = "Here we go grandma!",
-            }, new JsonSerializerOptions { WriteIndented = true }));
+            }, jsonOptions));
         }).DisableAntiforgery();
 
         app.MapPost("/presentation/loop", ([FromForm] string flavor) =>
@@ -102,7 +102,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             {
                 success = true,
                 message = "Here we go grandma!",
-            }, new JsonSerializerOptions { WriteIndented = true }));
+            }, jsonOptions));
         }).DisableAntiforgery();
 
         app.MapPost("/presentation/cancel", () =>
@@ -114,7 +114,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             {
                 success = true,
                 message = "Presentation Cancelled",
-            }, new JsonSerializerOptions { WriteIndented = true });
+            }, jsonOptions);
         });
 
         app.MapPost("/alert/send", ([FromForm] string text, [FromForm] string type) =>
@@ -132,7 +132,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
                 {
                     success = true,
                     message = "Invalid alert type",
-                }, new JsonSerializerOptions { WriteIndented = true });
+                }, jsonOptions);
             }
 
             Program.ShowWxWarning(Util.WordWrapGeneric(text), realType, Address.All, omcw);
@@ -142,7 +142,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             {
                 success = true,
                 message = "Alert Sent",
-            }, new JsonSerializerOptions { WriteIndented = true });
+            }, jsonOptions);
         }).DisableAntiforgery();
 
         app.MapPost("/data/refresh", () =>
@@ -154,10 +154,10 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             {
                 success = true,
                 message = "Refreshing all data now",
-            }, new JsonSerializerOptions { WriteIndented = true });
+            }, jsonOptions);
         });
 
-        await app.RunAsync();
+        return app.RunAsync();
     }
 
     public void SetConfig(Config config)
