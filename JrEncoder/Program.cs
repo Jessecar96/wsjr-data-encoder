@@ -59,7 +59,18 @@ class Program
         }
 
         // Background thread for data transmission
-        _ = Task.Run(() => _dataTransmitter.Run());
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                _dataTransmitter.Run();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Failed to run data transmitter: " + ex.Message);
+                if (ex.StackTrace != null) Logger.Error(ex.StackTrace);
+            }
+        });
 
         // Load config.json
         await LoadConfig("config.json");

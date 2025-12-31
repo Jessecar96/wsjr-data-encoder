@@ -93,7 +93,7 @@ public class GPIODataTransmitter(OMCW omcw) : DataTransmitter(omcw)
         Console.WriteLine("DDS Init Complete");
     }
 
-    public override async Task Run()
+    public override void Run()
     {
         DataFrame[] idleFrames = new PageBuilder(42, Address.None, omcw)
             .AddLine("00000000000000000000000000000000")

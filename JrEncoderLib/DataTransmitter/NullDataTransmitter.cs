@@ -13,7 +13,7 @@ public class NullDataTransmitter(OMCW omcw) : DataTransmitter(omcw)
     {
     }
 
-    public override Task Run()
+    public override void Run()
     {
         while (true) Thread.Sleep(100);
         // ReSharper disable once FunctionNeverReturns
