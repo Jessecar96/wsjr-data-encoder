@@ -133,10 +133,10 @@ public class Config
     /// <summary>
     /// Save config file to config.json
     /// </summary>
-    public void Save()
+    public void Save(string fileName = "config.json")
     {
         JsonSerializerOptions options = new() { WriteIndented = true };
-        File.WriteAllText(GetPath(), JsonSerializer.Serialize(this, options));
+        File.WriteAllText(GetPath(fileName), JsonSerializer.Serialize(this, options));
     }
 
     public static string GetPath(string fileName = "config.json")
@@ -165,23 +165,24 @@ public class Config
         return JsonSerializer.Deserialize<Config>(fileContent, options) ?? throw new InvalidOperationException("Invalid config.json file");
     }
 
-    public static void CreateConfig()
+    public static void CreateConfig(string fileName = "config.json")
     {
-        Config newConfig = new()
+        Config newConfig = new Config
         {
-            APIKey = "",
+            APIKey = "e1f10a1e78da46f5b10a1e78da96f525",
             LoopFlavor = "L",
-            ForceClockSet = false,
+            ForceClockSet = true,
             Stars =
             [
                 new WeatherStar()
                 {
-                    Location = "Lat,Lon",
-                    LocationName = "Location Name",
+                    Location = "40.78,-73.96",
+                    LocationName = "Central Park",
                     Switches = "00000000",
                 }
             ]
         };
-        newConfig.Save();
+        newConfig.Save(fileName);
+        Logger.Info("Created new config file: " + fileName);
     }
 }

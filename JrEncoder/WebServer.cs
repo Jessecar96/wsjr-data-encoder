@@ -48,7 +48,7 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             Console.WriteLine("Saved flavors file");
 
             // Tell program to reload config
-            _ = Program.LoadConfig("config.json");
+            _ = Program.LoadCreateConfig("config.json");
 
             // Return json response
             dynamic response = new

@@ -55,25 +55,41 @@ class Program
         {
             // Init GPIO data transmitter, sets up DDS module
             _dataTransmitter = new GPIODataTransmitter(_omcw);
-            _dataTransmitter.Init();
         }
+
+        // Init/reset hardware to send frames 
+        _dataTransmitter.Init();
 
         // Background thread for data transmission
         _ = Task.Run(() =>
         {
-            try
+            // Forever loop to always restart data transmitter
+            while (true)
             {
-                _dataTransmitter.Run();
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("Failed to run data transmitter: " + ex.Message);
-                if (ex.StackTrace != null) Logger.Error(ex.StackTrace);
+                try
+                {
+                    // Start sending frames forever
+                    _dataTransmitter.Run();
+                }
+                catch (Exception ex)
+                {
+                    // Something crashed in the data sender
+                    Logger.Error("Failed to run data transmitter: " + ex.Message);
+                    if (ex.StackTrace != null) Logger.Error(ex.StackTrace);
+                }
+                finally
+                {
+                    // We will restart the data sender but wait 1 second before trying
+                    Thread.Sleep(1000);
+
+                    // Init/reset hardware to send frames 
+                    _dataTransmitter.Init();
+                }
             }
         });
 
         // Load config.json
-        await LoadConfig("config.json");
+        await LoadCreateConfig("config.json");
 
         // Load flavor config
         _flavors = Flavors.LoadFlavors();
@@ -96,7 +112,7 @@ class Program
         // Start web server
         _webServer = new WebServer(_config, _flavors, _omcw);
         _ = _webServer.Run().ContinueWith(_ => Environment.Exit(0));
-        
+
         // Init flavor man
         FlavorMan = new FlavorMan(_config, _flavors, _dataTransmitter, _omcw);
 
@@ -159,8 +175,14 @@ class Program
     /// <summary>
     /// Load a config file
     /// </summary>
-    public static async Task LoadConfig(string fileName)
+    public static async Task LoadCreateConfig(string fileName)
     {
+        // Check if the file exists, if it doesn't create a new default config
+        if (!File.Exists(fileName))
+        {
+            Config.CreateConfig(fileName);
+        }
+        
         try
         {
             _config = await Config.LoadConfig(fileName);
