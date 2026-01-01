@@ -85,8 +85,8 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
                 .Radar(page.Radar)
                 .AuxAudio(page.AuxAudio)
                 .LocalPreroll(page.LocalPreroll)
-                .LocalProgram(page.LocalProgram);
-            omcw.Commit();
+                .LocalProgram(page.LocalProgram)
+                .Commit();
 
             Logger.Info("Switched to default page");
         }
@@ -191,9 +191,8 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
                 .Radar(page.Radar)
                 .AuxAudio(page.AuxAudio)
                 .LocalPreroll(page.LocalPreroll)
-                .LocalProgram(page.LocalProgram);
-
-            omcw.Commit();
+                .LocalProgram(page.LocalProgram)
+                .Commit();
 
             Logger.Info("Switched to page " + newPage);
 
