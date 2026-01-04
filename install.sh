@@ -5,8 +5,8 @@ if [ "$EUID" -eq 0 ]
   exit
 fi
 
-# Update OS
-echo "## Updating OS ##"
+# Update system
+echo "## Updating system ##"
 sudo apt-get update
 sudo apt-get upgrade -yq
 
@@ -70,11 +70,16 @@ echo "## Building project ##"
 mkdir -p $HOME/jrencoder
 $HOME/.dotnet/dotnet build --nologo --configuration Debug --property:OutputPath=$HOME/jrencoder/ -property:WarningLevel=0 $HOME/wsjr-data-encoder/JrEncoder.sln
 
+# Check if systemd service exists already
 if [ ! -f /etc/systemd/system/jrencoder.service ]; then
-  # Create systemd service
   echo "## Installing service ##"
-  service_installed=true
-  cat << EOL | sudo tee /etc/systemd/system/jrencoder.service
+  first_install=true
+else
+  echo "## Updating service ##"
+fi
+
+# Create/update systemd service
+cat << EOL | sudo tee /etc/systemd/system/jrencoder.service
 [Unit]
 Description=Weather Star Data Encoder
 After=network.target
@@ -85,11 +90,11 @@ Restart=always
 RestartSec=1
 User=${USER}
 ExecStart=$HOME/.dotnet/dotnet $HOME/jrencoder/JrEncoder.dll
+WorkingDirectory=$HOME/jrencoder/
 
 [Install]
 WantedBy=multi-user.target
 EOL
-fi
 
 # Reload systemctl
 sudo systemctl daemon-reload
@@ -97,18 +102,16 @@ sudo systemctl daemon-reload
 # Enable at boot
 sudo systemctl enable jrencoder.service
 
-# Generate config file
-echo "## Generating config file ##"
-cd $HOME/jrencoder
-$HOME/.dotnet/dotnet $HOME/jrencoder/JrEncoder.dll --create-config
+# Get wifi IP address
+ip=$(ip -4 addr show wlan0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
 
 # Check if the service was just installed for the first time
-if [ "$service_installed" = true ] ; then
+if [ "$first_install" = true ] ; then
 
   # Service was just installed, a reboot is required
   printf "\n\nInstall complete!\n"
-  echo "config.json file was created in $HOME/jrencoder/"
-  echo "Edit your config.json file using nano/vi/vim then reboot your pi to start the program"
+  echo "Reboot your pi to start the program\n"
+  echo "The configuration UI will be available at http://$ip:5000"
 
 else
 
@@ -116,6 +119,7 @@ else
   sudo systemctl start jrencoder.service
 
   printf "\n\nInstall complete!\n"
+  echo "The configuration UI is available at http://$ip:5000"
 
 fi
 

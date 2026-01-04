@@ -2,6 +2,7 @@
 
 public enum Page
 {
+    Blank = 0,
     CurrentConditions = 1, // Current conditions for the primary location
     Almanac = 2,
     Forecast1 = 3, // 36 hour forecast, page 1
@@ -14,6 +15,8 @@ public enum Page
     TravelCitiesForecast1 = 10,
     TravelCitiesForecast2 = 11,
     TravelCitiesForecast3 = 12,
+    AffiliateText1 = 13, // Cable company name
+    AffiliateText2 = 14, // Radio station or newspaper
     WxWarning = 20, // Used for weather warnings, these can be many pages long
     Error = 49, // Used for error messages
     LDL = 50, // LDL page, shows current conditions

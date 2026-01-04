@@ -1,4 +1,8 @@
 ﻿<Flavors>
+    <!-- Default OMCW state, only one page works in this flavor -->
+    <Flavor Name="Default">
+        <Page Name="Blank" Duration="1" TopSolid="0" BottomSolid="0" LDL="DateTime" RegionSeparator="0"/>
+    </Flavor>
     <Flavor Name="L">
         <Page Name="CurrentConditions" Duration="10"/>
         <Page Name="LatestObservations" Duration="12"/>
@@ -12,5 +16,9 @@
         <!-- Switch LDL back to normal -->
         <Page Name="ExtendedForecast" Duration="10" LDL="DateTime"/>
         <Page Name="TravelCitiesForecast1" Duration="42"/>
+    </Flavor>
+    <Flavor Name="53100">
+        <Page Name="AffiliateText1" Duration="5" TopSolid="0" BottomSolid="0" LDL="0" RegionSeparator="0"/>
+        <Page Name="AffiliateText2" Duration="5" TopSolid="0" BottomSolid="0" LDL="0" RegionSeparator="0"/>
     </Flavor>
 </Flavors>

@@ -15,7 +15,7 @@ public abstract class DataTransmitter(OMCW omcw)
     /// </summary>
     public abstract void Init();
 
-    public abstract Task Run();
+    public abstract void Run();
 
     /// <summary>
     /// Add a DataFrame to the message queue, sends it out asap

@@ -1,22 +1,21 @@
-﻿using System.Xml.Serialization;
-using JrEncoderLib;
+﻿using JrEncoderLib;
 using JrEncoderLib.DataTransmitter;
-using JrEncoderLib.Frames;
 using JrEncoderLib.StarAttributes;
 
 namespace JrEncoder;
 
 class Program
 {
-    private static OMCW omcw;
-    private static Flavors? flavors;
-    private static bool flavorRunning;
-    private static Config config;
-    private static TimeUpdater timeUpdater;
-    private static GPIODataTransmitter transmitter;
-    public static DataDownloader downloader;
+    private static OMCW? _omcw;
+    private static Flavors? _flavors;
+    private static Config? _config;
+    private static TimeUpdater? _timeUpdater;
+    private static DataTransmitter? _dataTransmitter;
+    private static WebServer? _webServer;
+    public static DataDownloader? Downloader;
+    public static FlavorMan? FlavorMan;
 
-    static async Task Main(string[] args)
+    private static async Task Main(string[] args)
     {
         Logger.Info("Starting WeatherSTAR Data Transmitter");
         Logger.Info("Written by Jesse Cardone, 2024");
@@ -39,7 +38,7 @@ class Program
         Util.HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd("JrEncoder/1.0");
 
         // Build our OMCW of defaults
-        omcw = OMCW.Create()
+        _omcw = OMCW.Create()
             .BottomSolid(false)
             .TopSolid(false)
             .TopPage(0)
@@ -47,53 +46,82 @@ class Program
             .LDL(LDLStyle.DateTime)
             .Commit();
 
-        // Init data transmitter, sets up DDS module
-        transmitter = new(omcw);
-        transmitter.Init();
+        if (args.Contains("--null-transmitter"))
+        {
+            // Use null transmitter, for debugging on a non-raspberry pi
+            _dataTransmitter = new NullDataTransmitter(_omcw);
+        }
+        else
+        {
+            // Init GPIO data transmitter, sets up DDS module
+            _dataTransmitter = new GPIODataTransmitter(_omcw);
+        }
+
+        // Init/reset hardware to send frames 
+        _dataTransmitter.Init();
 
         // Background thread for data transmission
-        _ = Task.Run(() => transmitter.Run());
+        _ = Task.Run(() =>
+        {
+            // Forever loop to always restart data transmitter
+            while (true)
+            {
+                try
+                {
+                    // Start sending frames forever
+                    _dataTransmitter.Run();
+                }
+                catch (Exception ex)
+                {
+                    // Something crashed in the data sender
+                    Logger.Error("Failed to run data transmitter: " + ex.Message);
+                    if (ex.StackTrace != null) Logger.Error(ex.StackTrace);
+                }
+                finally
+                {
+                    // We will restart the data sender but wait 1 second before trying
+                    Thread.Sleep(1000);
+
+                    // Init/reset hardware to send frames 
+                    _dataTransmitter.Init();
+                }
+            }
+        });
 
         // Load config.json
-        await LoadConfig("config.json");
+        await LoadCreateConfig("config.json");
+
+        // Load flavor config
+        _flavors = Flavors.LoadFlavors();
+
+        if (_flavors == null)
+        {
+            // No flavors :((
+            Logger.Error("Failed to load Flavors.xml");
+            ShowErrorMessage("Failed to load Flavors.xml", true);
+            return;
+        }
 
         // Init time updater
-        timeUpdater = new(config, transmitter, omcw);
-        timeUpdater.Run();
+        _timeUpdater = new TimeUpdater(_config, _dataTransmitter, _omcw);
+        _timeUpdater.Run();
 
         // Init data downloader
-        downloader = new(config, transmitter, omcw);
+        Downloader = new DataDownloader(_config, _dataTransmitter, _omcw);
 
-        // Start MQTT server
-        MQTTServer server = new();
-        _ = Task.Run(() => server.Run());
+        // Start web server
+        _webServer = new WebServer(_config, _flavors, _omcw);
+        _ = _webServer.Run().ContinueWith(_ => Environment.Exit(0));
 
-        // MQTT Client
-        MQTTClient client = new(omcw);
-        _ = Task.Run(() => client.Run());
+        // Init flavor man
+        FlavorMan = new FlavorMan(_config, _flavors, _dataTransmitter, _omcw);
 
-        // Updating page
-        DataFrame[] updatePage = new PageBuilder(41, Address.All, omcw)
-            .AddLine("                                ")
-            .AddLine("                                ")
-            .AddLine("                                ")
-            .AddLine("           Please Wait          ")
-            .AddLine("  Information is being updated  ")
-            .Build();
-        transmitter.AddFrame(updatePage);
-        
+        // Show "Information is being updated" page
+        FlavorMan.ShowUpdatePage();
+
         // Test for internet access
         do
         {
-            // Show updating page
-            omcw
-                .BottomSolid()
-                .TopSolid()
-                .TopPage(41)
-                .RegionSeparator()
-                .LDL(LDLStyle.DateTime)
-                .Commit();
-            
             // Run HTTP request to test connectivity to weather.gov
             try
             {
@@ -110,12 +138,12 @@ class Program
         } while (true);
 
         // Update all records
-        await downloader.UpdateAll();
+        await Downloader.UpdateAll();
 
         // Background thread for data downloading
         try
         {
-            downloader.Run();
+            Downloader.Run();
         }
         catch (Exception e)
         {
@@ -125,40 +153,19 @@ class Program
 
         await Task.Delay(500);
 
-        // Load flavor config
-        string flavorsFilePath = Path.Combine(Util.GetExeLocation(), "Flavors.xml");
-        if (File.Exists(flavorsFilePath))
-        {
-            XmlSerializer serializer = new(typeof(Flavors));
-            using StreamReader reader = new(flavorsFilePath);
-            flavors = (Flavors?)serializer.Deserialize(reader);
-        }
-
-        if (flavors == null)
-        {
-            // No flavors :((
-            Logger.Error("Failed to load Flavors.xml");
-            ShowErrorMessage("Failed to load Flavors.xml", true);
-            return;
-        }
-
         // Check if looping is configured
-        if (config.LoopFlavor != null)
+        if (!string.IsNullOrEmpty(_config.LoopFlavor))
         {
-            // Loop that flavor forever
-            while (true)
-                RunFlavor(config.LoopFlavor);
+            // await here if we're configured to run a loop by default
+            // If aborted we will break out and go to the Forever... loop
+            await FlavorMan.RunLoop(_config.LoopFlavor);
         }
-
-        // Default no loop state
-        omcw.TopSolid(false)
-            .TopPage(0)
-            .BottomSolid(false)
-            .RegionSeparator(false)
-            .LDL(LDLStyle.DateTime)
-            .Commit();
-
-        Logger.Info("Ready for commands! Looping is not enabled.");
+        else
+        {
+            // Default no loop state
+            FlavorMan.SetDefaultOMCW();
+            Logger.Info("Ready for commands! Looping is not enabled.");
+        }
 
         // Forever...
         while (true)
@@ -168,15 +175,23 @@ class Program
     /// <summary>
     /// Load a config file
     /// </summary>
-    public static async Task LoadConfig(string fileName)
+    public static async Task LoadCreateConfig(string fileName)
     {
+        // Check if the file exists, if it doesn't create a new default config
+        if (!File.Exists(fileName))
+        {
+            Config.CreateConfig(fileName);
+        }
+        
         try
         {
-            config = await Config.LoadConfig(fileName);
-            if (downloader != null)
-                downloader.SetConfig(config);
-            if (timeUpdater != null)
-                timeUpdater.SetConfig(config);
+            _config = await Config.LoadConfig(fileName);
+            if (Downloader != null)
+                Downloader.SetConfig(_config);
+            if (_timeUpdater != null)
+                _timeUpdater.SetConfig(_config);
+            if (_webServer != null)
+                _webServer.SetConfig(_config);
             Logger.Info("Loaded config file " + fileName);
         }
         catch (Exception e)
@@ -184,120 +199,6 @@ class Program
             Logger.Error($"Failed to load {fileName}: " + e.Message);
             ShowErrorMessage($"Failed to load {fileName}: " + e.Message, true);
         }
-    }
-
-    /// <summary>
-    /// Run an LF flavor, optionally at a specific time
-    /// </summary>
-    /// <param name="flavorName">Name of flavor, defined in Flavors.xml</param>
-    /// <param name="runTime">Specific time to run the flavor at</param>
-    public static async Task RunFlavor(string flavorName, DateTimeOffset? runTime = null)
-    {
-        if (flavorRunning)
-        {
-            Logger.Error("Flavor is already running. Not running another!");
-            return;
-        }
-
-        // Make sure flavors are defined
-        if (flavors == null)
-        {
-            Logger.Error("Flavors were not loaded");
-            ShowErrorMessage("Flavors were not loaded");
-            return;
-        }
-
-        // Find the flavor defined in Flavors.xml
-        Flavor? flavor = flavors.Flavor.FirstOrDefault(el => el.Name == flavorName);
-
-        // Could not find that flavor
-        if (flavor == null)
-        {
-            Logger.Error($"Flavor \"{flavorName}\" does not exist in Flavors.xml");
-            ShowErrorMessage($"Flavor \"{flavorName}\" does not exist in Flavors.xml");
-            return;
-        }
-
-        if (runTime != null)
-        {
-            long currentTimeUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            long runTimeUnix = runTime.Value.ToUnixTimeSeconds();
-
-            // Make sure schedule time was not in the past
-            if (runTime.Value <= DateTime.Now)
-            {
-                Logger.Error($"Flavor \"{flavorName}\" was scheduled to run before current time. Current time: {currentTimeUnix} scheduled: {runTimeUnix}");
-                return;
-            }
-
-            // Find the difference between now and run time
-            long secondsDifference = runTimeUnix - currentTimeUnix;
-            Logger.Info($"Flavor \"{flavorName}\" will run in {secondsDifference} seconds");
-            flavorRunning = true;
-
-            // Wait until the time we want
-            await Task.Delay(TimeSpan.FromSeconds(secondsDifference));
-        }
-
-        Logger.Info($"Running flavor \"{flavor.Name}\"");
-        flavorRunning = true;
-
-        // TODO: Save OMCW state to restore to after
-
-        foreach (FlavorPage page in flavor.Page)
-        {
-            // Make sure that page exists
-            if (!Enum.TryParse(page.Name, out Page newPage))
-            {
-                Logger.Error($"Invalid page \"{page.Name}\"");
-                ShowErrorMessage($"Invalid page \"{page.Name}\"");
-                return;
-            }
-
-            // Check if this page is changing LDL style
-            if (!string.IsNullOrEmpty(page.LDL))
-            {
-                // Make sure that LDL style exists
-                if (!Enum.TryParse(page.LDL, out LDLStyle ldlStyle))
-                {
-                    ShowErrorMessage($"Invalid LDL Style \"{page.LDL}\"");
-                    return;
-                }
-
-                // Set that LDL style
-                omcw.LDL(ldlStyle);
-            }
-
-            // Switch to the page, set all other OMCW attributes
-            omcw
-                .TopPage((int)newPage)
-                .TopSolid(page.TopSolid)
-                .BottomSolid(page.BottomSolid)
-                .RegionSeparator(page.RegionSeparator)
-                .Radar(page.Radar)
-                .AuxAudio(page.AuxAudio)
-                .LocalPreroll(page.LocalPreroll)
-                .LocalProgram(page.LocalProgram);
-
-            omcw.Commit();
-
-            Logger.Info("Switched to page " + newPage);
-
-            // Wait for its duration
-            Thread.Sleep(page.Duration * 1000);
-        }
-
-        // we done!
-        flavorRunning = false;
-        Logger.Info($"Flavor \"{flavor.Name}\" complete");
-
-        // Default no loop state
-        omcw.TopSolid(false)
-            .TopPage(0)
-            .BottomSolid(false)
-            .RegionSeparator(false)
-            .LDL(LDLStyle.DateTime)
-            .Commit();
     }
 
     public static void ShowWxWarning(string message, WarningType type, Address address, OMCW omcw)
@@ -345,7 +246,7 @@ class Program
             pageOffset++;
 
             // Send it
-            transmitter.AddFrame(page.Build());
+            _dataTransmitter.AddFrame(page.Build());
             Logger.Info("Sent page " + page.PageNumber);
         }
 
@@ -359,7 +260,7 @@ class Program
     /// <param name="fatal">If this message should show forever, locking up the program</param>
     public static void ShowErrorMessage(string message, bool fatal = false)
     {
-        PageBuilder page = new PageBuilder((int)Page.Error, Address.All, omcw)
+        PageBuilder page = new PageBuilder((int)Page.Error, Address.All, _omcw)
             .AddLine(Util.CenterString("ATTENTION CABLE OPERATOR"), new TextLineAttributes { Color = Color.Diarrhea })
             .AddLine(Util.CenterString("An Error Has Occurred"), new TextLineAttributes { Color = Color.Diarrhea })
             .AddLine(Util.CenterString("Restart Software Once Corrected"), new TextLineAttributes { Color = Color.Diarrhea })
@@ -370,13 +271,13 @@ class Program
         foreach (string s in messages)
             page.AddLine(Util.CenterString(s), new TextLineAttributes { Color = Color.Diarrhea });
 
-        transmitter.AddFrame(page.Build());
+        _dataTransmitter.AddFrame(page.Build());
 
         // Wait for the page to load into memory...
         Thread.Sleep(500);
 
         // Show blank page
-        omcw.TopSolid(true)
+        _omcw.TopSolid(true)
             .BottomSolid(true)
             .RegionSeparator(true)
             .TopPage(0)
@@ -386,7 +287,7 @@ class Program
         Thread.Sleep(500);
 
         // Show error page
-        omcw.TopSolid(true)
+        _omcw.TopSolid(true)
             .BottomSolid(true)
             .RegionSeparator(true)
             .TopPage((int)Page.Error)

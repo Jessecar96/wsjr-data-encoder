@@ -9,7 +9,7 @@ public class TimeUpdater(Config config, DataTransmitter dataTransmitter, OMCW om
     private Config _config = config;
     private DataTransmitter _dataTransmitter = dataTransmitter;
     private OMCW _omcw = omcw;
-    
+
     public void Run()
     {
         Logger.Info("[TimeUpdater] Running...");
@@ -22,7 +22,7 @@ public class TimeUpdater(Config config, DataTransmitter dataTransmitter, OMCW om
                 UpdateTime();
         });
     }
-    
+
     public void SetConfig(Config config)
     {
         _config = config;
@@ -31,7 +31,7 @@ public class TimeUpdater(Config config, DataTransmitter dataTransmitter, OMCW om
     private void UpdateTime()
     {
         Logger.Info("[TimeUpdater] Sending time update");
-        
+
         // Look if any stars have all 0 switches, or config is set to force clock set
         if (_config.ForceClockSet || _config.Stars.Any(star => star.Switches == "00000000"))
         {
