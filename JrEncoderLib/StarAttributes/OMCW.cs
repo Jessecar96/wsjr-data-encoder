@@ -199,8 +199,12 @@ public class OMCW
     /// <returns></returns>
     public byte[] ToBytes()
     {
-        if (_needsCommit) // Ensure that any data manipulation was committed before use-- helps with catching bugs.
-            throw new Exception("OMCW edited and used without first committing.");
+        // Wait until _needsCommit is no longer true
+        while (_needsCommit)
+        {
+            Console.WriteLine("WARNING: OMCW being used without first committing");
+            // Wait
+        }
 
         return _omcwBytes;
     }
