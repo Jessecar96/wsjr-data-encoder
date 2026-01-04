@@ -59,7 +59,7 @@ latestTag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
 git checkout -q $latestTag
 
 # Stop service
-if [ ! -f /etc/systemd/system/jrencoder.service ]; then
+if [ -f /etc/systemd/system/jrencoder.service ]; then
   echo "## Stopping service ##"
   sudo systemctl stop jrencoder.service
 fi
