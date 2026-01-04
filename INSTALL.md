@@ -22,11 +22,9 @@
    - Replace [your username] with what you chose during imaging. If this doesn't work you may need to find the Pi's IP and use that instead of the hostname.
 6. Run this command over SSH to install this software:
    - `curl -sSL https://raw.githubusercontent.com/Jessecar96/wsjr-data-encoder/refs/heads/main/install.sh | bash`
-7. Once finished, edit your config.json file using `nano $HOME/jrencoder/config.json`
-   - Obtain a weather.com API key and paste it into the "apikey" value
-   - Under "stars" fill in your star's switches, location, and location name.
-8. Reboot the pi using this command: `sudo reboot now`
-9. When rebooted, you should see your star showing data!
+7. Reboot the pi using this command: `sudo reboot now`
+8. When rebooted, visit the URL given at the end of the install script to visit the web UI
+9. Click the "Config" tab and fill in the information as desired
 
 ## How to find your star's switches
 ### The Weather Star Jr
