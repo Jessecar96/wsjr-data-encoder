@@ -26,6 +26,13 @@
 8. When rebooted, visit the URL given at the end of the install script to visit the web UI
 9. Click the "Config" tab and fill in the information as desired
 
+# Update Instructions
+1. Connect to the Pi over SSH. Open a terminal program on your PC and run this command:
+   - `ssh [your username]@jrencoder.local`
+   - Replace [your username] with what you chose during imaging. If this doesn't work you may need to find the Pi's IP and use that instead of the hostname.
+2. Run this command over SSH to update this software:
+   - `curl -sSL https://raw.githubusercontent.com/Jessecar96/wsjr-data-encoder/refs/heads/main/install.sh | bash`
+
 ## How to find your star's switches
 ### The Weather Star Jr
 1. Connect an AT or PS/2 keyboard (with adapter) to the front of the star
