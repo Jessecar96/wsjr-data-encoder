@@ -2,7 +2,8 @@
 1. Download and install Raspberry Pi Imager: https://www.raspberrypi.com/software/
 2. Connect your SD card to a PC and use the following options in Raspberry Pi Imager:
     - Raspberry Pi Device: Raspberry Pi Zero 2 W
-    - Operating System: Other -> Raspberry Pi OS Lite (64-bit)
+    - Operating System: Other -> Raspberry Pi OS (Legacy, 64-bit) Lite
+        - This is the Debian Bookworm derivative released 2025-11-24, considered Legacy. At the time of this update, the latest version (Debian Trixie) does not seem to operate correctly on the Pi Zero 2 W. Your mileage may vary.
     - Storage: (select your SD card)
     - Click "Next"
     - When asked, click "Edit Settings" for Use OS customisation?
