@@ -7,7 +7,7 @@ This project is distributed under the GNU General Public License v3.0.
 See [INSTALL.md](INSTALL.md)
 
 ## API
-This program contains an HTTP server that allows you to control your stars. See See [API.md](API.md) for usage info.
+This program contains an HTTP server that allows you to control your stars. See [API.md](API.md) for usage info.
 
 ## Working
 - Setting the clock
