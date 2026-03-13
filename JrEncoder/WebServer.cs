@@ -92,10 +92,29 @@ public class WebServer(Config config, Flavors flavors, OMCW omcw)
             }, jsonOptions));
         }).DisableAntiforgery();
 
-        app.MapPost("/presentation/loop", ([FromForm] string flavor) =>
+        app.MapPost("/presentation/loop", ([FromForm] string flavor, [FromForm] string? time = null) =>
         {
+            DateTimeOffset? runTime = null;
+            // Check if time was passed in
+            if (time != null)
+            {
+                // Try to parse it as an int
+                if (!int.TryParse(time, out int parsedTime))
+                {
+                    // Failed to, let's bail out
+                    return Task.FromResult(JsonSerializer.Serialize(new
+                    {
+                        success = false,
+                        message = "Invalid time provided",
+                    }, jsonOptions));
+                }
+
+                // Now parse that to a DateTimeOffset
+                runTime = DateTimeOffset.FromUnixTimeSeconds(parsedTime);
+            }
+            
             // Run that flavor in the background on a new task
-            _ = Task.Run(() => Program.FlavorMan?.RunLoop(flavor));
+            _ = Task.Run(() => Program.FlavorMan?.RunLoop(flavor, runTime));
 
             // Return json response
             return Task.FromResult(JsonSerializer.Serialize(new

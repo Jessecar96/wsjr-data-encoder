@@ -127,29 +127,32 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
             long currentTimeUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             long runTimeUnix = runTime.Value.ToUnixTimeSeconds();
 
-            // Make sure schedule time was not in the past
-            if (runTime.Value <= DateTime.Now)
+            // Check if the runTime is in the future, and if so, wait
+            if (runTime.Value >= DateTime.Now)
             {
-                Logger.Error($"Flavor \"{flavorName}\" was scheduled to run before current time. Current time: {currentTimeUnix} scheduled: {runTimeUnix}");
-                return;
-            }
+                Logger.Info($"Flavor \"{flavorName}\" was scheduled to run in the future. Current time: {currentTimeUnix} scheduled: {runTimeUnix}");
+                // Find the difference between now and run time
+                long secondsDifference = runTimeUnix - currentTimeUnix;
+                Logger.Info($"Flavor \"{flavorName}\" will run in {secondsDifference} seconds");
+                _flavorRunning = true;
 
-            // Find the difference between now and run time
-            long secondsDifference = runTimeUnix - currentTimeUnix;
-            Logger.Info($"Flavor \"{flavorName}\" will run in {secondsDifference} seconds");
-            _flavorRunning = true;
-
-            try
-            {
-                // Wait until the time we want
-                await Task.Delay(TimeSpan.FromSeconds(secondsDifference), cancellationToken);
+                try
+                {
+                    // Wait until the time we want
+                    await Task.Delay(TimeSpan.FromSeconds(secondsDifference), cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    // We were signaled to stop so stop
+                    Logger.Info("RunFlavor Cancelled");
+                    return;
+                }
+                catch
+                {
+                    Logger.Error("Something went wrong");
+                }
             }
-            catch (OperationCanceledException)
-            {
-                // We were signaled to stop so stop
-                Logger.Info("RunFlavor Cancelled");
-                return;
-            }
+            
         }
 
         Logger.Info($"Running flavor \"{flavor.Name}\"");
@@ -235,7 +238,7 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
         SetDefaultOMCW();
     }
 
-    public async Task RunLoop(string flavorName)
+    public async Task RunLoop(string flavorName, DateTimeOffset? runTime = null)
     {
         // Make sure we don't run on top of anything else
         if (_flavorRunning || _runLoop)
@@ -249,6 +252,6 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
 
         // Loop that flavor forever
         while (_runLoop)
-            await RunFlavor(flavorName);
+            await RunFlavor(flavorName, runTime);
     }
 }
