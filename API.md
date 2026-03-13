@@ -20,6 +20,7 @@ Runs a presenation flavor until cancel is called
 | Parameter | Description       | Example    |
 |-----------|-------------------|------------|
 | flavor    | Flavor name       | L          |
+| time      | Start time (unix) | 1764559358 |
 
 ## POST /presentation/cancel
 Cancels any currently running presentation
