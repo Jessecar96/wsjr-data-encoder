@@ -21,7 +21,7 @@ then
 
   # Install .NET LTS
   echo "## Installing .NET ##"
-  curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel LTS
+  curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 8.0
 
   # Add to PATH
   # shellcheck disable=SC2016
