@@ -18,7 +18,7 @@ public class DataDownloader
     private OMCW _omcw;
 
     // Alerts config
-    private readonly Alerts _alertsConfig;
+    private readonly Alerts? _alertsConfig;
 
     // Data cache
     private readonly Dictionary<string, List<GeoJsonFeature>> _alertsCache = new();
@@ -49,7 +49,6 @@ public class DataDownloader
             // No alert config :((
             Logger.Error("Failed to load Alerts.xml");
             Program.ShowErrorMessage("Failed to load Alerts.xml", true);
-            return;
         }
     }
 
@@ -261,7 +260,7 @@ public class DataDownloader
                 }
 
                 // Look for event in alert config
-                Alert? alertConfig = _alertsConfig.Alert.FirstOrDefault(alert => alert.Name == nwsFeature.Alert.Event);
+                Alert? alertConfig = _alertsConfig?.Alert.FirstOrDefault(alert => alert.Name == nwsFeature.Alert.Event);
                 if (alertConfig == null)
                 {
                     // Not found in config, ignore it
@@ -300,14 +299,14 @@ public class DataDownloader
                 }
 
                 // Add description
-                fullAlertText += nwsFeature?.Alert?.Description + "\n\n";
+                fullAlertText += nwsFeature.Alert.Description + "\n\n";
 
                 // Remove AWIPSidentifier from description
-                if (nwsFeature?.Alert?.Parameters?.AWIPSidentifier?[0] != null)
+                if (nwsFeature.Alert.Parameters.AWIPSidentifier?[0] != null)
                     fullAlertText = fullAlertText.Replace(nwsFeature.Alert.Parameters.AWIPSidentifier?[0] + "\n\n", "");
 
                 // Add instruction
-                if (nwsFeature?.Alert?.Instruction != null)
+                if (nwsFeature.Alert.Instruction != null)
                 {
                     fullAlertText += "PRECAUTIONARY/PREPAREDNESS ACTIONS...\n\n";
                     fullAlertText += nwsFeature.Alert.Instruction;
@@ -775,7 +774,7 @@ public class DataDownloader
                         foreach (GeoJsonFeature nwsFeature in nwsFeatures)
                         {
                             // Look for event in alert config
-                            Alert? alertConfig = _alertsConfig.Alert.FirstOrDefault(alert => alert.Name == nwsFeature.Alert.Event);
+                            Alert? alertConfig = _alertsConfig?.Alert.FirstOrDefault(alert => alert.Name == nwsFeature.Alert.Event);
 
                             // Not found in config, ignore it
                             if (alertConfig == null)

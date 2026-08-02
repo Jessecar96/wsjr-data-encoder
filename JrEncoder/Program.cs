@@ -91,6 +91,14 @@ class Program
         // Load config.json
         await LoadCreateConfig("config.json");
 
+        if (_config == null)
+        {
+            // No config :((
+            Logger.Error("Failed to load config.json");
+            ShowErrorMessage("Failed to load config.json", true);
+            return;
+        }
+
         // Load flavor config
         _flavors = Flavors.LoadFlavors();
 
@@ -246,7 +254,7 @@ class Program
             pageOffset++;
 
             // Send it
-            _dataTransmitter.AddFrame(page.Build());
+            _dataTransmitter?.AddFrame(page.Build());
             Logger.Info("Sent page " + page.PageNumber);
         }
 
@@ -271,7 +279,7 @@ class Program
         foreach (string s in messages)
             page.AddLine(Util.CenterString(s), new TextLineAttributes { Color = Color.Diarrhea });
 
-        _dataTransmitter.AddFrame(page.Build());
+        _dataTransmitter?.AddFrame(page.Build());
 
         // Wait for the page to load into memory...
         Thread.Sleep(500);

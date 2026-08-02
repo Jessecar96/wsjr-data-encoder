@@ -7,7 +7,7 @@ namespace JrEncoder.Schema.NWS;
 public class GeoJsonFeature
 {
     [JsonPropertyName("id")]
-    public string? Id { get; set; }
+    public required string Id { get; set; }
 
     [JsonPropertyName("type")]
     public required string Type { get; set; }
