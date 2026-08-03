@@ -120,6 +120,7 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
         {
             Logger.Error($"Flavor \"{flavorName}\" does not exist in Flavors.xml");
             Program.ShowErrorMessage($"Flavor \"{flavorName}\" does not exist in Flavors.xml");
+            _runLoop = false;
             return;
         }
 
