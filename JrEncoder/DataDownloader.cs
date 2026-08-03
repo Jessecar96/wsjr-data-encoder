@@ -410,7 +410,7 @@ public class DataDownloader
                 string ceilingStr = conditionsData.CloudCeiling == null ? " Unlimited" : ": " + (conditionsData.CloudCeiling + " ft.").PadLeft(5);
 
                 // This page gets sent to both CC and LDL (they are two different pages)
-                foreach (Page pageNum in new[] { Page.CurrentConditions, Page.LDL })
+                foreach (PageNum pageNum in new[] { PageNum.CurrentConditions, PageNum.LDL })
                 {
                     // Build page
                     DataFrame[] ccPage = new PageBuilder((int)pageNum, Address.FromSwitches(star.Switches), _omcw)
@@ -431,7 +431,7 @@ public class DataDownloader
             // Latest Observations
             // //
 
-            PageBuilder nearbyObs = new PageBuilder((int)Page.LatestObservations, Address.FromSwitches(star.Switches), _omcw);
+            PageBuilder nearbyObs = new PageBuilder((int)PageNum.LatestObservations, Address.FromSwitches(star.Switches), _omcw);
             nearbyObs.AddLine("   Latest Hourly Observations");
             nearbyObs.AddLine("LOCATION       ?F WEATHER   WIND", smallHeight);
 
@@ -459,13 +459,13 @@ public class DataDownloader
             }
 
             _dataTransmitter.AddFrame(nearbyObs.Build());
-            Logger.Info($"[DataDownloader] Page {(int)Page.LatestObservations} sent");
+            Logger.Info($"[DataDownloader] Page {(int)PageNum.LatestObservations} sent");
 
             // // 
             // Regional Observations
             // //
 
-            PageBuilder regionalObs = new PageBuilder((int)Page.RegionalObservations, Address.FromSwitches(star.Switches), _omcw);
+            PageBuilder regionalObs = new PageBuilder((int)PageNum.RegionalObservations, Address.FromSwitches(star.Switches), _omcw);
             regionalObs.AddLine("  Conditions Across The Region");
             regionalObs.AddLine("CITY                WEATHER   ?F", smallHeight);
 
@@ -490,23 +490,23 @@ public class DataDownloader
             }
 
             _dataTransmitter.AddFrame(regionalObs.Build());
-            Logger.Info($"[DataDownloader] Page {(int)Page.RegionalObservations} sent");
+            Logger.Info($"[DataDownloader] Page {(int)PageNum.RegionalObservations} sent");
         }
     }
 
     private void SendCcNoReportPage(Config.WeatherStar star)
     {
-        DataFrame[] ccPage = new PageBuilder((int)Page.CurrentConditions, Address.FromSwitches(star.Switches), _omcw)
+        DataFrame[] ccPage = new PageBuilder((int)PageNum.CurrentConditions, Address.FromSwitches(star.Switches), _omcw)
             .AddLine($"Conditions at {star.LocationName}")
             .AddLine("No Current Report")
             .Build();
         _dataTransmitter.AddFrame(ccPage);
-        Logger.Info($"[DataDownloader] Page {(int)Page.CurrentConditions} sent");
+        Logger.Info($"[DataDownloader] Page {(int)PageNum.CurrentConditions} sent");
     }
 
     private void SendObsNoReportPage(Config.WeatherStar star)
     {
-        PageBuilder nearbyObs = new PageBuilder((int)Page.LatestObservations, Address.FromSwitches(star.Switches), _omcw);
+        PageBuilder nearbyObs = new PageBuilder((int)PageNum.LatestObservations, Address.FromSwitches(star.Switches), _omcw);
         nearbyObs.AddLine("   Latest Hourly Observations");
         nearbyObs.AddLine("LOCATION       ?F WEATHER   WIND", new TextLineAttributes
         {
@@ -523,7 +523,7 @@ public class DataDownloader
         }
 
         _dataTransmitter.AddFrame(nearbyObs.Build());
-        Logger.Info($"[DataDownloader] Page {(int)Page.LatestObservations} sent");
+        Logger.Info($"[DataDownloader] Page {(int)PageNum.LatestObservations} sent");
     }
 
     /// <summary>
@@ -544,7 +544,7 @@ public class DataDownloader
         for (int i = 0; i < 3; i++)
         {
             // Build page
-            int actualPageNum = (int)Page.Forecast1 + i;
+            int actualPageNum = (int)PageNum.Forecast1 + i;
             PageBuilder pageBuilder = new PageBuilder(actualPageNum, Address.FromSwitches(star.Switches), _omcw)
                 .AddLine("        Your TWC Forecast", smallHeight)
                 .AddLine("")
@@ -555,16 +555,16 @@ public class DataDownloader
         }
 
         // Extended forecast
-        PageBuilder extForecastPage = new PageBuilder((int)Page.ExtendedForecast, Address.FromSwitches(star.Switches), _omcw)
+        PageBuilder extForecastPage = new PageBuilder((int)PageNum.ExtendedForecast, Address.FromSwitches(star.Switches), _omcw)
             .AddLine("       Extended Forecast")
             .AddLine("")
             .AddLine("No Report");
 
         _dataTransmitter.AddFrame(extForecastPage.Build());
-        Logger.Info($"[DataDownloader] Page {(int)Page.ExtendedForecast} sent");
+        Logger.Info($"[DataDownloader] Page {(int)PageNum.ExtendedForecast} sent");
 
         // Regional forecast
-        PageBuilder regionalFcst = new PageBuilder((int)Page.RegionalForecast, Address.FromSwitches(star.Switches), _omcw)
+        PageBuilder regionalFcst = new PageBuilder((int)PageNum.RegionalForecast, Address.FromSwitches(star.Switches), _omcw)
             .AddLine("   Forecast Across The Region")
             .AddLine("City           Weather   Low  Hi", smallHeight);
 
@@ -576,7 +576,7 @@ public class DataDownloader
         }
 
         _dataTransmitter.AddFrame(regionalFcst.Build());
-        Logger.Info($"[DataDownloader] Page {(int)Page.RegionalForecast} sent");
+        Logger.Info($"[DataDownloader] Page {(int)PageNum.RegionalForecast} sent");
     }
 
     private async Task UpdateAlmanac()
@@ -665,7 +665,7 @@ public class DataDownloader
             DateTime tomorrowSunSet = TimeZoneInfo.ConvertTime(cTomorrow.CelestialInfo.SunSet ?? DateTime.MinValue, star.GetTimeZoneInfo()).ToLocalTime();
 
             // Build page
-            DataFrame[] almanacPage = new PageBuilder((int)Page.Almanac, Address.FromSwitches(star.Switches), _omcw)
+            DataFrame[] almanacPage = new PageBuilder((int)PageNum.Almanac, Address.FromSwitches(star.Switches), _omcw)
                 .AddLine("  The Weather Channel Almanac   ")
                 .AddLine("", smallHeight)
                 .AddLine($"              {todayDayName.PadRight(leftDayPadding)}{tomorrowDayName}")
@@ -678,7 +678,7 @@ public class DataDownloader
                 .Build();
 
             _dataTransmitter.AddFrame(almanacPage);
-            Logger.Info($"[DataDownloader] Page {(int)Page.Almanac} sent");
+            Logger.Info($"[DataDownloader] Page {(int)PageNum.Almanac} sent");
         }
     }
 
@@ -839,7 +839,7 @@ public class DataDownloader
                     }
 
                     // Build page
-                    int actualPageNum = (int)Page.Forecast1 + curForecastPage;
+                    int actualPageNum = (int)PageNum.Forecast1 + curForecastPage;
                     PageBuilder pageBuilder = new PageBuilder(actualPageNum, Address.FromSwitches(star.Switches), _omcw)
                         .AddLine("        Your TWC Forecast", smallHeight)
                         .AddLine("");
@@ -884,7 +884,7 @@ public class DataDownloader
                 string day3Hi = forecastData.TemperatureMax[4].ToString() ?? "";
                 string day3Lo = forecastData.TemperatureMin[4].ToString() ?? "";
 
-                PageBuilder extForecastPage = new PageBuilder((int)Page.ExtendedForecast, Address.FromSwitches(star.Switches), _omcw)
+                PageBuilder extForecastPage = new PageBuilder((int)PageNum.ExtendedForecast, Address.FromSwitches(star.Switches), _omcw)
                     .AddLine("       Extended Forecast")
                     .AddLine("")
                     .AddLine($" {day1Name,-11}{day2Name,-11}{day3Name,-11}")
@@ -895,14 +895,14 @@ public class DataDownloader
                     .AddLine($" Hi: {day1Hi,-3}    Hi: {day2Hi,-3}    Hi: {day3Hi,-3}");
 
                 _dataTransmitter.AddFrame(extForecastPage.Build());
-                Logger.Info($"[DataDownloader] Page {(int)Page.ExtendedForecast} sent");
+                Logger.Info($"[DataDownloader] Page {(int)PageNum.ExtendedForecast} sent");
             } // end primary forecastData null check
 
             // // 
             // Regional Forecast
             // //
 
-            PageBuilder regionalFcst = new PageBuilder((int)Page.RegionalForecast, Address.FromSwitches(star.Switches), _omcw);
+            PageBuilder regionalFcst = new PageBuilder((int)PageNum.RegionalForecast, Address.FromSwitches(star.Switches), _omcw);
             regionalFcst.AddLine("   Forecast Across The Region");
             regionalFcst.AddLine("City           Weather   Low  Hi", smallHeight);
 
@@ -930,7 +930,7 @@ public class DataDownloader
             }
 
             _dataTransmitter.AddFrame(regionalFcst.Build());
-            Logger.Info($"[DataDownloader] Page {(int)Page.RegionalForecast} sent");
+            Logger.Info($"[DataDownloader] Page {(int)PageNum.RegionalForecast} sent");
         }
     }
 
@@ -1033,7 +1033,7 @@ public class DataDownloader
         bool morePages;
 
         // Start with the first page
-        PageBuilder tcfPage1 = new PageBuilder((int)Page.TravelCitiesForecast1, Address.All, _omcw);
+        PageBuilder tcfPage1 = new PageBuilder((int)PageNum.TravelCitiesForecast1, Address.All, _omcw);
         tcfPage1.Attributes(new PageAttributes { Chain = true, Roll = true });
         tcfPage1.AddLine(" Travel Cities Forecast", titleAttr);
         tcfPage1.AddLine("", attr);
@@ -1052,7 +1052,7 @@ public class DataDownloader
         // Use a loop to add the rest of the lines to multiple pages
         do
         {
-            PageBuilder tcfPage = new PageBuilder((int)Page.TravelCitiesForecast1 + currentPageExtra, Address.All, _omcw);
+            PageBuilder tcfPage = new PageBuilder((int)PageNum.TravelCitiesForecast1 + currentPageExtra, Address.All, _omcw);
             currentPageExtra++;
 
             // More than 9 cities left, we'll need to add another page
@@ -1079,7 +1079,7 @@ public class DataDownloader
 
     private async Task UpdateStaticPages(Config.WeatherStar star)
     {
-        PageBuilder affiliateText1 = new PageBuilder((int)Page.AffiliateText1, Address.FromSwitches(star.Switches), _omcw);
+        PageBuilder affiliateText1 = new PageBuilder((int)PageNum.AffiliateText1, Address.FromSwitches(star.Switches), _omcw);
         string headendId = star.HeadendId ?? "000000";
         string channelNum = star.ChannelNumber != null ? "CHANNEL " + star.ChannelNumber : "";
         // Headend ID
@@ -1123,9 +1123,9 @@ public class DataDownloader
             Height = 2
         });
         _dataTransmitter.AddFrame(affiliateText1.Build());
-        Logger.Info($"[DataDownloader] Page {(int)Page.AffiliateText1} sent");
+        Logger.Info($"[DataDownloader] Page {(int)PageNum.AffiliateText1} sent");
 
-        PageBuilder affiliateText2 = new PageBuilder((int)Page.AffiliateText2, Address.FromSwitches(star.Switches), _omcw);
+        PageBuilder affiliateText2 = new PageBuilder((int)PageNum.AffiliateText2, Address.FromSwitches(star.Switches), _omcw);
         if (string.IsNullOrEmpty(star.RadioStation))
         {
             // No radio station name defined, use "NewspaperL"
@@ -1167,6 +1167,6 @@ public class DataDownloader
         }
 
         _dataTransmitter.AddFrame(affiliateText2.Build());
-        Logger.Info($"[DataDownloader] Page {(int)Page.AffiliateText2} sent");
+        Logger.Info($"[DataDownloader] Page {(int)PageNum.AffiliateText2} sent");
     }
 }

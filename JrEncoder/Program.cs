@@ -1,4 +1,5 @@
-﻿using JrEncoderLib;
+﻿using JrEncoder.Schema;
+using JrEncoderLib;
 using JrEncoderLib.DataTransmitter;
 using JrEncoderLib.StarAttributes;
 
@@ -33,6 +34,11 @@ class Program
             Logger.Info("Created config.json, program will now exit.");
             return;
         }
+        
+        // Create necessary directories
+        string pageDir = Path.Combine(Util.GetExeLocation(), "Pages");
+        if (!Directory.Exists(pageDir))
+            Directory.CreateDirectory(pageDir);
 
         // Setup http client
         Util.HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd("JrEncoder/1.0");
@@ -223,7 +229,7 @@ class Program
         for (int i = 0; i < chunks.Length; i++)
         {
             // Make a new page
-            PageBuilder page = new PageBuilder((int)Page.WxWarning + pageOffset, address, omcw);
+            PageBuilder page = new PageBuilder((int)PageNum.WxWarning + pageOffset, address, omcw);
 
             // Set page attributes
             bool firstPage = i == 0;
@@ -268,7 +274,7 @@ class Program
     /// <param name="fatal">If this message should show forever, locking up the program</param>
     public static void ShowErrorMessage(string message, bool fatal = false)
     {
-        PageBuilder page = new PageBuilder((int)Page.Error, Address.All, _omcw)
+        PageBuilder page = new PageBuilder((int)PageNum.Error, Address.All, _omcw)
             .AddLine(Util.CenterString("ATTENTION CABLE OPERATOR"), new TextLineAttributes { Color = Color.Diarrhea })
             .AddLine(Util.CenterString("An Error Has Occurred"), new TextLineAttributes { Color = Color.Diarrhea })
             .AddLine(Util.CenterString("Restart Software Once Corrected"), new TextLineAttributes { Color = Color.Diarrhea })
@@ -298,7 +304,7 @@ class Program
         _omcw.TopSolid(true)
             .BottomSolid(true)
             .RegionSeparator(true)
-            .TopPage((int)Page.Error)
+            .TopPage((int)PageNum.Error)
             .Commit();
 
         // Fatal error will cause the program to stop here forever

@@ -1,4 +1,5 @@
-﻿using JrEncoderLib;
+﻿using JrEncoder.Schema;
+using JrEncoderLib;
 using JrEncoderLib.DataTransmitter;
 using JrEncoderLib.Frames;
 using JrEncoderLib.StarAttributes;
@@ -59,7 +60,7 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
             FlavorPage page = flavor.Page[0];
 
             // Parse the page number
-            if (!Enum.TryParse(page.Name, out Page newPage))
+            if (!Enum.TryParse(page.Name, out PageNum newPage))
             {
                 Logger.Error($"Invalid page \"{page.Name}\"");
                 Program.ShowErrorMessage($"Invalid page \"{page.Name}\"");
@@ -163,7 +164,7 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
         foreach (FlavorPage page in flavor.Page)
         {
             // Make sure that page exists
-            if (!Enum.TryParse(page.Name, out Page newPage))
+            if (!Enum.TryParse(page.Name, out PageNum newPage))
             {
                 Logger.Error($"Invalid page \"{page.Name}\"");
                 Program.ShowErrorMessage($"Invalid page \"{page.Name}\"");

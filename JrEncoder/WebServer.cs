@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using JrEncoder.Schema;
 using JrEncoderLib.StarAttributes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;

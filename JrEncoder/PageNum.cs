@@ -1,6 +1,6 @@
 ﻿namespace JrEncoder;
 
-public enum Page
+public enum PageNum
 {
     Blank = 0,
     CurrentConditions = 1, // Current conditions for the primary location
