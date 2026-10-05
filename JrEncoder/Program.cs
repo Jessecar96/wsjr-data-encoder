@@ -34,7 +34,7 @@ class Program
             Logger.Info("Created config.json, program will now exit.");
             return;
         }
-        
+
         // Create necessary directories
         string pageDir = Path.Combine(Util.GetExeLocation(), "Pages");
         if (!Directory.Exists(pageDir))
@@ -123,6 +123,10 @@ class Program
         // Init data downloader
         Downloader = new DataDownloader(_config, _dataTransmitter, _omcw);
 
+        // Init custom page downloader
+        StaticPageDownloader pageDownloader = new StaticPageDownloader(_config, _dataTransmitter, _omcw);
+        _ = Task.Run(pageDownloader.Run);
+
         // Start web server
         _webServer = new WebServer(_config, _flavors, _omcw);
         _ = _webServer.Run().ContinueWith(_ => Environment.Exit(0));
@@ -151,7 +155,10 @@ class Program
             }
         } while (true);
 
-        // Update all records
+        // Update all static pages
+        pageDownloader.UpdateAll();
+
+        // Update all weather data pages
         await Downloader.UpdateAll();
 
         // Background thread for data downloading
@@ -196,7 +203,7 @@ class Program
         {
             Config.CreateConfig(fileName);
         }
-        
+
         try
         {
             _config = await Config.LoadConfig(fileName);

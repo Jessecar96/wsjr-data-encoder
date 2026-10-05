@@ -21,7 +21,7 @@ public class PageLine
     /// <summary>
     /// Enable reverse text color, see <see cref="TextLineAttributes.Reverse"/>
     /// </summary>
-    [XmlAttribute(AttributeName = "Flash")]
+    [XmlAttribute(AttributeName = "Reverse")]
     public bool Reverse = false;
 
     /// <summary>

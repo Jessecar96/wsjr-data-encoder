@@ -60,10 +60,15 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
             FlavorPage page = flavor.Page[0];
 
             // Parse the page number
-            if (!Enum.TryParse(page.Name, out PageNum newPage))
+            int newPage;
+            try
             {
-                Logger.Error($"Invalid page \"{page.Name}\"");
-                Program.ShowErrorMessage($"Invalid page \"{page.Name}\"");
+                newPage = GetPageNum(page.Name);
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e.Message);
+                Program.ShowErrorMessage(e.Message);
                 return;
             }
 
@@ -78,7 +83,7 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
 
             // Set omcw properties
             omcw
-                .TopPage((int)newPage)
+                .TopPage(newPage)
                 .LDL(ldlStyle)
                 .TopSolid(page.TopSolid)
                 .BottomSolid(page.BottomSolid)
@@ -154,7 +159,6 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
                     Logger.Error("Something went wrong");
                 }
             }
-            
         }
 
         Logger.Info($"Running flavor \"{flavor.Name}\"");
@@ -164,11 +168,16 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
 
         foreach (FlavorPage page in flavor.Page)
         {
-            // Make sure that page exists
-            if (!Enum.TryParse(page.Name, out PageNum newPage))
+            // Parse the page number
+            int newPage;
+            try
             {
-                Logger.Error($"Invalid page \"{page.Name}\"");
-                Program.ShowErrorMessage($"Invalid page \"{page.Name}\"");
+                newPage = GetPageNum(page.Name);
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e.Message);
+                Program.ShowErrorMessage(e.Message);
                 return;
             }
 
@@ -189,7 +198,7 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
 
             // Switch to the page, set all other OMCW attributes
             omcw
-                .TopPage((int)newPage)
+                .TopPage(newPage)
                 .TopSolid(page.TopSolid)
                 .BottomSolid(page.BottomSolid)
                 .RegionSeparator(page.RegionSeparator)
@@ -199,7 +208,7 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
                 .LocalProgram(page.LocalProgram)
                 .Commit();
 
-            Logger.Info("Switched to page " + newPage);
+            Logger.Info("Switched to page " + page.Name);
 
             // Wait for its duration
             try
@@ -255,5 +264,27 @@ public class FlavorMan(Config config, Flavors flavors, DataTransmitter dataTrans
         // Loop that flavor forever
         while (_runLoop)
             await RunFlavor(flavorName, runTime);
+    }
+
+    /// <summary>
+    /// Translate a page name string to a page number 
+    /// </summary>
+    /// <param name="pageName"></param>
+    /// <returns></returns>
+    private int GetPageNum(string pageName)
+    {
+        // First try to find it in the enum
+        if (Enum.TryParse(pageName, out PageNum pageNum))
+        {
+            return (int)pageNum;
+        }
+
+        // Then try to find it in the static pages dict
+        if (StaticPageDownloader.PageList.ContainsKey(pageName))
+        {
+            return StaticPageDownloader.PageList[pageName];
+        }
+
+        throw new Exception($"Invalid page \"{pageName}\"");
     }
 }

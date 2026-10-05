@@ -17,7 +17,9 @@ public enum PageNum
     TravelCitiesForecast3 = 12,
     AffiliateText1 = 13, // Cable company name
     AffiliateText2 = 14, // Radio station or newspaper
-    WxWarning = 20, // Used for weather warnings, these can be many pages long
+    WxWarning = 15, // Used for weather warnings, these can be many pages long
+    // 15 - 29 are for warnings
+    // 30 - 48 are for static pages, defined in StaticPageDownloader.cs
     Error = 49, // Used for error messages
     LDL = 50, // LDL page, shows current conditions
 }
