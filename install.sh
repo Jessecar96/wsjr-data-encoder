@@ -5,6 +5,10 @@ if [ "$EUID" -eq 0 ]
   exit
 fi
 
+# Do not prompt for any package updates, and auto restart any services
+DEBIAN_FRONTEND=noninteractive
+NEEDSRESTART_MODE=a
+
 # Update system
 echo "## Updating system ##"
 sudo apt-get update
