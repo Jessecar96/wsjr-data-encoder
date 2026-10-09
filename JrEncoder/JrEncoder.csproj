@@ -28,16 +28,16 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Update="ObsMapping.json">
+        <Content Include="ObsMapping.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <Content Update="FcstMapping.json">
+        <Content Include="FcstMapping.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <Content Update="FcstTwoLineMapping.json">
+        <Content Include="FcstTwoLineMapping.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <Content Update="Alerts.xml">
+        <Content Include="Alerts.xml">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
         <Content Include="wwwroot/**/*.*">
