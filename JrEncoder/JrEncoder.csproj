@@ -28,24 +28,24 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="ObsMapping.json">
+        <Content Update="ObsMapping.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="FcstMapping.json">
+        </Content>
+        <Content Update="FcstMapping.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="FcstTwoLineMapping.json">
+        </Content>
+        <Content Update="FcstTwoLineMapping.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="Alerts.xml">
+        </Content>
+        <Content Update="Alerts.xml">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
+        </Content>
         <Content Include="wwwroot/**/*.*">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-        <None Update="Examples\Flavors.xml">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
+        <Content Include="Examples/**/*.*">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
 </Project>
