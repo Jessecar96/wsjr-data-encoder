@@ -21,10 +21,14 @@ public class Flavors
     {
         string flavorsFilePath = GetPath(fileName);
         if (!File.Exists(flavorsFilePath))
-            throw new InvalidOperationException(fileName + " does not exist.");
+        {
+            // No flavors file, copy the example one to the root dir
+            File.Copy(Path.Combine(Util.GetExeLocation(), "Examples", "Flavors.xml"), flavorsFilePath);
+        }
 
-        XmlSerializer serializer = new(typeof(Flavors));
-        using StreamReader reader = new(flavorsFilePath);
+        // Deserialize XML
+        XmlSerializer serializer = new XmlSerializer(typeof(Flavors));
+        using StreamReader reader = new StreamReader(flavorsFilePath);
         return (Flavors?)serializer.Deserialize(reader);
     }
 
@@ -33,9 +37,10 @@ public class Flavors
     /// </summary>
     public void Save()
     {
+        // Serialize XML
         string flavorsFilePath = GetPath();
-        XmlSerializer serializer = new(typeof(Flavors));
-        using StreamWriter writer = new(flavorsFilePath);
+        XmlSerializer serializer = new XmlSerializer(typeof(Flavors));
+        using StreamWriter writer = new StreamWriter(flavorsFilePath);
         serializer.Serialize(writer, this);
     }
 }

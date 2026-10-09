@@ -28,9 +28,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="Flavors.xml">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
         <None Update="ObsMapping.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
@@ -46,6 +43,9 @@
         <Content Include="wwwroot/**/*.*">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
+        <None Update="Examples\Flavors.xml">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>
